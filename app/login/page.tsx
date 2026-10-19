@@ -1,9 +1,9 @@
 "use client";
-import { FormEvent, useState } from "react";
+import { FormEvent, Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export default function LoginPage() {
+function LoginForm() {
   const supabase = createClient();
   const router = useRouter();
   const params = useSearchParams();
@@ -36,4 +36,8 @@ export default function LoginPage() {
       <button className="btn primary" style={{width:"100%"}} disabled={busy}>{busy?"Signing in…":"Sign in"}</button>
     </form>
   </section></main>;
+}
+
+export default function LoginPage(){
+  return <Suspense fallback={<main className="login-shell"><section className="login-card"><div className="brand">LHS Creator Network</div><p className="muted">Loading secure sign-in…</p></section></main>}><LoginForm/></Suspense>;
 }
