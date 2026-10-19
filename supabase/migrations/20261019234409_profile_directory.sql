@@ -1,0 +1,6 @@
+-- LHS CRM production migration history marker.
+-- Version: 20261019234409
+-- Name: profile_directory
+-- Applied to Supabase project uapqewolovgbbhemmphb during the initial backend stabilization.
+-- The live schema is authoritative for this historical marker; all migrations after the
+-- initial stabilization are committed with full SQL before application.

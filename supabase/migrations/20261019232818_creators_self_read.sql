@@ -1,0 +1,6 @@
+-- LHS CRM production migration history marker.
+-- Version: 20261019232818
+-- Name: creators_self_read
+-- Applied to Supabase project uapqewolovgbbhemmphb during the initial backend stabilization.
+-- The live schema is authoritative for this historical marker; all migrations after the
+-- initial stabilization are committed with full SQL before application.
