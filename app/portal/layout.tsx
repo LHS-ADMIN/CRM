@@ -23,7 +23,7 @@ export default async function PortalLayout({children}:{children:React.ReactNode}
   return <div className="portal-shell">
     <aside className="sidebar">
       <div className="brand-lockup branded">
-        <div className="brand-logo-wrap"><img src="/lhs-logo.png" alt="LHS logo"/></div>
+        <div className="brand-logo-wrap"><img src="/lhs-logo.webp" alt="LHS logo"/></div>
         <div className="brand-copy"><strong>LHS Connect</strong><span>Life · Health · Strength</span></div>
       </div>
       <div className="sidebar-brand-rule"><span/><span/><span/></div>
