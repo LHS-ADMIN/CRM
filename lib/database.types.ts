@@ -1171,6 +1171,7 @@ export type Database = {
           email: string | null
           niche: string | null
           phone: string | null
+          real_name: string | null
           updated_at: string
           user_id: string
         }
@@ -1182,6 +1183,7 @@ export type Database = {
           email?: string | null
           niche?: string | null
           phone?: string | null
+          real_name?: string | null
           updated_at?: string
           user_id: string
         }
@@ -1193,6 +1195,7 @@ export type Database = {
           email?: string | null
           niche?: string | null
           phone?: string | null
+          real_name?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -1569,8 +1572,51 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      moderate_community: { Args: { p_kind: string; p_id: string; p_hidden: boolean }; Returns: undefined }
+      admin_set_creator_active: {
+        Args: { p_active: boolean; p_actor_id: string; p_creator_id: string }
+        Returns: undefined
+      }
+      admin_update_access: {
+        Args: {
+          p_actor_id: string
+          p_roles?: string[]
+          p_team_ids?: string[]
+          p_user_id: string
+        }
+        Returns: undefined
+      }
+      commit_campaigns_import: {
+        Args: {
+          p_actor_id: string
+          p_import_id: string
+          p_invalid?: number
+          p_rows: Json
+        }
+        Returns: Json
+      }
+      commit_creators_import: {
+        Args: {
+          p_actor_id: string
+          p_import_id: string
+          p_invalid?: number
+          p_rows: Json
+        }
+        Returns: undefined
+      }
+      commit_metrics_import: {
+        Args: {
+          p_actor_id: string
+          p_import_id: string
+          p_invalid?: number
+          p_rows: Json
+        }
+        Returns: undefined
+      }
       finish_password_change: { Args: never; Returns: undefined }
+      moderate_community: {
+        Args: { p_hidden: boolean; p_id: string; p_kind: string }
+        Returns: undefined
+      }
       record_login_success: { Args: never; Returns: undefined }
       switch_role: { Args: { target_role: string }; Returns: string }
     }
