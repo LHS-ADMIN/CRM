@@ -48,8 +48,8 @@ Deno.serve(async (req) => {
     const actorId = authData.user.id;
     const { data: role } = await userClient.from("user_roles").select("role")
       .eq("user_id", actorId).eq("role", "admin").maybeSingle();
-    const { data: actorProfile } = await userClient.from("profiles").select("active,active_role").eq("id", actorId).maybeSingle();
-    if (!role || actorProfile?.active !== true || actorProfile?.active_role !== "admin") return json({ error: "Admin role must be active" }, 403);
+    const { data: actorProfile } = await userClient.from("profiles").select("active,active_role,must_change_password").eq("id", actorId).maybeSingle();
+    if (!role || actorProfile?.active !== true || actorProfile?.active_role !== "admin" || actorProfile?.must_change_password !== false) return json({ error: "Admin role must be active" }, 403);
 
     const body = await req.json();
     const rows = Array.isArray(body?.rows) ? body.rows : [];
@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
       const title = s(pick(row, "Name", "Campaign Name", "Activity Name", "title", "name"));
       const start = iso(pick(row, "Start time", "Start Time", "Start", "start_at", "start_time"));
       const end = iso(pick(row, "End time", "End Time", "End", "end_at", "end_time")) ?? start;
-      if (!title || !start || !end) {
+      if (!title || !start || !end || new Date(end) < new Date(start)) {
         invalid++;
         continue;
       }
@@ -103,30 +103,14 @@ Deno.serve(async (req) => {
       return json({ error: "No valid campaign rows found" }, 400);
     }
 
-    const existingKeys = new Set<string>();
-    const keys = prepared.map((x) => String(x.import_key));
-    for (let i = 0; i < keys.length; i += 200) {
-      const { data } = await admin.from("campaigns").select("import_key").in("import_key", keys.slice(i, i + 200));
-      for (const x of data ?? []) if (x.import_key) existingKeys.add(String(x.import_key));
+    const {data:counts,error:commitError}=await admin.rpc("commit_campaigns_import",{
+      p_rows:prepared,p_import_id:log.id,p_actor_id:actorId,p_invalid:invalid,
+    });
+    if(commitError){
+      await admin.from("import_log").update({status:"failed",unmatched_count:invalid,completed_at:new Date().toISOString(),metadata:{error:commitError.message,code:commitError.code}}).eq("id",log.id);
+      return json({error:"Campaign import failed. No campaign rows were changed. Check the Import Log for details."},400);
     }
-
-    for (let i = 0; i < prepared.length; i += 250) {
-      const { error } = await admin.from("campaigns").upsert(prepared.slice(i, i + 250), { onConflict: "import_key" });
-      if (error) throw error;
-    }
-
-    const created = prepared.filter((x) => !existingKeys.has(String(x.import_key))).length;
-    const updated = prepared.length - created;
-    await admin.from("import_log").update({
-      matched_count: prepared.length,
-      unmatched_count: invalid,
-      created_count: created,
-      updated_count: updated,
-      status: "completed",
-      completed_at: new Date().toISOString(),
-    }).eq("id", log.id);
-
-    return json({ ok: true, importId: log.id, received: rows.length, valid: prepared.length, invalid, created, updated });
+    return json({ok:true,importId:log.id,received:rows.length,valid:prepared.length,invalid,created:counts?.created??0,updated:counts?.updated??0});
   } catch (error) {
     console.error(error);
     return json({ error: error instanceof Error ? error.message : "Unexpected server error" }, 500);

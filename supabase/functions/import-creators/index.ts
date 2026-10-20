@@ -51,8 +51,8 @@ Deno.serve(async (req) => {
     const { data: adminRole } = await userClient
       .from("user_roles").select("role")
       .eq("user_id", actorId).eq("role", "admin").maybeSingle();
-    const { data: actorProfile } = await userClient.from("profiles").select("active,active_role").eq("id", actorId).maybeSingle();
-    if (!adminRole || actorProfile?.active !== true || actorProfile?.active_role !== "admin") return json({ error: "Admin role must be active" }, 403);
+    const { data: actorProfile } = await userClient.from("profiles").select("active,active_role,must_change_password").eq("id", actorId).maybeSingle();
+    if (!adminRole || actorProfile?.active !== true || actorProfile?.active_role !== "admin" || actorProfile?.must_change_password !== false) return json({ error: "Admin role must be active" }, 403);
 
     const body = await req.json();
     const rows = Array.isArray(body?.rows) ? body.rows : [];

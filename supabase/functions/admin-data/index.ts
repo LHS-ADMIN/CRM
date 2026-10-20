@@ -36,9 +36,9 @@ Deno.serve(async (req) => {
 
     const [{ data: role }, { data: actorProfile }] = await Promise.all([
       userClient.from("user_roles").select("role").eq("user_id", actorId).eq("role", "admin").maybeSingle(),
-      userClient.from("profiles").select("login_username,active,active_role").eq("id", actorId).maybeSingle(),
+      userClient.from("profiles").select("login_username,active,active_role,must_change_password").eq("id", actorId).maybeSingle(),
     ]);
-    if (!role || actorProfile?.active !== true || actorProfile?.active_role !== "admin") {
+    if (!role || actorProfile?.active !== true || actorProfile?.active_role !== "admin" || actorProfile?.must_change_password !== false) {
       return json({ error: "Admin role must be active" }, 403);
     }
 
@@ -86,35 +86,13 @@ Deno.serve(async (req) => {
       const{error}=await admin.from("creators").update({display_name:display,tiktok_handle:raw?`@${raw}`:null,niche:String(body?.niche??"").trim()||null,team_id:body?.teamId||null}).eq("id",creatorId);
       if(error)throw error;return json({ok:true});
     }
-    if (action === "archive_creator") {
+    if (action === "archive_creator" || action === "restore_creator") {
       const creatorId = String(body?.creatorId ?? "");
       if (!creatorId) return json({ error: "creatorId is required" }, 400);
-      const { data: creator, error } = await admin.from("creators").update({
-        active: false,
-        status: "archived",
-        archived_at: new Date().toISOString(),
-        archived_by: actorId,
-      }).eq("id", creatorId).select("id,auth_user_id").single();
+      const {error} = await admin.rpc("admin_set_creator_active", {
+        p_actor_id: actorId, p_creator_id: creatorId, p_active: action === "restore_creator",
+      });
       if (error) throw error;
-      if (creator.auth_user_id) {
-        const{error:profileError}=await admin.from("profiles").update({ active: false }).eq("id", creator.auth_user_id);if(profileError)throw profileError;
-      }
-      return json({ ok: true });
-    }
-
-    if (action === "restore_creator") {
-      const creatorId = String(body?.creatorId ?? "");
-      if (!creatorId) return json({ error: "creatorId is required" }, 400);
-      const { data: creator, error } = await admin.from("creators").update({
-        active: true,
-        status: "active",
-        archived_at: null,
-        archived_by: null,
-      }).eq("id", creatorId).select("id,auth_user_id").single();
-      if (error) throw error;
-      if (creator.auth_user_id) {
-        const{error:profileError}=await admin.from("profiles").update({ active: true }).eq("id", creator.auth_user_id);if(profileError)throw profileError;
-      }
       return json({ ok: true });
     }
 

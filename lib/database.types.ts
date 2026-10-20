@@ -1569,6 +1569,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      moderate_community: { Args: { p_kind: string; p_id: string; p_hidden: boolean }; Returns: undefined }
       finish_password_change: { Args: never; Returns: undefined }
       record_login_success: { Args: never; Returns: undefined }
       switch_role: { Args: { target_role: string }; Returns: string }

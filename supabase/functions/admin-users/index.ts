@@ -21,9 +21,9 @@ Deno.serve(async(req)=>{
     const actorId=authData.user.id;
     const [{data:roleRow},{data:actorProfile}]=await Promise.all([
       userClient.from("user_roles").select("role").eq("user_id",actorId).eq("role","admin").maybeSingle(),
-      userClient.from("profiles").select("login_username,active,active_role").eq("id",actorId).maybeSingle()
+      userClient.from("profiles").select("login_username,active,active_role,must_change_password").eq("id",actorId).maybeSingle()
     ]);
-    if(!roleRow||actorProfile?.active!==true||actorProfile?.active_role!=="admin")return json({error:"Admin role must be active"},403);
+    if(!roleRow||actorProfile?.active!==true||actorProfile?.active_role!=="admin"||actorProfile?.must_change_password!==false)return json({error:"Admin role must be active"},403);
     const body=await req.json();const action=String(body?.action??"");
     if(action==="create"){
       const username=String(body?.username??"").trim().toLowerCase(),displayName=String(body?.displayName??"").trim();
@@ -59,10 +59,19 @@ Deno.serve(async(req)=>{
     }
     const userId=String(body?.userId??"");if(!userId)return json({error:"userId is required."},400);
     if(userId===actorId&&["set_active","set_roles"].includes(action))return json({error:"Your own access cannot be changed here."},400);
-    if(action==="reset_password"){const temp=String(body?.temporaryPassword??"")||temporaryPassword();if(temp.length<10)return json({error:"Temporary password must be at least 10 characters."},400);const {error}=await admin.auth.admin.updateUserById(userId,{password:temp});if(error)throw error;await admin.from("profiles").update({must_change_password:true}).eq("id",userId);return json({ok:true,temporaryPassword:temp,mustChangePassword:true})}
+    if(action==="reset_password"){const temp=String(body?.temporaryPassword??"")||temporaryPassword();if(temp.length<10)return json({error:"Temporary password must be at least 10 characters."},400);const {error}=await admin.auth.admin.updateUserById(userId,{password:temp});if(error)throw error;const {error:flagError}=await admin.from("profiles").update({must_change_password:true}).eq("id",userId);if(flagError)throw flagError;return json({ok:true,temporaryPassword:temp,mustChangePassword:true})}
     if(action==="set_active"){const active=Boolean(body?.active);const {error}=await admin.from("profiles").update({active}).eq("id",userId);if(error)throw error;return json({ok:true,active})}
-    if(action==="set_roles"){const roles=normalizeRoles(body?.roles);if(!roles.length)return json({error:"At least one role is required."},400);const {error:de}=await admin.from("user_roles").delete().eq("user_id",userId);if(de)throw de;const {error:ie}=await admin.from("user_roles").insert(roles.map(role=>({user_id:userId,role,assigned_by:actorId})));if(ie)throw ie;const preferredRole=roles.includes("admin")?"admin":roles.includes("manager")?"manager":"creator";const {error:pe}=await admin.from("profiles").update({active_role:preferredRole}).eq("id",userId);if(pe)throw pe;return json({ok:true,roles})}
-    if(action==="set_teams"){const teamIds=Array.isArray(body?.teamIds)?[...new Set(body.teamIds.map(String))]:[];const {error:de}=await admin.from("team_memberships").delete().eq("user_id",userId);if(de)throw de;if(teamIds.length){const {error:ie}=await admin.from("team_memberships").insert(teamIds.map(team_id=>({team_id,user_id:userId,membership_role:"manager",active:true})));if(ie)throw ie}return json({ok:true,teamIds})}
+    if(action==="set_roles"){
+      const roles=normalizeRoles(body?.roles);
+      if(!roles.length)return json({error:"At least one role is required."},400);
+      const {error}=await admin.rpc("admin_update_access",{p_actor_id:actorId,p_user_id:userId,p_roles:roles});
+      if(error)throw error;return json({ok:true,roles});
+    }
+    if(action==="set_teams"){
+      const teamIds=Array.isArray(body?.teamIds)?[...new Set(body.teamIds.map(String))]:[];
+      const {error}=await admin.rpc("admin_update_access",{p_actor_id:actorId,p_user_id:userId,p_team_ids:teamIds});
+      if(error)throw error;return json({ok:true,teamIds});
+    }
     return json({error:"Unsupported action."},400);
   }catch(error){console.error(error);return json({error:error instanceof Error?error.message:"Unexpected server error"},500)}
 });
