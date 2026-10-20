@@ -4,7 +4,7 @@
 
 **NOT READY FOR LAUNCH**
 
-This is an interim certification record. Critical browser workflows and accessibility checks remain untested. A successful deployment and passing database tests do not certify those workflows.
+This is an interim certification record. Critical browser workflows and accessibility checks remain untested. The testing browser encountered a credential-protection error during file-chooser testing and its automation runtime reset; further login repetition is not requested. A successful deployment and passing database tests do not certify those workflows.
 
 Outstanding software verification: complete Creator and Manager browser workflows; profile/contact editing and photo upload/replacement/invalid-file checks; cross-role signed attachment delivery; campaign XLSX upload through the UI; new campaign attachment and community moderation controls; full Academy link behavior; authentication expiry/error states; desktop/laptop/tablet/mobile layouts; 100%, 125%, and 150% browser zoom; and application console/network review. These are unfinished QA work, not external data dependencies. Release cleanup remains incomplete while the role-testing account is needed.
 
@@ -22,6 +22,8 @@ Personally exercised in the production browser earlier in this review:
 - October calendar has 102 October-only records; October 20 shows four selected-day rows. September archive has 83 rows. Spillover dates do not render old-month cards in the active month.
 - Roster XLSX counts malformed rows; handle changes preserve permanent IDs; duplicate IDs reject without modifying the roster.
 - Current-metrics XLSX uploads 12,345 diamonds, two live days and three streams. An unmatched file reports failure and preserves the successful snapshot. Disposable metric data was later removed.
+
+A fresh production browser sign-in as Pi/Admin was personally verified during this pass. The Academy page rendered the official resource and its link has target `_blank`; the external destination could not be verified because browser session protection blocked the new-tab observation.
 
 The user reported successful QA-account login. Database state confirms first-login completion and active Creator mode. This is not presented as an agent-observed Creator browser session.
 
@@ -61,7 +63,7 @@ All changes use the existing repository, database, Edge Functions, and Vercel pr
 ## 4. REMAINING EXTERNAL DEPENDENCIES
 
 - The approved production LHS roster will be supplied separately. No Jeremiah Tasi data was imported or used.
-- A signed-in session in the agent's testing browser is required for the remaining browser QA. The currently available testing browser redirects to login; the user's separate successful login does not establish that browser session.
+- Browser automation must recover from a credential-protection failure before the remaining signed-in UI tests can continue. Pi/Admin login succeeded in the testing browser, but file-chooser/new-tab and developer-log operations encountered retained-credential protection; a file-chooser error reset the automation runtime. This is a testing-browser blocker, not evidence that the application's upload itself failed. No further password reset or repeated login is requested.
 - Vercel runtime error-log access returned HTTP 403. Deployment inspection works, but runtime-log certification needs appropriate access. No authenticated Vercel CLI is installed in this workspace.
 
 ## 5. ROLE MATRIX
@@ -85,7 +87,7 @@ Current security advisor warnings:
 
 Sampled Supabase logs from 14:31–14:51 UTC showed 198 successful API responses, three successful username-login function responses, and one username-login 401. No 5xx responses appeared in that sample. This is limited traffic evidence, not full runtime certification.
 
-Data safety: all **666 original battles** remain. The current roster contains only the disposable `qa_creator_launch` account needed for role testing. Earlier disposable roster/import/campaign/community fixtures were removed, with audit/import evidence retained. Two private QA text objects and their inactive announcement/resolved support-ticket parents still require supported Storage API cleanup. No claim is made that cleanup is complete.
+Data safety: all **666 original battles** remain. The current roster contains only the disposable `qa_creator_launch` account needed for role testing. Earlier disposable roster/import/campaign/community fixtures were removed, with audit/import evidence retained. Two private QA text objects and their inactive announcement/resolved support-ticket parents still require supported Storage API cleanup. No claim is made that cleanup is complete. The interrupted campaign upload attempt created no campaign record; no campaign-import regression fixtures remain.
 
 ## 7. ACCESSIBILITY RESULT
 
@@ -100,7 +102,7 @@ Latest application release: `5279f6eba56dd60d4403166173f1a101e7d7ea8a`.
 - Production URL: https://crm-taupe-sigma.vercel.app
 - Local TypeScript and production build passed; production dependency audit found zero vulnerabilities.
 - Database migrations applied to the existing project. Updated Admin/import/sync Edge Functions are ACTIVE with JWT verification enabled.
-- Source and deployed database changes are recorded in GitHub. This report may be followed by a documentation-only commit.
+- Source and deployed database changes are recorded in GitHub. Documentation commit `29ccaf80b72cbacd35f179aa280ecf7cae6ab3ab` also deployed READY as `dpl_HcrUXQi1yK6Huh2anuzEQDdRbw24`. This report may be followed by another documentation-only commit.
 - Vercel runtime-log access remains blocked by 403. Application console/network checks for the complete signed-in workflow are pending.
 
 ## 9. REAL CREATOR IMPORT READINESS
