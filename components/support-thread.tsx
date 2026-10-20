@@ -1,0 +1,9 @@
+"use client";
+import {FormEvent,useState} from "react";
+import {useRouter} from "next/navigation";
+import {createClient} from "@/lib/supabase/client";
+export function SupportThread({ticketId,userId,status,canManage,messages}:{ticketId:string;userId:string;status:string;canManage:boolean;messages:{id:string;body:string;created_at:string;internal:boolean}[]}){
+ const router=useRouter();const[busy,setBusy]=useState(false);const[msg,setMsg]=useState("");
+ async function reply(e:FormEvent<HTMLFormElement>){e.preventDefault();const form=e.currentTarget;const f=new FormData(form);setBusy(true);const{error}=await createClient().from("support_messages").insert({ticket_id:ticketId,author_user_id:userId,body:String(f.get("body")).trim(),internal:canManage&&f.get("internal")==="on"});setBusy(false);if(error){setMsg("Reply could not be sent.");return;}form.reset();setMsg("Reply sent.");router.refresh();}
+ return <details><summary>Conversation & ticket actions</summary>{messages.map(m=><div className="community-reply" key={m.id}><small>{new Date(m.created_at).toLocaleString()}{m.internal?" · Leadership note":""}</small><p>{m.body}</p></div>)}{msg&&<p role="status">{msg}</p>}{canManage&&<label>Ticket status<select className="select" value={status} disabled={busy} onChange={async e=>{setBusy(true);const{error}=await createClient().from("support_tickets").update({status:e.target.value}).eq("id",ticketId);setBusy(false);setMsg(error?"Status could not be updated.":"Status updated.");router.refresh();}}>{["open","in_progress","waiting","resolved","closed"].map(s=><option key={s} value={s}>{s.replaceAll("_"," ")}</option>)}</select></label>}<form onSubmit={reply}><label>Message<textarea className="textarea" name="body" required/></label>{canManage&&<label><input name="internal" type="checkbox"/>Leadership-only note</label>}<button className="btn" disabled={busy}>Send reply</button></form></details>;
+}

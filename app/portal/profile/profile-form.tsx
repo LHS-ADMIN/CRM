@@ -10,6 +10,7 @@ export function ProfileForm({userId,profile,creator,details}:{userId:string;prof
 
   async function imageChange(e:ChangeEvent<HTMLInputElement>){
     const file=e.target.files?.[0];if(!file)return;
+    if(!["image/png","image/jpeg","image/webp","image/gif"].includes(file.type)||file.size>5*1024*1024){setMsg("Choose a JPG, PNG, WEBP or GIF no larger than 5 MB.");e.currentTarget.value="";return;}
     setBusy(true);setMsg("");
     const supabase=createClient();
     const ext=file.name.split(".").pop()?.toLowerCase()||"jpg";
@@ -73,19 +74,19 @@ export function ProfileForm({userId,profile,creator,details}:{userId:string;prof
       <div className="panel-head inner"><div><span className="section-kicker">Profile details</span><h2>Tell LHS who you are</h2><p>Keep your profile current so leadership has the right contact and creator information.</p></div><UserRound size={24}/></div>
 
       <div className="form-grid">
-        <div className="field"><label>Display name</label><input className="input" name="display_name" defaultValue={creator?.display_name||profile?.display_name||""}/></div>
-        <div className="field"><label><Sparkles size={15}/> Niche</label><input className="input" name="niche" defaultValue={details?.niche||""} placeholder="Beauty, comedy, gaming, lifestyle…"/></div>
+        <div className="field"><label htmlFor="profile-form-display_name">Display name</label><input id="profile-form-display_name" className="input" name="display_name" defaultValue={creator?.display_name||profile?.display_name||""}/></div>
+        <div className="field"><label htmlFor="profile-form-niche"><Sparkles size={15}/> Niche</label><input id="profile-form-niche" className="input" name="niche" defaultValue={details?.niche||""} placeholder="Beauty, comedy, gaming, lifestyle…"/></div>
       </div>
 
-      <div className="field"><label>Bio <span className="muted">(200 characters maximum)</span></label><textarea className="textarea" name="bio" maxLength={200} rows={4} defaultValue={details?.bio||""} placeholder="A short description creators and leadership can use to understand your brand."/></div>
+      <div className="field"><label htmlFor="profile-form-bio">Bio <span className="muted">(200 characters maximum)</span></label><textarea id="profile-form-bio" className="textarea" name="bio" maxLength={200} rows={4} defaultValue={details?.bio||""} placeholder="A short description creators and leadership can use to understand your brand."/></div>
 
       <div className="private-section enhanced-private">
         <div className="private-head"><div><strong>Private contact information</strong><span>Visible only to you and active Admin users</span></div><LockKeyhole size={19}/></div>
         <div className="form-grid">
-          <div className="field"><label><AtSign size={15}/> Email</label><input className="input" name="email" type="email" defaultValue={details?.email||""} placeholder="name@example.com"/></div>
-          <div className="field"><label><Phone size={15}/> Phone number</label><input className="input" name="phone" type="tel" defaultValue={details?.phone||""} placeholder="(555) 555-5555"/></div>
-          <div className="field"><label><CalendarDays size={15}/> Birthday</label><input className="input" name="birthday" type="date" defaultValue={details?.birthday||""}/></div>
-          <div className="field"><label><MapPin size={15}/> Address</label><input className="input" name="address" defaultValue={details?.address||""} placeholder="Street, city, state, ZIP"/></div>
+          <div className="field"><label htmlFor="profile-form-email"><AtSign size={15}/> Email</label><input id="profile-form-email" className="input" name="email" type="email" defaultValue={details?.email||""} placeholder="name@example.com"/></div>
+          <div className="field"><label htmlFor="profile-form-phone"><Phone size={15}/> Phone number</label><input id="profile-form-phone" className="input" name="phone" type="tel" defaultValue={details?.phone||""} placeholder="(555) 555-5555"/></div>
+          <div className="field"><label htmlFor="profile-form-birthday"><CalendarDays size={15}/> Birthday</label><input id="profile-form-birthday" className="input" name="birthday" type="date" defaultValue={details?.birthday||""}/></div>
+          <div className="field"><label htmlFor="profile-form-address"><MapPin size={15}/> Address</label><input id="profile-form-address" className="input" name="address" defaultValue={details?.address||""} placeholder="Street, city, state, ZIP"/></div>
         </div>
       </div>
 

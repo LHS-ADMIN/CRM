@@ -27,12 +27,14 @@ function LoginForm(){
     if(sessionError||!signedInUser){setError("The username or password is incorrect.");setBusy(false);return}
 
     const {error:auditError}=await supabase.rpc("record_login_success");
-    if(auditError){await supabase.auth.signOut();setError(auditError.message);setBusy(false);return}
+    if(auditError){await supabase.auth.signOut();setError("Your account could not be opened. Please contact LHS support.");setBusy(false);return}
 
     const {data:profile,error:profileError}=await supabase.from("profiles").select("active,must_change_password").eq("id",signedInUser.id).single();
     if(profileError||!profile?.active){await supabase.auth.signOut();setError("This LHS account is not active.");setBusy(false);return}
 
-    router.replace(profile.must_change_password?"/change-password":(params.get("next")||"/portal"));
+    const next=params.get("next");
+    const destination=next?.startsWith("/portal")&&!next.startsWith("//")?next:"/portal";
+    router.replace(profile.must_change_password?"/change-password":destination);
     router.refresh();
   }
 
@@ -53,8 +55,8 @@ function LoginForm(){
         <p className="muted">Sign in with your permanent LHS username. No email address is needed.</p>
         {error&&<div className="error">{error}</div>}
         <form onSubmit={submit}>
-          <div className="field"><label>Username</label><input className="input" name="username" autoComplete="username" required placeholder="your.username"/></div>
-          <div className="field"><label>Password</label><input className="input" name="password" type="password" autoComplete="current-password" required placeholder="••••••••••"/></div>
+          <div className="field"><label htmlFor="page-username">Username</label><input id="page-username" className="input" name="username" autoComplete="username" required placeholder="your.username"/></div>
+          <div className="field"><label htmlFor="page-password">Password</label><input id="page-password" className="input" name="password" type="password" autoComplete="current-password" required placeholder="••••••••••"/></div>
           <button className="btn primary login-submit" disabled={busy}>{busy?"Signing in…":"Enter LHS Connect"}</button>
         </form>
         <div className="login-security"><ShieldCheck size={15}/> Protected by secure role-based access.</div>

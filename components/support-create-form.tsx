@@ -1,4 +1,5 @@
 "use client";
+import { useDialog } from "@/components/use-dialog";
 import { FormEvent, useState } from "react";
 import { ImagePlus, Link2, Paperclip, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -9,6 +10,7 @@ function safeName(name:string){return name.replace(/[^a-zA-Z0-9._-]/g,"-").slice
 export function SupportCreateForm({userId,creatorId,teamId}:{userId:string;creatorId:string|null;teamId:string|null}){
   const router=useRouter();const[open,setOpen]=useState(false);const[busy,setBusy]=useState(false);const[msg,setMsg]=useState("");
 
+  const dialogRef=useDialog(open,()=>setOpen(false));
   async function submit(e:FormEvent<HTMLFormElement>){
     e.preventDefault();setBusy(true);setMsg("");
     const form=e.currentTarget;
@@ -55,17 +57,17 @@ export function SupportCreateForm({userId,creatorId,teamId}:{userId:string;creat
 
   return <><button className="btn primary" onClick={()=>setOpen(true)}><Plus size={17}/> New ticket</button>{open&&
     <div className="modal-backdrop" onMouseDown={()=>setOpen(false)}>
-      <div className="modal-card" onMouseDown={e=>e.stopPropagation()}>
-        <div className="modal-head"><div><span className="section-kicker">Support Center</span><h2>Open a support ticket</h2><p>Give leadership enough detail to help quickly. You can include a screenshot, document, or link.</p></div><button className="icon-button" onClick={()=>setOpen(false)}><X size={20}/></button></div>
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Create support ticket" tabIndex={-1} className="modal-card" onMouseDown={e=>e.stopPropagation()}>
+        <div className="modal-head"><div><span className="section-kicker">Support Center</span><h2>Open a support ticket</h2><p>Give leadership enough detail to help quickly. You can include a screenshot, document, or link.</p></div><button className="icon-button" aria-label="Close dialog" onClick={()=>setOpen(false)}><X size={20}/></button></div>
         {msg&&<div className={msg==="Ticket created."?"success":"error"}>{msg}</div>}
         <form onSubmit={submit}>
-          <div className="field"><label>Subject</label><input className="input" name="subject" required placeholder="What do you need help with?"/></div>
-          <div className="field"><label>Details</label><textarea className="textarea" name="description" rows={5} placeholder="Explain the issue, what happened, and anything leadership should know."/></div>
+          <div className="field"><label htmlFor="support-create-form-subject">Subject</label><input id="support-create-form-subject" className="input" name="subject" required placeholder="What do you need help with?"/></div>
+          <div className="field"><label htmlFor="support-create-form-description">Details</label><textarea id="support-create-form-description" className="textarea" name="description" rows={5} placeholder="Explain the issue, what happened, and anything leadership should know."/></div>
           <div className="form-grid">
-            <div className="field"><label>Category</label><select className="select" name="category"><option>General</option><option>Battle</option><option>Campaign</option><option>Account</option><option>Creator Support</option><option>Technical</option></select></div>
-            <div className="field"><label>Priority</label><select className="select" name="priority"><option value="normal">Normal</option><option value="low">Low</option><option value="high">High</option><option value="urgent">Urgent</option></select></div>
+            <div className="field"><label htmlFor="support-create-form-category">Category</label><select id="support-create-form-category" className="select" name="category"><option>General</option><option>Battle</option><option>Campaign</option><option>Account</option><option>Creator Support</option><option>Technical</option></select></div>
+            <div className="field"><label htmlFor="support-create-form-priority">Priority</label><select id="support-create-form-priority" className="select" name="priority"><option value="normal">Normal</option><option value="low">Low</option><option value="high">High</option><option value="urgent">Urgent</option></select></div>
           </div>
-          <div className="field"><label><Link2 size={15}/> Optional link</label><input className="input" type="url" name="external_url" placeholder="https://…"/></div>
+          <div className="field"><label htmlFor="support-create-form-external_url"><Link2 size={15}/> Optional link</label><input id="support-create-form-external_url" className="input" type="url" name="external_url" placeholder="https://…"/></div>
           <div className="upload-field">
             <div><ImagePlus size={20}/><span><strong>Add screenshot or file</strong><small>Images, PDF, Word, Excel or text · up to 20 MB</small></span></div>
             <label className="btn"><Paperclip size={16}/> Choose file<input hidden type="file" name="attachment" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"/></label>

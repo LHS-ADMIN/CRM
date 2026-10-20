@@ -15,7 +15,8 @@ const s = (v: unknown) => {
 const n = (v: unknown) => {
   if (v === null || v === undefined || v === "") return 0;
   const x = Number(String(v).replace(/,/g, "").trim());
-  return Number.isFinite(x) ? x : 0;
+  if (!Number.isSafeInteger(x) || x < 0) throw new Error("Metric values must be nonnegative whole numbers.");
+  return x;
 };
 const pick = (row: Record<string, unknown>, ...keys: string[]) => {
   for (const key of keys) if (row[key] !== undefined && row[key] !== null && String(row[key]).trim() !== "") return row[key];
@@ -26,6 +27,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
+  let markFailed: (() => Promise<void>) | null = null;
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) return json({ error: "Unauthorized" }, 401);
@@ -80,6 +82,7 @@ Deno.serve(async (req) => {
       created_by: actorId,
     }).select("id").single();
     if (logError) throw logError;
+    markFailed = async () => { await admin.from("import_log").update({status:"failed",completed_at:new Date().toISOString(),metadata:{error:"Import failed; no replacement committed."}}).eq("id",log.id).eq("status","processing"); };
 
     const prepared: Record<string, unknown>[] = [];
     const unmatched: Array<{creatorId?: string|null, handle?: string|null, name?: string|null}> = [];
@@ -125,23 +128,17 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Current-only rule: replace the snapshot atomically enough for this single-admin workflow.
-    const { error: deleteError } = await admin.from("metrics_current").delete().neq("creator_id", "00000000-0000-0000-0000-000000000000");
-    if (deleteError) throw deleteError;
-
-    for (let i = 0; i < prepared.length; i += 500) {
-      const { error } = await admin.from("metrics_current").insert(prepared.slice(i, i + 500));
-      if (error) throw error;
+    if (!prepared.length) {
+      await admin.from("import_log").update({status:"failed",unmatched_count:unmatched.length,completed_at:new Date().toISOString(),metadata:{error:"No matched creators. Existing metrics preserved."}}).eq("id",log.id);
+      return json({error:"No creators matched. The previous metrics remain unchanged."},400);
     }
-
-    await admin.from("import_log").update({
-      matched_count: prepared.length,
-      unmatched_count: unmatched.length,
-      created_count: prepared.length,
-      status: "completed",
-      completed_at: new Date().toISOString(),
-      metadata: { unmatched: unmatched.slice(0, 100), currentOnly: true, dataPeriod },
-    }).eq("id", log.id);
+    const { error: commitError } = await admin.rpc("commit_metrics_import", {
+      p_rows: prepared, p_import_id: log.id, p_actor_id: actorId, p_invalid: unmatched.length,
+    });
+    if (commitError) {
+      await admin.from("import_log").update({status:"failed",completed_at:new Date().toISOString(),metadata:{error:"Replacement rolled back; previous snapshot preserved."}}).eq("id",log.id);
+      return json({error:"Metrics import failed. The previous metrics remain unchanged. Check duplicate IDs or malformed values."},400);
+    }
 
     return json({
       ok: true,
@@ -152,7 +149,8 @@ Deno.serve(async (req) => {
       dataPeriod,
     });
   } catch (error) {
-    console.error(error);
+    if(markFailed) await markFailed();
+    console.error("Import failed");
     return json({ error: error instanceof Error ? error.message : "Unexpected server error" }, 500);
   }
 });

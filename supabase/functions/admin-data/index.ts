@@ -78,6 +78,14 @@ Deno.serve(async (req) => {
       return json({ ok: true, creator: data });
     }
 
+    if (action === "update_creator") {
+      const creatorId=String(body?.creatorId??"");const display=String(body?.displayName??"").trim();
+      if(!creatorId||!display)return json({error:"Creator and display name are required."},400);
+      const raw=String(body?.handle??"").trim().replace(/^@/,"");
+      if(raw){const{data:conflict}=await admin.from("creators").select("id").ilike("tiktok_handle",`@${raw}`).neq("id",creatorId).limit(1);if(conflict?.length)return json({error:"Handle already belongs to another creator."},409);}
+      const{error}=await admin.from("creators").update({display_name:display,tiktok_handle:raw?`@${raw}`:null,niche:String(body?.niche??"").trim()||null,team_id:body?.teamId||null}).eq("id",creatorId);
+      if(error)throw error;return json({ok:true});
+    }
     if (action === "archive_creator") {
       const creatorId = String(body?.creatorId ?? "");
       if (!creatorId) return json({ error: "creatorId is required" }, 400);
@@ -89,7 +97,7 @@ Deno.serve(async (req) => {
       }).eq("id", creatorId).select("id,auth_user_id").single();
       if (error) throw error;
       if (creator.auth_user_id) {
-        await admin.from("profiles").update({ active: false }).eq("id", creator.auth_user_id);
+        const{error:profileError}=await admin.from("profiles").update({ active: false }).eq("id", creator.auth_user_id);if(profileError)throw profileError;
       }
       return json({ ok: true });
     }
@@ -105,7 +113,7 @@ Deno.serve(async (req) => {
       }).eq("id", creatorId).select("id,auth_user_id").single();
       if (error) throw error;
       if (creator.auth_user_id) {
-        await admin.from("profiles").update({ active: true }).eq("id", creator.auth_user_id);
+        const{error:profileError}=await admin.from("profiles").update({ active: true }).eq("id", creator.auth_user_id);if(profileError)throw profileError;
       }
       return json({ ok: true });
     }

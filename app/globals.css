@@ -578,3 +578,22 @@ html{font-size:18px}
   .float-live{left:7px}.float-battle{right:7px}.float-campaign{right:11px}
   .username-onboarding-banner{align-items:flex-start}
 }
+
+/* Launch readability: core text and controls remain readable at every breakpoint. */
+html{font-size:18px}
+body{line-height:1.6}
+.field label,.input,.select,.textarea,.btn,.table td,.post-card>p,.ticket-description{font-size:1rem;line-height:1.6}
+.sidebar-nav a,.nav-item,.table th,.chip,.status-badge,.calendar-weekdays span,.calendar-date small,.battle-event strong,.battle-event span,.battle-event small,.no-battles,.more-events,.attachment-file strong,.attachment-file small,.privacy-note,.ticket-meta,.profile-save-row span,.upload-field small,.modal-head p,.credential-card p{font-size:.9rem}
+.btn,.icon-button,.mini-action,input,select{min-height:44px}
+.icon-button,.mini-action{min-width:44px}
+:focus-visible{outline:3px solid #176fc1;outline-offset:3px}
+.error{color:#8f1832;background:#fff0f3;font-size:1rem;line-height:1.6}
+.workspace,.content,.panel,.form-grid>*{min-width:0}
+.modal-card{max-height:90dvh;overflow-y:auto}
+.community-reply{border-left:3px solid #d4b467;margin:12px 0;padding:10px 16px;background:#f6f8fc;border-radius:8px;overflow-wrap:anywhere}
+.community-reply time{display:block;color:#526078;font-size:.9rem}
+.community-reply p{white-space:pre-wrap;margin:5px 0}
+.post-card>p{white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:800px){html{font-size:18px}.form-grid{grid-template-columns:1fr}.topbar-actions{flex-wrap:wrap}.calendar-grid{overflow-x:auto}.calendar-events{display:none}.calendar-date{flex-wrap:wrap}.calendar-date small{font-size:.8rem}.calendar-day{min-height:80px}.calendar-date small{white-space:normal}.profile-save-row{flex-wrap:wrap}}
+
+form>label,.form-grid>label{display:grid;gap:6px;margin-bottom:14px;font-size:1rem}fieldset label{display:flex;gap:10px;align-items:center}fieldset input[type=checkbox]{min-height:24px;width:24px}.account-list>details{padding:16px 0;border-bottom:1px solid var(--line)}summary{cursor:pointer;min-height:44px;padding:9px 0;font-size:1rem}.team-chip{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.sidebar nav a{font-size:1rem}.calendar-day-link{overflow:hidden}.calendar-date{min-width:0}

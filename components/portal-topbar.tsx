@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Bell, HeartPulse, Sparkles } from "lucide-react";
 import { LogoutButton } from "@/components/logout-button";
 import { RoleSwitcher } from "@/components/role-switcher";
@@ -15,10 +16,10 @@ export function PortalTopbar({
       <span className="workspace-spark"><Sparkles size={16}/></span>
     </div>
     <div className="topbar-actions">
-      <button className="icon-button" aria-label="Notifications">
+      <Link href="/portal/announcements" className="icon-button" aria-label="View announcements">
         <Bell size={19}/>
         {unread>0&&<span className="notification-count">{unread>9?"9+":unread}</span>}
-      </button>
+      </Link>
       <RoleSwitcher roles={roles} active={activeRole}/>
       <div className="user-chip"><span className="avatar-fallback">{initials}</span><span className="user-chip-copy"><strong>{displayName}</strong><small>{activeRole||"member"}</small></span></div>
       <LogoutButton/>

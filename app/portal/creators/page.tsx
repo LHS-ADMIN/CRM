@@ -1,16 +1,16 @@
 import Link from "next/link";
 import { Activity, FileUp, Gem, Search, ShieldCheck, UsersRound } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { AddCreatorControl, ArchiveCreatorButton } from "@/components/creator-admin-controls";
+import { AddCreatorControl, ArchiveCreatorButton, RestoreCreatorButton } from "@/components/creator-admin-controls";
 
-export default async function CreatorsPage({searchParams}:{searchParams:Promise<{q?:string}>}){
-  const {q=""}=await searchParams;
+export default async function CreatorsPage({searchParams}:{searchParams:Promise<{q?:string;archived?:string}>}){
+  const {q="",archived}=await searchParams;
   const supabase=await createClient();
   const {data:{user}}=await supabase.auth.getUser();
   const {data:profile}=user?await supabase.from("profiles").select("active_role").eq("id",user.id).single():{data:null};
   const admin=profile?.active_role==="admin";
 
-  let query=supabase.from("creators").select("id,agency_creator_id,creator_name,display_name,tiktok_handle,group_name,creator_network_manager,graduation_status,status,tier").eq("active",true).order("creator_name").limit(1000);
+  let query=supabase.from("creators").select("id,agency_creator_id,creator_name,display_name,tiktok_handle,group_name,creator_network_manager,graduation_status,status,tier").eq("active",!(admin&&archived==="1")).order("creator_name").limit(1000);
   if(q.trim())query=query.or(`creator_name.ilike.%${q.trim()}%,display_name.ilike.%${q.trim()}%,tiktok_handle.ilike.%${q.trim()}%,agency_creator_id.ilike.%${q.trim()}%`);
 
   const [{data:creators},{data:metrics},{data:teams}]=await Promise.all([
@@ -36,8 +36,8 @@ export default async function CreatorsPage({searchParams}:{searchParams:Promise<
     </section>
 
     <section className="panel creator-directory-panel">
-      <div className="panel-head"><div><span className="section-kicker">Directory</span><h2>Active creators</h2></div><form className="search-form"><Search size={17}/><input name="q" placeholder="Search creator, handle, or ID" defaultValue={q}/></form></div>
-      {(creators||[]).length?<div className="table-wrap"><table className="table creator-table"><thead><tr><th>Creator</th><th>Creator ID</th><th>Manager</th><th>Group</th><th>Tier</th><th>Diamonds</th><th>LIVE Days</th><th>Streams</th><th>Status</th>{admin&&<th>Actions</th>}</tr></thead><tbody>{(creators||[]).map(c=>{const m=metricMap.get(c.id);const name=c.display_name||c.creator_name;return <tr key={c.id}><td><div className="creator-cell"><span className="avatar-fallback sm">{(name||"L")[0].toUpperCase()}</span><div><strong>{name}</strong><small>{c.tiktok_handle||"No handle"}</small></div></div></td><td><code>{c.agency_creator_id}</code></td><td>{c.creator_network_manager||"—"}</td><td>{c.group_name||"—"}</td><td><span className="chip">{m?.tier_status||c.tier||"—"}</span></td><td><strong>{Number(m?.diamonds||0).toLocaleString()}</strong></td><td>{m?.live_days||0}</td><td>{m?.live_streams||0}</td><td><span className="status-badge success">{c.status}</span></td>{admin&&<td><ArchiveCreatorButton creatorId={c.id} name={name}/></td>}</tr>})}</tbody></table></div>:
+      <div className="panel-head"><div><span className="section-kicker">Directory</span><h2>{admin&&archived==="1"?"Archived creators":"Active creators"}</h2>{admin&&<Link className="btn" href={archived==="1"?"/portal/creators":"/portal/creators?archived=1"}>{archived==="1"?"View active roster":"View archive"}</Link>}</div><form className="search-form"><Search size={17}/>{archived==="1"&&<input type="hidden" name="archived" value="1"/>}<input aria-label="Search creators" name="q" placeholder="Search creator, handle, or ID" defaultValue={q}/></form></div>
+      {(creators||[]).length?<div className="table-wrap"><table className="table creator-table"><thead><tr><th>Creator</th><th>Creator ID</th><th>Manager</th><th>Group</th><th>Tier</th><th>Diamonds</th><th>LIVE Days</th><th>Streams</th><th>Status</th>{admin&&<th>Actions</th>}</tr></thead><tbody>{(creators||[]).map(c=>{const m=metricMap.get(c.id);const name=c.display_name||c.creator_name;return <tr key={c.id}><td><div className="creator-cell"><span className="avatar-fallback sm">{(name||"L")[0].toUpperCase()}</span><div><strong><Link href={`/portal/creators/${c.id}`}>{name}</Link></strong><small>{c.tiktok_handle||"No handle"}</small></div></div></td><td><code>{c.agency_creator_id}</code></td><td>{c.creator_network_manager||"—"}</td><td>{c.group_name||"—"}</td><td><span className="chip">{m?.tier_status||c.tier||"—"}</span></td><td><strong>{Number(m?.diamonds||0).toLocaleString()}</strong></td><td>{m?.live_days||0}</td><td>{m?.live_streams||0}</td><td><span className="status-badge success">{c.status}</span></td>{admin&&<td>{archived==="1"?<RestoreCreatorButton creatorId={c.id}/>:<ArchiveCreatorButton creatorId={c.id} name={name}/>}</td>}</tr>})}</tbody></table></div>:
       <div className="creator-empty-state"><div className="creator-empty-visual"><UsersRound size={38}/><span><ShieldCheck size={18}/></span></div><div><span className="section-kicker">Start your live roster</span><h2>No active creators are loaded yet</h2><p>Add creators individually by username or import the approved LHS roster. Email addresses are not required for creator onboarding.</p>{admin&&<div className="empty-actions"><AddCreatorControl teams={teams||[]}/><Link className="btn" href="/portal/administration"><FileUp size={17}/> Import approved roster</Link></div>}</div></div>}
     </section>
   </>;

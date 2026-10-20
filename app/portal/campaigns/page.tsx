@@ -8,7 +8,7 @@ export default async function CampaignsPage(){
   if(!user)return null;
   const [{data:profile},{data:teams}]=await Promise.all([supabase.from("profiles").select("active_role").eq("id",user.id).single(),supabase.from("teams").select("id,name").eq("active",true).order("name")]);
   const {data}=await supabase.from("campaigns")
-    .select("id,title,description,start_at,end_at,status,audience_type,rules,metric,campaign_prizes(place_label,prize_description),campaign_leaderboard(rank,score,metric_value)")
+    .select("id,title,description,start_at,end_at,status,audience_type,team_id,created_by,rules,metric,campaign_prizes(id,place_label,prize_description),campaign_leaderboard(rank,score,metric_value,creators(creator_name,tiktok_handle))")
     .eq("active",true).order("start_at",{ascending:false}).limit(200);
 
   const now=Date.now();
@@ -24,6 +24,8 @@ export default async function CampaignsPage(){
         <div className="campaign-meta"><span><CalendarRange size={15}/>{start.toLocaleDateString()} – {end.toLocaleDateString()}</span><span><Trophy size={15}/>{c.metric||"Campaign metric"}</span></div>
         <div className="progress large"><span style={{width:`${pct}%`}}/></div><div className="progress-label"><span>Timeline progress</span><strong>{pct}%</strong></div>
         {c.campaign_prizes?.length>0&&<div className="prize-box"><div className="prize-title"><Gift size={16}/> Prizes</div>{c.campaign_prizes.slice(0,3).map((p:any,i:number)=><div className="prize-row" key={i}><span>{p.place_label||`Prize ${i+1}`}</span><strong>{p.prize_description}</strong></div>)}</div>}
+        {c.campaign_leaderboard?.length>0&&<div><h3>Leaderboard</h3><ol>{[...c.campaign_leaderboard].sort((a:any,b:any)=>(a.rank||999)-(b.rank||999)).map((row:any,i:number)=><li key={i}>{row.rank||i+1}. {row.creators?.tiktok_handle||row.creators?.creator_name||"LHS Creator"} — {row.metric_value??row.score??0}</li>)}</ol></div>}
+        {(profile?.active_role==="admin"||(profile?.active_role==="manager"&&c.created_by===user.id))&&<CampaignCreatePanel userId={user.id} activeRole={profile.active_role} teams={teams||[]} existing={c}/>}
         {c.rules&&<details className="rules"><summary>Campaign rules</summary><p>{c.rules}</p></details>}
       </article>
     }):<div className="panel empty-state">No campaigns are available for your current role.</div>}</div>

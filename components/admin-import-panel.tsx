@@ -23,8 +23,10 @@ export function AdminImportPanel(){
   const [msg,setMsg]=useState("");
 
   async function upload(e:ChangeEvent<HTMLInputElement>){
-    const file=e.target.files?.[0];
+    const input=e.currentTarget;
+    const file=input.files?.[0];
     if(!file)return;
+    if(!file.name.toLowerCase().endsWith(".xlsx")||file.size>20*1024*1024){setMsg("Choose an .xlsx file no larger than 20 MB.");input.value="";return;}
     setBusy(true);setMsg("");
     try{
       const sheet=await readSheet(file);
@@ -39,7 +41,7 @@ export function AdminImportPanel(){
     }catch(err){
       setMsg(err instanceof Error?err.message:"Import failed.");
     }finally{
-      setBusy(false);e.target.value="";
+      setBusy(false);input.value="";
     }
   }
 

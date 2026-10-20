@@ -1,5 +1,6 @@
 "use client";
 
+import { useDialog } from "@/components/use-dialog";
 import { FormEvent, useState } from "react";
 import { Copy, Plus, Trash2, UserPlus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -14,6 +15,7 @@ export function AddCreatorControl({teams}:{teams:Team[]}){
   const[msg,setMsg]=useState("");
   const[credentials,setCredentials]=useState<{username:string;password:string;agencyId:string|null}|null>(null);
 
+  const dialogRef=useDialog(open,()=>setOpen(false));
   async function submit(e:FormEvent<HTMLFormElement>){
     e.preventDefault();setBusy(true);setMsg("");setCredentials(null);
     const form=e.currentTarget;
@@ -51,10 +53,10 @@ export function AddCreatorControl({teams}:{teams:Team[]}){
   return <>
     <button className="btn primary creator-add-button" onClick={()=>{setOpen(true);setMsg("");setCredentials(null)}}><UserPlus size={18}/> Add creator</button>
     {open&&<div className="modal-backdrop" onMouseDown={()=>setOpen(false)}>
-      <div className="modal-card creator-onboard-modal" onMouseDown={e=>e.stopPropagation()}>
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Add creator" tabIndex={-1} className="modal-card creator-onboard-modal" onMouseDown={e=>e.stopPropagation()}>
         <div className="modal-head">
-          <div><span className="section-kicker">Creator access</span><h2>Add a creator by username</h2><p>No email address is required from the Admin. LHS creates the secure Supabase sign-in identity behind the scenes.</p></div>
-          <button className="icon-button" onClick={()=>setOpen(false)} aria-label="Close"><X size={20}/></button>
+          <div><span className="section-kicker">Creator access</span><h2>Add a creator by username</h2><p>No email address is required from the Admin. LHS creates the secure sign-in identity automatically.</p></div>
+          <button className="icon-button" aria-label="Close dialog" onClick={()=>setOpen(false)}><X size={20}/></button>
         </div>
 
         {msg&&<div className={msg.includes("successfully")||msg.includes("copied")?"success":"error"}>{msg}</div>}
@@ -67,14 +69,14 @@ export function AddCreatorControl({teams}:{teams:Team[]}){
           <button className="btn" type="button" onClick={()=>{setCredentials(null);setMsg("")}}><Plus size={16}/> Add another creator</button>
         </div>:
         <form onSubmit={submit}>
-          <div className="creator-username-callout"><strong>USERNAME-FIRST ONBOARDING</strong><span>Creators sign in with the username you choose here. Supabase's required email field is handled internally and is never part of the creator onboarding form.</span></div>
+          <div className="creator-username-callout"><strong>USERNAME-FIRST ONBOARDING</strong><span>Creators sign in with the username you choose here. A secure sign-in identity is created automatically. The creator receives a temporary password.</span></div>
           <div className="form-grid">
-            <div className="field"><label>Login username</label><input className="input" name="username" required pattern="[A-Za-z0-9._-]{3,50}" placeholder="creatorname"/></div>
-            <div className="field"><label>Display name</label><input className="input" name="display_name" required placeholder="Creator display name"/></div>
-            <div className="field"><label>TikTok handle <span className="muted">(optional)</span></label><input className="input" name="tiktok_handle" placeholder="@creator"/></div>
-            <div className="field"><label>Niche <span className="muted">(optional)</span></label><input className="input" name="niche" placeholder="Beauty, gaming, lifestyle…"/></div>
+            <div className="field"><label htmlFor="creator-admin-controls-username">Login username</label><input id="creator-admin-controls-username" className="input" name="username" required pattern="[A-Za-z0-9._-]{3,50}" placeholder="creatorname"/></div>
+            <div className="field"><label htmlFor="creator-admin-controls-display_name">Display name</label><input id="creator-admin-controls-display_name" className="input" name="display_name" required placeholder="Creator display name"/></div>
+            <div className="field"><label htmlFor="creator-admin-controls-tiktok_handle">TikTok handle <span className="muted">(optional)</span></label><input id="creator-admin-controls-tiktok_handle" className="input" name="tiktok_handle" placeholder="@creator"/></div>
+            <div className="field"><label htmlFor="creator-admin-controls-niche">Niche <span className="muted">(optional)</span></label><input id="creator-admin-controls-niche" className="input" name="niche" placeholder="Beauty, gaming, lifestyle…"/></div>
           </div>
-          {teams.length>0&&<div className="field"><label>Manager team</label><select className="select" name="team_id" defaultValue=""><option value="">Unassigned</option>{teams.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}</select></div>}
+          {teams.length>0&&<div className="field"><label htmlFor="creator-admin-controls-team_id">Manager team</label><select id="creator-admin-controls-team_id" className="select" name="team_id" defaultValue=""><option value="">Unassigned</option>{teams.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}</select></div>}
           <div className="modal-actions"><button type="button" className="btn" onClick={()=>setOpen(false)}>Cancel</button><button className="btn gold" disabled={busy}><UserPlus size={17}/>{busy?"Creating…":"Create creator access"}</button></div>
         </form>}
       </div>
@@ -92,5 +94,10 @@ export function ArchiveCreatorButton({creatorId,name}:{creatorId:string;name:str
     if(error||data?.error){window.alert(data?.error||error?.message||"Creator could not be removed.");setBusy(false);return}
     router.refresh();
   }
-  return <button className="mini-action danger-action" type="button" onClick={archive} disabled={busy} title="Remove creator"><Trash2 size={16}/></button>;
+  return <button className="mini-action danger-action" type="button" onClick={archive} disabled={busy} aria-label={`Archive ${name}`} title="Archive creator"><Trash2 size={16}/></button>;
+}
+
+export function RestoreCreatorButton({creatorId}:{creatorId:string}){
+ const router=useRouter();const[busy,setBusy]=useState(false);const[msg,setMsg]=useState("");
+ return <><button className="btn" disabled={busy} onClick={async()=>{setBusy(true);const{error,data}=await createClient().functions.invoke("admin-data",{body:{action:"restore_creator",creatorId}});setBusy(false);if(error||data?.error){setMsg("Creator could not be restored.");return;}router.refresh();}}>Restore creator</button>{msg&&<p role="alert">{msg}</p>}</>;
 }

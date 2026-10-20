@@ -26,6 +26,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
+  let markFailed: (() => Promise<void>) | null = null;
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) return json({ error: "Unauthorized" }, 401);
@@ -67,6 +68,7 @@ Deno.serve(async (req) => {
       created_by: actorId,
     }).select("id").single();
     if (logError) throw logError;
+    markFailed = async () => { await admin.from("import_log").update({status:"failed",completed_at:new Date().toISOString(),metadata:{error:"Import failed; no replacement committed."}}).eq("id",log.id).eq("status","processing"); };
 
     const { data: existing, error: existingError } = await admin
       .from("creators")
@@ -124,36 +126,18 @@ Deno.serve(async (req) => {
       return json({ error: "No valid creator rows found" }, 400);
     }
 
-    const chunkSize = 500;
-    for (let i = 0; i < prepared.length; i += chunkSize) {
-      const { error } = await admin.from("creators").upsert(
-        prepared.slice(i, i + chunkSize),
-        { onConflict: "agency_creator_id" }
-      );
-      if (error) throw error;
-    }
-
-    await admin.from("import_log").update({
-      matched_count: prepared.length,
-      unmatched_count: invalid,
-      created_count: created,
-      updated_count: updated,
-      status: "completed",
-      completed_at: new Date().toISOString(),
-    }).eq("id", log.id);
-
-    await admin.from("audit_log").insert({
-      actor_user_id: actorId,
-      action: "creator_import",
-      entity_type: "import_log",
-      entity_id: log.id,
-      result: "success",
-      metadata: { sourceFileName, received: rows.length, valid: prepared.length, invalid, created, updated },
+    const { error: commitError } = await admin.rpc("commit_creators_import", {
+      p_rows: prepared, p_import_id: log.id, p_actor_id: actorId, p_invalid: invalid,
     });
+    if (commitError) {
+      await admin.from("import_log").update({status:"failed",completed_at:new Date().toISOString(),metadata:{error:"Import rolled back; roster unchanged."}}).eq("id",log.id);
+      return json({error:"Import failed. No roster changes were saved. Check for duplicate IDs or malformed rows."},400);
+    }
 
     return json({ ok: true, importId: log.id, received: rows.length, valid: prepared.length, invalid, created, updated });
   } catch (error) {
-    console.error(error);
+    if(markFailed) await markFailed();
+    console.error("Import failed");
     return json({ error: error instanceof Error ? error.message : "Unexpected server error" }, 500);
   }
 });

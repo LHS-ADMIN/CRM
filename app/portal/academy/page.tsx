@@ -1,10 +1,13 @@
 import { BookOpen, ExternalLink, FileText, GraduationCap, PlayCircle, Sparkles, TrendingUp } from "lucide-react";
+import { AcademyResourcePanel } from "@/components/academy-resource-panel";
 import { createClient } from "@/lib/supabase/server";
 
 const iconFor=(type:string)=>type==="video"?PlayCircle:type==="pdf"||type==="document"?FileText:BookOpen;
 
 export default async function AcademyPage(){
   const supabase=await createClient();
+  const {data:{user}}=await supabase.auth.getUser();
+  const [{data:profile},{data:teams}]=await Promise.all([supabase.from("profiles").select("active_role").eq("id",user!.id).single(),supabase.from("teams").select("id,name").eq("active",true)]);
   const {data}=await supabase.from("academy_resources").select("id,title,description,resource_type,resource_url,audience_type").eq("active",true).order("sort_order").limit(500);
   const official=(data||[]).find(r=>r.resource_url?.includes("tiktok.com/creator-academy"));
   const others=(data||[]).filter(r=>r.id!==official?.id);
@@ -23,6 +26,7 @@ export default async function AcademyPage(){
       </a>}
     </section>
 
+    {profile?.active_role==="admin"&&<AcademyResourcePanel userId={user!.id} teams={teams||[]}/>}
     <div className="academy-section-head"><div><span className="section-kicker">LHS learning library</span><h2>Network resources</h2></div><span className="chip">{others.length} resources</span></div>
 
     {others.length?<div className="academy-grid">{others.map(r=>{const Icon=iconFor(r.resource_type);return <article className="resource-card rich-card" key={r.id}>

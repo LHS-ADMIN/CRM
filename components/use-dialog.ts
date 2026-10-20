@@ -1,0 +1,6 @@
+"use client";
+import {useEffect,useRef} from "react";
+export function useDialog(open:boolean,onClose:()=>void){
+ const ref=useRef<HTMLDivElement>(null);const close=useRef(onClose);close.current=onClose;
+ useEffect(()=>{if(!open||!ref.current)return;const node=ref.current;const previous=document.activeElement as HTMLElement|null;const oldOverflow=document.body.style.overflow;document.body.style.overflow="hidden";const controls=()=>Array.from(node.querySelectorAll<HTMLElement>('button:not([disabled]),input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled]),a[href],[tabindex="0"]')).filter(el=>el.getClientRects().length>0);(controls()[0]||node).focus();function key(e:KeyboardEvent){if(e.key==="Escape"){e.preventDefault();close.current();return;}if(e.key!=="Tab")return;const nodes=controls();if(!nodes.length){e.preventDefault();node.focus();return;}if(e.shiftKey&&document.activeElement===nodes[0]){e.preventDefault();nodes[nodes.length-1].focus();}else if(!e.shiftKey&&document.activeElement===nodes[nodes.length-1]){e.preventDefault();nodes[0].focus();}}node.addEventListener("keydown",key);return()=>{node.removeEventListener("keydown",key);document.body.style.overflow=oldOverflow;previous?.focus();};},[open]);return ref;
+}

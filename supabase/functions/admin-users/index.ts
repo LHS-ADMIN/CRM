@@ -47,7 +47,7 @@ Deno.serve(async(req)=>{
         const initialRole=roles.includes("admin")?"admin":roles.includes("manager")?"manager":"creator";
         const {error:activeRoleError}=await admin.from("profiles").update({active:true,active_role:initialRole,must_change_password:true,display_name:displayName,login_username:username}).eq("id",userId);if(activeRoleError)throw activeRoleError;
         if(teamIds.length){const {error:teamError}=await admin.from("team_memberships").insert(teamIds.map(team_id=>({team_id,user_id:userId,membership_role:"manager",active:true})));if(teamError)throw teamError}
-        if(existingCreatorId){const {error:creatorError}=await admin.from("creators").update({auth_user_id:userId}).eq("id",existingCreatorId);if(creatorError)throw creatorError}
+        if(existingCreatorId){const {data:linked,error:creatorError}=await admin.from("creators").update({auth_user_id:userId}).eq("id",existingCreatorId).is("auth_user_id",null).eq("active",true).select("id").single();if(creatorError||!linked)throw new Error("Creator is inactive, missing, or already has login access.")}
         else if(createCreator){
           const agencyCreatorId=creatorAgencyId();
           const {data:creatorRow,error:creatorError}=await admin.from("creators").insert({agency_creator_id:agencyCreatorId,auth_user_id:userId,creator_name:displayName,display_name:displayName,tiktok_handle:tiktokHandle,team_id:creatorTeamId,niche,status:"active",active:true,join_date:new Date().toISOString().slice(0,10)}).select("id,agency_creator_id").single();
@@ -58,6 +58,7 @@ Deno.serve(async(req)=>{
       return json({ok:true,userId,username,temporaryPassword:temp,mustChangePassword:true,creatorId:createdCreator?.id??existingCreatorId,agencyCreatorId:createdCreator?.agency_creator_id??null});
     }
     const userId=String(body?.userId??"");if(!userId)return json({error:"userId is required."},400);
+    if(userId===actorId&&["set_active","set_roles"].includes(action))return json({error:"Your own access cannot be changed here."},400);
     if(action==="reset_password"){const temp=String(body?.temporaryPassword??"")||temporaryPassword();if(temp.length<10)return json({error:"Temporary password must be at least 10 characters."},400);const {error}=await admin.auth.admin.updateUserById(userId,{password:temp});if(error)throw error;await admin.from("profiles").update({must_change_password:true}).eq("id",userId);return json({ok:true,temporaryPassword:temp,mustChangePassword:true})}
     if(action==="set_active"){const active=Boolean(body?.active);const {error}=await admin.from("profiles").update({active}).eq("id",userId);if(error)throw error;return json({ok:true,active})}
     if(action==="set_roles"){const roles=normalizeRoles(body?.roles);if(!roles.length)return json({error:"At least one role is required."},400);const {error:de}=await admin.from("user_roles").delete().eq("user_id",userId);if(de)throw de;const {error:ie}=await admin.from("user_roles").insert(roles.map(role=>({user_id:userId,role,assigned_by:actorId})));if(ie)throw ie;const preferredRole=roles.includes("admin")?"admin":roles.includes("manager")?"manager":"creator";const {error:pe}=await admin.from("profiles").update({active_role:preferredRole}).eq("id",userId);if(pe)throw pe;return json({ok:true,roles})}

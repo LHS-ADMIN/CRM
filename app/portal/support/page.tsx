@@ -1,5 +1,6 @@
 import { CircleDot, ExternalLink, LifeBuoy, MessageSquareText } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { SupportThread } from "@/components/support-thread";
 import { SupportCreateForm } from "@/components/support-create-form";
 import { AttachmentDisplay, type AttachmentRecord } from "@/components/attachment-display";
 
@@ -17,6 +18,8 @@ export default async function SupportPage(){
     .select("id,subject,description,external_url,category,priority,status,updated_at,created_at")
     .order("updated_at",{ascending:false}).limit(100);
 
+  const {data:profile}=await supabase.from("profiles").select("active_role").eq("id",user.id).single();
+  const {data:messages}=await supabase.from("support_messages").select("id,ticket_id,body,internal,created_at").order("created_at");
   const ids=(data||[]).map(t=>t.id);
   const {data:attachments}=ids.length
     ?await supabase.from("attachments").select("id,parent_id,file_name,mime_type,file_size").eq("parent_type","support_ticket").in("parent_id",ids)
@@ -43,6 +46,7 @@ export default async function SupportPage(){
         <div className="ticket-meta"><span className={`priority ${t.priority}`}>{t.priority} priority</span><span>Updated {new Date(t.updated_at).toLocaleString()}</span></div>
         {t.external_url&&<a className="resource-link" href={t.external_url} target="_blank" rel="noreferrer"><ExternalLink size={16}/> Open reference link</a>}
         <AttachmentDisplay items={byTicket.get(t.id)||[]}/>
+        <SupportThread ticketId={t.id} userId={user.id} status={t.status} canManage={["admin","manager"].includes(profile?.active_role||"")} messages={(messages||[]).filter(m=>m.ticket_id===t.id)}/>
       </article>
     )}</div>:<section className="empty-feature"><div className="empty-feature-icon"><LifeBuoy size={30}/></div><div><span className="section-kicker">Support queue</span><h2>No tickets yet</h2><p>When you need assistance, open a ticket and include a screenshot, document, or link so the team has the full picture.</p></div><SupportCreateForm userId={user.id} creatorId={creator?.id||null} teamId={creator?.team_id||teams?.[0]?.id||null}/></section>}
   </>;
