@@ -1,51 +1,108 @@
-# LHS Connect launch review — October 19, 2026
+# LHS Connect launch certification review — October 20, 2026
 
-## Launch status
-**NOT READY FOR LAUNCH.** This is an interim review, not a completion certificate.
+## 1. LAUNCH STATUS
 
-## Verified in production during this review
-- Pi's Admin session persists and reaches the dashboard and Administration.
-- Username-only creator provisioning creates Auth/profile/Creator role, a linked creator, a permanent Agency Creator ID, and mandatory first-login password change.
-- Creator archive and restore both update roster and profile activation.
+**NOT READY FOR LAUNCH**
+
+This is an interim certification record. Critical browser workflows and accessibility checks remain untested. A successful deployment and passing database tests do not certify those workflows.
+
+Outstanding software verification: complete Creator and Manager browser workflows; profile/contact editing and photo upload/replacement/invalid-file checks; cross-role signed attachment delivery; campaign XLSX upload through the UI; new campaign attachment and community moderation controls; full Academy link behavior; authentication expiry/error states; desktop/laptop/tablet/mobile layouts; 100%, 125%, and 150% browser zoom; and application console/network review. These are unfinished QA work, not external data dependencies. Release cleanup remains incomplete while the role-testing account is needed.
+
+## 2. VERIFIED WORKING
+
+Personally exercised in the production browser earlier in this review:
+
+- Admin sign-in, dashboard and Administration access, session persistence, logout, protected-route redirect, and returning sign-in.
+- Username-only creator provisioning creates Auth/profile/Creator access, linked creator, permanent Agency Creator ID, temporary credentials, and mandatory first-login password change.
+- Creator archive and restore update both roster and login activation.
 - Leadership community post and reply render with author and timestamp.
-- Scoped campaign creation and editing persist rules and prizes after the policy correction.
-- Leadership announcement publishes with an external link and a private text attachment.
-- Support ticket creation, private attachment, reply, and status resolution work.
-- October calendar contains 102 October-only records, no spillover battle cards. October 20 shows four selected-day rows. September opens as archive with 83 rows.
-- Roster XLSX upload counts malformed rows. Updating a handle preserves its permanent ID. Duplicate IDs reject the transaction without modifying the roster.
-- SQL regression passes stable identity, import rollback, service-only RPCs, Creator isolation, Manager scope, private contacts, first-login guards, and inactive access. All SQL fixtures roll back.
-- TypeScript and production build pass with the project's public Supabase configuration. Production dependency audit reports zero vulnerabilities.
+- Scoped campaign create/edit persists rules and prizes.
+- Announcement publishing with external link and a private text attachment.
+- Support ticket creation, private text attachment, reply, and status resolution.
+- October calendar has 102 October-only records; October 20 shows four selected-day rows. September archive has 83 rows. Spillover dates do not render old-month cards in the active month.
+- Roster XLSX counts malformed rows; handle changes preserve permanent IDs; duplicate IDs reject without modifying the roster.
+- Current-metrics XLSX uploads 12,345 diamonds, two live days and three streams. An unmatched file reports failure and preserves the successful snapshot. Disposable metric data was later removed.
 
-## Fixes and release state
-- Existing production commit: `7169e4e0d3abecf5b1000910386d420a5172bb84`, Vercel deployment `dpl_949JYvmMPLGirz5s4qzdqS2FyEjN` READY.
-- Migration `20261020024300_launch_insert_visibility.sql` applied successfully to the existing database. Campaign/announcement/ticket SELECT policies evaluate candidate rows directly, preserving existing role/audience predicates and restrictive account guards. This fixes INSERT RETURNING failures. The migration is in local commit `e719f15`; its push was rejected by automatic approval review.
-- Local import UI correction exposes the backend's useful error, reports received/processed/invalid/created/updated counts, refreshes logs after completion, labels the import selector, and locks it during upload.
-- Local metrics diagnostic correction records the failed RPC's code and message in the Admin-only import log, without recording credentials or the file's rows.
+The user reported successful QA-account login. Database state confirms first-login completion and active Creator mode. This is not presented as an agent-observed Creator browser session.
 
-## Remaining software verification and issues
-- Metrics XLSX upload now passes through the production UI. API safe-update protection required an explicit DELETE predicate. The transactional replacement now limits deletion to non-null creator IDs (the primary key). An unmatched file fails with a clear message and preserves the successful 12,345-diamond snapshot.
-- Approved import UI and diagnostic changes were published through the authenticated GitHub connector as commit 92e1b1b740b921d94f4cca5cf64fb57ee5830f7c. Vercel deployment dpl_BpBBE8R225hhsMCsesKAYt99aW1w is READY. The metrics diagnostic function is active at version 4.
-- Full Creator/Manager browser sessions, first-login/password-change, logout/return login, role switching, profile/photo replacement, cross-role attachment access, campaign import, campaign attachments, moderation, complete device/zoom coverage, GitHub Actions build result, and runtime log review remain unverified.
-- No claim is made that all launch requirements have passed.
+Production-database regression tests passed, with every fixture and its audit events rolled back:
 
-## Role matrix: evidence limits
-| Role | Verified evidence | Still required |
+- Stable IDs, duplicate rejection, transactional metrics and campaign imports, campaign create/update counts, invalid-date import rollback, and service-only import RPC privileges.
+- Atomic role/team replacement: an invalid team rolls back role removal, memberships, and active-role changes together. Valid changes persist inside the test transaction. Non-Admin callers are rejected.
+- Archive/restore preserves permanent identity and changes profile activation with creator status in one transaction.
+- Creator own-roster/private-contact isolation; Manager assigned-team scope without private contacts; inactive and first-login account restrictions.
+- A multi-role account in Creator mode cannot create or manage targeted campaigns using its inactive Manager assignment.
+- Creator/Manager/Admin visibility across network, team, and leadership community content; announcements; campaigns; support tickets; and attachment metadata.
+- Cross-owner attachment metadata injection is rejected even when the supplied visibility is `all`.
+- Scoped community moderation hides posts/replies without deletion. Manager network-wide moderation and restoration are denied; Admin restoration works.
+
+Tests: `tests/launch-database.sql` and `tests/launch-content-access.sql`. These simulate authenticated database roles; they do not replace browser or Storage API tests.
+
+## 3. FIXES COMPLETED
+
+- Preserved form references across asynchronous requests so successful forms reset reliably.
+- Added transactional roster/current-metrics import commits, duplicate and stable-ID safeguards, and failure preservation of the current metric snapshot.
+- Corrected campaign/announcement/support-ticket SELECT policies so authorized INSERT RETURNING requests can see newly inserted rows.
+- Corrected the metrics replacement DELETE predicate for API safe-update protection.
+- Improved import error messages, counters, selector labeling, busy states, refreshed logs, and Admin-only failure diagnostics.
+- Enforced account activation and mandatory password-change guards; restricted client writes to permanent IDs and account fields; cleared the first-login flag only after an Auth password update.
+- Added attachment-parent visibility and insertion checks while retaining the private document bucket.
+- Completed support replies/status controls, community replies, Academy resource creation, creator editing, team management, and creator restore controls.
+- Improved temporary-password readability, copying, retained display, duplicate-reset prevention, and stale-session messages. A new reset still invalidates the preceding temporary password.
+- Required the active Manager role for targeted campaign creation and management, including child records controlled by the campaign helper.
+- Made role/team changes and creator archive/restore transactional through service-only Admin RPCs. Admin Edge Functions also require completed first-login password change.
+- Added scoped, reversible community Hide/Restore controls. Database authorization tests passed; new controls still require browser exercise.
+- Made campaign imports transactional, rejected duplicate keys, counted create/update results, preserved existing data on failure, and logged failed imports. Browser XLSX exercise remains pending.
+- Added optional campaign image/PDF upload/display using the existing private attachment system, with a 20 MB limit and cleanup after metadata failure. Admin edits preserve the original campaign owner, and existing targeted audiences are retained. Browser upload exercise remains pending.
+- Displayed role-switch failures instead of silently ignoring them.
+
+All changes use the existing repository, database, Edge Functions, and Vercel project.
+
+## 4. REMAINING EXTERNAL DEPENDENCIES
+
+- The approved production LHS roster will be supplied separately. No Jeremiah Tasi data was imported or used.
+- A signed-in session in the agent's testing browser is required for the remaining browser QA. The currently available testing browser redirects to login; the user's separate successful login does not establish that browser session.
+- Vercel runtime error-log access returned HTTP 403. Deployment inspection works, but runtime-log certification needs appropriate access. No authenticated Vercel CLI is installed in this workspace.
+
+## 5. ROLE MATRIX
+
+| Role | Verified database access | Production-browser evidence |
 | --- | --- | --- |
-| Creator | SQL: own creator/private contacts only, inactive/first-login restrictions | Browser workflows |
-| Manager | SQL: assigned team creators only, no private contacts | Browser workflows and all content scopes |
-| Admin | Live provisioning, archive/restore, campaigns, community, announcements, support, roster upload | Remaining administrative and import flows |
+| Creator | Own creator/private details and ticket; network/own-team content; no leadership channel or campaign writes; no other-team/private attachments; own-content moderation only | User confirmed login; Creator active role and completed password change verified in DB. Full agent-observed browser workflows pending. |
+| Manager | Assigned-team roster/content/tickets/attachment records plus leadership channel; no private contacts or other-team scope; scoped campaign management; team moderation without restore | Complete browser workflow pending. |
+| Admin | Network-wide test content, tickets and attachment records; account-access transactions; archive/restore; moderation restore | Provisioning, archive/restore, campaigns, community, announcements, support, roster/metrics imports and authentication exercised. New controls and remaining flows pending. |
 
-## Security
-All 29 public tables retain RLS. Account guards remain enforced. The document bucket is private. Security advisor reports one warning: leaked-password protection is disabled. No service-role key was placed in client source.
+## 6. SECURITY RESULT
 
-## Accessibility
-Readability changes are in the existing deployment. The required 100%, 125%, 150% zoom and desktop/tablet/mobile certification is still pending; it must not be marked passed.
+All 29 public tables retain RLS; none has RLS disabled. `crm-uploads` is private with a 20 MB limit and explicit allowed MIME types. Profile images intentionally use a public avatar bucket with a 5 MB limit and PNG/JPEG/WEBP/GIF allowlist. No service-role key was added to client source.
 
-## Cleanup and data safety
-All 666 original battles remain. Disposable QA creator Auth/profile/roster records, imported roster record, campaign/prize, community post/reply were removed. The QA team was deactivated. Audit evidence and import outcomes were retained.
-Two private storage text objects and their QA announcement/resolved support ticket remain pending storage cleanup through its supported API. The QA announcement is inactive. Do not claim release cleanup is complete.
+Administrative transaction and import RPCs are denied to anonymous/authenticated clients and executable only by the service role. Published Admin/import/sync Edge Functions retain JWT verification, validate Auth users, and require an active Admin role with first-login completion. Attachment signing reads attachment metadata through the caller's RLS before issuing a 60-second URL. Full cross-role Storage delivery still requires browser verification.
 
-## External dependency and import readiness
-The approved real LHS roster will be supplied separately. No Jeremiah Tasi data was used. Roster test cases passed, but final import clearance is withheld until release synchronization and remaining launch checks are completed.
+Current security advisor warnings:
 
-Production URL: https://crm-taupe-sigma.vercel.app
+- Leaked-password protection is disabled. This is an existing Auth configuration warning.
+- `moderate_community` is intentionally executable by signed-in users as SECURITY DEFINER to perform only scoped hide/restore operations. It derives the actor from `auth.uid()`, checks active-account and content permissions, and restricts restore to Admin. Positive and negative authorization tests passed. This is a reviewed warning, not a claim that all callable definer functions are safe by default.
+
+Sampled Supabase logs from 14:31–14:51 UTC showed 198 successful API responses, three successful username-login function responses, and one username-login 401. No 5xx responses appeared in that sample. This is limited traffic evidence, not full runtime certification.
+
+Data safety: all **666 original battles** remain. The current roster contains only the disposable `qa_creator_launch` account needed for role testing. Earlier disposable roster/import/campaign/community fixtures were removed, with audit/import evidence retained. Two private QA text objects and their inactive announcement/resolved support-ticket parents still require supported Storage API cleanup. No claim is made that cleanup is complete.
+
+## 7. ACCESSIBILITY RESULT
+
+**Not yet certified.** Readability and temporary-credential improvements are deployed. Required 100%, 125%, and 150% zoom, keyboard/focus, contrast, and desktop/laptop/tablet/mobile checks remain pending in an authenticated browser. Do not mark these passed based on a build or database test.
+
+## 8. DEPLOYMENT RESULT
+
+Latest application release: `5279f6eba56dd60d4403166173f1a101e7d7ea8a`.
+
+- GitHub CI push run **39442910508: success**. https://github.com/LHS-ADMIN/CRM/actions/runs/39442910508
+- Vercel production deployment **dpl_CXMYbh8oZxas3vnGDoGe9kX4bF4V: READY**.
+- Production URL: https://crm-taupe-sigma.vercel.app
+- Local TypeScript and production build passed; production dependency audit found zero vulnerabilities.
+- Database migrations applied to the existing project. Updated Admin/import/sync Edge Functions are ACTIVE with JWT verification enabled.
+- Source and deployed database changes are recorded in GitHub. This report may be followed by a documentation-only commit.
+- Vercel runtime-log access remains blocked by 403. Application console/network checks for the complete signed-in workflow are pending.
+
+## 9. REAL CREATOR IMPORT READINESS
+
+**Final clearance withheld.** Disposable roster XLSX tests and transactional database safeguards passed. Mia should wait until the remaining authenticated Creator/Manager, private-upload, accessibility, and release-cleanup checks are complete. No approved production roster has been loaded.
