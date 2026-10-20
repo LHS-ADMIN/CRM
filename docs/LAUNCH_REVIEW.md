@@ -23,8 +23,8 @@
 - Local metrics diagnostic correction records the failed RPC's code and message in the Admin-only import log, without recording credentials or the file's rows.
 
 ## Remaining software verification and issues
-- Metrics XLSX upload fails at the service-side `commit_metrics_import` REST call with database code `21000`. Equivalent rollback-only SQL succeeds, so the live API boundary still needs diagnosis. Do not certify metrics imports.
-- The corrected import UI and diagnostic function are local and have not been deployed. The migration's source must be synchronized to GitHub.
+- Metrics XLSX upload now passes through the production UI. API safe-update protection required an explicit DELETE predicate. The transactional replacement now limits deletion to non-null creator IDs (the primary key). An unmatched file fails with a clear message and preserves the successful 12,345-diamond snapshot.
+- Approved import UI and diagnostic changes were published through the authenticated GitHub connector as commit 92e1b1b740b921d94f4cca5cf64fb57ee5830f7c. Vercel deployment dpl_BpBBE8R225hhsMCsesKAYt99aW1w is READY. The metrics diagnostic function is active at version 4.
 - Full Creator/Manager browser sessions, first-login/password-change, logout/return login, role switching, profile/photo replacement, cross-role attachment access, campaign import, campaign attachments, moderation, complete device/zoom coverage, GitHub Actions build result, and runtime log review remain unverified.
 - No claim is made that all launch requirements have passed.
 
