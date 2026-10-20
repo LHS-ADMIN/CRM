@@ -597,3 +597,7 @@ body{line-height:1.6}
 @media(max-width:800px){html{font-size:18px}.form-grid{grid-template-columns:1fr}.topbar-actions{flex-wrap:wrap}.calendar-grid{overflow-x:auto}.calendar-events{display:none}.calendar-date{flex-wrap:wrap}.calendar-date small{font-size:.8rem}.calendar-day{min-height:80px}.calendar-date small{white-space:normal}.profile-save-row{flex-wrap:wrap}}
 
 form>label,.form-grid>label{display:grid;gap:6px;margin-bottom:14px;font-size:1rem}fieldset label{display:flex;gap:10px;align-items:center}fieldset input[type=checkbox]{min-height:24px;width:24px}.account-list>details{padding:16px 0;border-bottom:1px solid var(--line)}summary{cursor:pointer;min-height:44px;padding:9px 0;font-size:1rem}.team-chip{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.sidebar nav a{font-size:1rem}.calendar-day-link{overflow:hidden}.calendar-date{min-width:0}
+.temporary-login-panel{margin:20px 0;padding:24px;border:2px solid #176fc1;border-radius:16px;background:#f1f7ff;color:#10283f;gap:12px;scroll-margin-top:100px}
+.temporary-login-panel h3{font-size:1.4rem;margin:0}
+.temporary-login-panel code{display:block;font-size:1.35rem;line-height:1.6;font-weight:700;padding:16px;background:#fff;border:1px solid #9baec3;border-radius:8px;overflow-wrap:anywhere;user-select:all}
+.temporary-login-panel p{font-size:1rem;margin:0}
