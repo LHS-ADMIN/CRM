@@ -51,7 +51,7 @@ export function AdminAccountPanel({accounts,teams,creators,currentUser}:{account
    }
    if(data?.error)throw new Error(data.error);
    if(data.temporaryPassword){setCopied(false);setCredential({username:data.username||accounts.find(a=>a.id===body.userId)?.login_username||"",password:data.temporaryPassword});}
-   setMessage(data.temporaryPassword?"New temporary password created. Copy it below before signing out.":"Account updated.");
+   setMessage(data.temporaryPassword?"Password reset to the LHS temporary password. The user must change it at the next sign-in.":"Account updated.");
    router.refresh();
    return true;
   }catch(e){
@@ -107,7 +107,7 @@ export function AdminAccountPanel({accounts,teams,creators,currentUser}:{account
  }
 
  return <section className="panel card-pad">
-  <div className="panel-head inner admin-users-head"><div><span className="section-kicker">Access management</span><h2>Users & role assignments</h2><p>Create username-based accounts, assign Creator/Manager/Admin roles, activate or deactivate user access, and assign Manager teams.</p></div><button type="button" className="btn primary" onClick={()=>{setMessage("");setAddOpen(true)}}><UserPlus size={17}/> Add user</button></div>
+  <div className="panel-head inner admin-users-head"><div><span className="section-kicker">Access management</span><h2>Users & role assignments</h2><p>Create username-based accounts, assign Creator/Manager/Admin roles, activate or deactivate user access, assign Manager teams, and reset forgotten passwords. New and reset accounts use the temporary password LHS2026! and must change it at sign-in.</p></div><button type="button" className="btn primary" onClick={()=>{setMessage("");setAddOpen(true)}}><UserPlus size={17}/> Add user</button></div>
 
   <div className="leadership-setup-card">
     <div className="leadership-setup-head">
@@ -139,7 +139,7 @@ export function AdminAccountPanel({accounts,teams,creators,currentUser}:{account
   {credential&&<div ref={credentialPanel} tabIndex={-1} className="credential-values temporary-login-panel" aria-label="Latest temporary login details">
     <h3>Latest temporary login</h3>
     <p>Username: <strong>{credential.username}</strong></p>
-    <p>This replaces every earlier temporary password for this account. Copy this password before signing out.</p>
+    <p>This resets the account to the standard LHS temporary password. The user must change it at the next sign-in.</p>
     <code aria-label="Temporary password">{credential.password}</code>
     <div className="head-actions"><button type="button" className="btn primary" onClick={copyPassword}>{copied?"Password copied":"Copy password"}</button><button type="button" className="btn" onClick={()=>{setCredential(null);setCopied(false);}}>Dismiss login details</button></div>
     <p>Sign in with the username above. You will then choose a new password.</p>
@@ -151,13 +151,13 @@ export function AdminAccountPanel({accounts,teams,creators,currentUser}:{account
       <form className="form-grid account-role-form" onSubmit={async e=>{e.preventDefault();const f=new FormData(e.currentTarget);const roles=f.getAll("roles").map(String);if(!roles.length){setMessage("Select at least one role.");return;}if(await invoke({action:"set_roles",userId:a.id,roles}))await invoke({action:"set_teams",userId:a.id,teamIds:f.getAll("teams")});}}>
         <fieldset><legend>Roles for @{a.login_username}</legend>{["creator","manager","admin"].map(role=><label key={role}><input type="checkbox" name="roles" value={role} defaultChecked={a.roles.includes(role)} disabled={a.id===currentUser}/>{role}</label>)}</fieldset>
         <label>Manager teams<select className="select" multiple name="teams" defaultValue={a.teamIds}>{teams.map(t=><option value={t.id} key={t.id}>{t.name}</option>)}</select></label>
-        <div className="head-actions"><button className="btn primary" disabled={busy||a.id===currentUser}>Save roles & teams</button><button className="btn" type="button" disabled={busy||a.id===currentUser} onClick={()=>invoke({action:"set_active",userId:a.id,active:!a.active})}>{a.active?"Deactivate user":"Activate user"}</button><button className="btn" type="button" disabled={busy||a.id===currentUser||Boolean(credential)} onClick={()=>{if(window.confirm("Issue a new temporary password for "+a.login_username+"? This replaces every earlier temporary password for this account."))void invoke({action:"reset_password",userId:a.id});}}>Issue temporary password</button></div>
+        <div className="head-actions"><button className="btn primary" disabled={busy||a.id===currentUser}>Save roles & teams</button><button className="btn" type="button" disabled={busy||a.id===currentUser} onClick={()=>invoke({action:"set_active",userId:a.id,active:!a.active})}>{a.active?"Deactivate user":"Activate user"}</button><button className="btn" type="button" disabled={busy||a.id===currentUser||Boolean(credential)} onClick={()=>{if(window.confirm("Reset the password for "+a.login_username+" to LHS2026!? The user will be required to choose a new password at the next sign-in."))void invoke({action:"reset_password",userId:a.id});}}>Reset password</button></div>
       </form>
     </details>)}</div>
   </div>
 
   {addOpen&&<div className="modal-backdrop" onMouseDown={()=>setAddOpen(false)}><div ref={addDialogRef} role="dialog" aria-modal="true" aria-label="Add user" tabIndex={-1} className="modal-card" onMouseDown={e=>e.stopPropagation()}>
-    <div className="modal-head"><div><span className="section-kicker">User access</span><h2>Add a user</h2><p>Create a username-based login and assign one or more roles. Creator-role users can be linked to an imported creator record.</p></div><button className="icon-button" aria-label="Close dialog" onClick={()=>setAddOpen(false)}><X size={20}/></button></div>
+    <div className="modal-head"><div><span className="section-kicker">User access</span><h2>Add a user</h2><p>Create a username-based login and assign one or more roles. Creator-role users can be linked to an imported creator record. The temporary password will be LHS2026! and must be changed at first sign-in.</p></div><button className="icon-button" aria-label="Close dialog" onClick={()=>setAddOpen(false)}><X size={20}/></button></div>
     <form onSubmit={create} className="form-grid">
       <div className="field"><label>Username</label><input className="input" name="username" required pattern="[a-zA-Z0-9][a-zA-Z0-9._-]{2,49}" placeholder="username"/></div>
       <div className="field"><label>Display name</label><input className="input" name="display_name" required placeholder="Name shown in LHS"/></div>
