@@ -1,2 +1,27 @@
+import { CalendarRange, Gift, Target, Trophy } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-export default async function CampaignsPage(){const supabase=await createClient();const {data}=await supabase.from("campaigns").select("id,title,description,start_at,end_at,status,audience_type,campaign_prizes(place_label,prize_description)").eq("active",true).order("start_at",{ascending:false}).limit(200);return <><div className="page-head"><div><h1>Campaigns</h1><p>Campaign visibility is enforced by your active role and team.</p></div></div><div className="grid cols2">{(data||[]).map(c=><article className="card card-pad" key={c.id}><div className="split"><h2 style={{margin:0,fontSize:"1.1rem"}}>{c.title}</h2><span className="chip">{c.status}</span></div><p className="muted">{c.description||"No description provided."}</p><div className="muted" style={{fontSize:13}}>{new Date(c.start_at).toLocaleDateString()} – {new Date(c.end_at).toLocaleDateString()}</div>{c.campaign_prizes?.length?<div style={{marginTop:12}}><strong>Prizes</strong>{c.campaign_prizes.map((p,i)=><div key={i} className="muted">{p.place_label||"Prize"}: {p.prize_description}</div>)}</div>:null}</article>)}</div></>}
+
+export default async function CampaignsPage(){
+  const supabase=await createClient();
+  const {data}=await supabase.from("campaigns")
+    .select("id,title,description,start_at,end_at,status,audience_type,rules,metric,campaign_prizes(place_label,prize_description),campaign_leaderboard(rank,score,metric_value)")
+    .eq("active",true).order("start_at",{ascending:false}).limit(200);
+
+  const now=Date.now();
+  return <>
+    <div className="page-head"><div><span className="section-kicker">Campaign Manager</span><h1>Campaign hub</h1><p>Creators have read-only campaign visibility. Managers and Admins work within the permissions assigned to their teams.</p></div></div>
+    <div className="campaign-grid">{(data||[]).length?(data||[]).map((c:any)=>{
+      const start=new Date(c.start_at),end=new Date(c.end_at);
+      const active=now>=start.valueOf()&&now<=end.valueOf();
+      const pct=Math.max(0,Math.min(100,Math.round(((now-start.valueOf())/Math.max(1,end.valueOf()-start.valueOf()))*100)));
+      return <article className="campaign-card" key={c.id}>
+        <div className="campaign-card-top"><span className={active?"status-badge success":"status-badge"}>{active?"Active":c.status}</span><span className="chip accent"><Target size={13}/>{c.audience_type}</span></div>
+        <h2>{c.title}</h2><p>{c.description||"No campaign description has been added yet."}</p>
+        <div className="campaign-meta"><span><CalendarRange size={15}/>{start.toLocaleDateString()} – {end.toLocaleDateString()}</span><span><Trophy size={15}/>{c.metric||"Campaign metric"}</span></div>
+        <div className="progress large"><span style={{width:`${pct}%`}}/></div><div className="progress-label"><span>Timeline progress</span><strong>{pct}%</strong></div>
+        {c.campaign_prizes?.length>0&&<div className="prize-box"><div className="prize-title"><Gift size={16}/> Prizes</div>{c.campaign_prizes.slice(0,3).map((p:any,i:number)=><div className="prize-row" key={i}><span>{p.place_label||`Prize ${i+1}`}</span><strong>{p.prize_description}</strong></div>)}</div>}
+        {c.rules&&<details className="rules"><summary>Campaign rules</summary><p>{c.rules}</p></details>}
+      </article>
+    }):<div className="panel empty-state">No campaigns are available for your current role.</div>}</div>
+  </>;
+}
