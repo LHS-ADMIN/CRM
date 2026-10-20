@@ -5,7 +5,7 @@ import { readSheet } from "read-excel-file/browser";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
-const endpoints={creators:"import-creators",metrics:"import-metrics",campaigns:"import-campaigns"} as const;
+const endpoints={creators:"import-creators",campaigns:"import-campaigns"} as const;
 
 const normalizeHeader=(value:unknown)=>String(value??"").replace(/[’‘']/g,"").trim().toLowerCase().replace(/[^a-z0-9]+/g,"");
 
@@ -43,7 +43,7 @@ function rowsToObjects(rows:unknown[][],type:keyof typeof endpoints){
 
 export function AdminImportPanel(){
   const router=useRouter();
-  const [type,setType]=useState<keyof typeof endpoints>("metrics");
+  const [type,setType]=useState<keyof typeof endpoints>("creators");
   const [busy,setBusy]=useState(false);
   const [msg,setMsg]=useState("");
 
@@ -68,7 +68,6 @@ export function AdminImportPanel(){
         sourceFileName:file.name,
         detectedHeaderRow:parsed.headerRow
       };
-      if(type==="metrics")body.dataPeriod=new Date().toISOString().slice(0,7);
 
       const {data,error}=await createClient().functions.invoke(endpoints[type],{body});
       if(error){
@@ -98,10 +97,9 @@ export function AdminImportPanel(){
 
   return <section className="panel card-pad">
     <div className="panel-head inner"><div><span className="section-kicker">Data intake</span><h2>Production imports</h2></div><FileSpreadsheet size={20}/></div>
-    <p className="muted">Imports use secured backend functions and are recorded in the Import Log. Metrics replace the previous current snapshot.</p>
+    <p className="muted">Roster and campaign imports use secured backend functions and are recorded in the Import Log. Creator metrics are intentionally not enabled in this launch.</p>
     <div style={{display:"grid",gridTemplateColumns:"minmax(0,1fr) auto",gap:10,alignItems:"center"}}>
       <select aria-label="Import type" className="select" disabled={busy} value={type} onChange={e=>setType(e.target.value as keyof typeof endpoints)}>
-        <option value="metrics">Creator metrics</option>
         <option value="creators">Manage Creators roster</option>
         <option value="campaigns">Campaign data</option>
       </select>
