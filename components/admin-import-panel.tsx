@@ -1,10 +1,21 @@
 "use client";
 import { ChangeEvent, useState } from "react";
 import { FileSpreadsheet, UploadCloud } from "lucide-react";
-import * as XLSX from "xlsx";
+import { readSheet } from "read-excel-file/browser";
 import { createClient } from "@/lib/supabase/client";
 
 const endpoints={creators:"import-creators",metrics:"import-metrics",campaigns:"import-campaigns"} as const;
+
+function rowsToObjects(rows:unknown[][]){
+  if(rows.length<2)return [];
+  const headers=rows[0].map((value,index)=>{
+    const label=String(value??"").trim();
+    return label||`Column ${index+1}`;
+  });
+  return rows.slice(1)
+    .filter(row=>row.some(value=>value!==null&&value!==undefined&&String(value).trim()!==""))
+    .map(row=>Object.fromEntries(headers.map((header,index)=>[header,row[index]??""])));
+}
 
 export function AdminImportPanel(){
   const [type,setType]=useState<keyof typeof endpoints>("metrics");
@@ -16,10 +27,8 @@ export function AdminImportPanel(){
     if(!file)return;
     setBusy(true);setMsg("");
     try{
-      const buffer=await file.arrayBuffer();
-      const workbook=XLSX.read(buffer,{type:"array",cellDates:true});
-      const sheet=workbook.Sheets[workbook.SheetNames[0]];
-      const rows=XLSX.utils.sheet_to_json<Record<string,unknown>>(sheet,{defval:""});
+      const sheet=await readSheet(file);
+      const rows=rowsToObjects(sheet as unknown[][]);
       if(!rows.length)throw new Error("The first worksheet has no data rows.");
       const body:Record<string,unknown>={rows,sourceFileName:file.name};
       if(type==="metrics")body.dataPeriod=new Date().toISOString().slice(0,7);
@@ -43,7 +52,7 @@ export function AdminImportPanel(){
         <option value="creators">Manage Creators roster</option>
         <option value="campaigns">Campaign data</option>
       </select>
-      <label className={busy?"btn disabled":"btn primary"}><UploadCloud size={16}/>{busy?"Importing…":"Choose spreadsheet"}<input hidden type="file" accept=".xlsx,.xls,.csv" onChange={upload} disabled={busy}/></label>
+      <label className={busy?"btn disabled":"btn primary"}><UploadCloud size={16}/>{busy?"Importing…":"Choose .xlsx file"}<input hidden type="file" accept=".xlsx" onChange={upload} disabled={busy}/></label>
     </div>
     {msg&&<div className={msg.startsWith("Import completed")?"success":"error"} style={{marginTop:12}}>{msg}</div>}
   </section>;
