@@ -26,14 +26,14 @@ function LoginForm(){
     <section className="login-experience">
       <div className="login-story">
         <div className="login-story-brand">
-          <div className="login-logo-wrap"><img src="/lhs-logo.png" alt="LHS logo"/></div>
+          <div className="login-logo-wrap"><img src="/lhs-logo.webp" alt="LHS logo"/></div>
           <div><strong>LHS Connect</strong><small>Life · Health · Strength Creator Network</small></div>
         </div>
         <div className="login-story-copy"><span className="eyebrow light">A community built to connect, plan, and grow</span><h1>Your LHS community. Together.</h1><p>Creators and leadership share one home for battles, campaigns, development, community conversations, and network support.</p></div>
         <div className="login-feature-grid"><div><UsersRound size={20}/><span><strong>Creator Operations</strong><small>Profiles, teams and metrics</small></span></div><div><Swords size={20}/><span><strong>Battle Central</strong><small>League schedule in one place</small></span></div><div><Sparkles size={20}/><span><strong>Campaign Hub</strong><small>Challenges, prizes and growth</small></span></div><div><HeartPulse size={20}/><span><strong>LHS Community</strong><small>Life. Health. Strength.</small></span></div></div>
       </div>
       <div className="login-card">
-        <div className="login-mobile-brand"><img src="/lhs-logo.png" alt="LHS"/><span>LHS Connect</span></div>
+        <div className="login-mobile-brand"><img src="/lhs-logo.webp" alt="LHS"/><span>LHS Connect</span></div>
         <span className="eyebrow">Invitation-only access</span>
         <div className="brand">Welcome back.</div>
         <p className="muted">Use your permanent LHS username to enter the creator network portal.</p>
