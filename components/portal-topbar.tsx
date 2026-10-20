@@ -10,7 +10,7 @@ export function PortalTopbar({
   const initials=displayName.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]?.toUpperCase()).join("")||"LH";
   return <header className="topbar branded-topbar">
     <div className="workspace-identity">
-      <div className="workspace-mini-logo"><img src="/lhs-logo.png" alt=""/></div>
+      <div className="workspace-mini-logo"><img src="/lhs-logo.webp" alt=""/></div>
       <div><strong>LHS Connect</strong><span><HeartPulse size={14}/> Life, Health & Strength Creator Network</span></div>
       <span className="workspace-spark"><Sparkles size={16}/></span>
     </div>
