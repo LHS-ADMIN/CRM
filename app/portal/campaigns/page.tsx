@@ -1,15 +1,19 @@
 import { CalendarRange, Gift, Target, Trophy } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { CampaignCreatePanel } from "@/components/campaign-create-panel";
 
 export default async function CampaignsPage(){
   const supabase=await createClient();
+  const {data:{user}}=await supabase.auth.getUser();
+  if(!user)return null;
+  const [{data:profile},{data:teams}]=await Promise.all([supabase.from("profiles").select("active_role").eq("id",user.id).single(),supabase.from("teams").select("id,name").eq("active",true).order("name")]);
   const {data}=await supabase.from("campaigns")
     .select("id,title,description,start_at,end_at,status,audience_type,rules,metric,campaign_prizes(place_label,prize_description),campaign_leaderboard(rank,score,metric_value)")
     .eq("active",true).order("start_at",{ascending:false}).limit(200);
 
   const now=Date.now();
   return <>
-    <div className="page-head"><div><span className="section-kicker">Campaign Manager</span><h1>Campaign hub</h1><p>Creators have read-only campaign visibility. Managers and Admins work within the permissions assigned to their teams.</p></div></div>
+    <div className="page-head"><div><span className="section-kicker">Campaign Manager</span><h1>Campaign hub</h1><p>Creators have read-only campaign visibility. Managers and Admins work within the permissions assigned to their teams.</p></div><div className="head-actions"><CampaignCreatePanel userId={user.id} activeRole={profile?.active_role||"creator"} teams={teams||[]}/></div></div>
     <div className="campaign-grid">{(data||[]).length?(data||[]).map((c:any)=>{
       const start=new Date(c.start_at),end=new Date(c.end_at);
       const active=now>=start.valueOf()&&now<=end.valueOf();
