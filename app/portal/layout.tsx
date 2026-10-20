@@ -22,15 +22,16 @@ export default async function PortalLayout({children}:{children:React.ReactNode}
 
   return <div className="portal-shell">
     <aside className="sidebar">
-      <div className="brand-lockup">
-        <div className="brand-mark">LHS</div>
-        <div><strong>Creator Network</strong><span>Command Center</span></div>
+      <div className="brand-lockup branded">
+        <div className="brand-logo-wrap"><img src="/lhs-logo.png" alt="LHS logo"/></div>
+        <div className="brand-copy"><strong>LHS Connect</strong><span>Life · Health · Strength</span></div>
       </div>
+      <div className="sidebar-brand-rule"><span/><span/><span/></div>
       <div className="sidebar-label">Workspace</div>
       <SidebarNav activeRole={active}/>
       <div className="sidebar-footer">
-        <div className="network-status"><span className="status-dot"/><div><strong>Production</strong><small>Supabase backend online</small></div></div>
-        <div className="sidebar-version">LHS CRM · V4 Elite</div>
+        <div className="network-status"><span className="status-dot"/><div><strong>Production</strong><small>Creator network online</small></div></div>
+        <div className="sidebar-version">LHS Connect · Command Center</div>
       </div>
     </aside>
     <main className="workspace">
