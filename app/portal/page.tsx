@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, CalendarClock, Gem, HeartPulse, Megaphone, Radio, Sparkles, Swords, Trophy, UsersRound } from "lucide-react";
+import { ArrowRight, BellRing, CalendarClock, HeartPulse, Megaphone, Radio, Sparkles, Swords, Trophy, UsersRound } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function Dashboard(){
@@ -11,19 +11,17 @@ export default async function Dashboard(){
   const in30=new Date(Date.now()+30*86400000).toISOString().slice(0,10);
   const isoNow=now.toISOString();
 
-  const [{count:creators},{count:battles},{count:campaigns},{data:upcoming},{data:campaignList},{data:announcements},{data:metrics},{data:profile}]=await Promise.all([
+  const [{count:creators},{count:battles},{count:campaigns},{count:announcementCount},{data:upcoming},{data:campaignList},{data:announcements},{data:profile}]=await Promise.all([
     supabase.from("creators").select("*",{count:"exact",head:true}).eq("active",true),
     supabase.from("battles").select("*",{count:"exact",head:true}).gte("battle_date",today).lte("battle_date",in30),
     supabase.from("campaigns").select("*",{count:"exact",head:true}).eq("active",true).lte("start_at",isoNow).gte("end_at",isoNow),
+    supabase.from("announcements").select("*",{count:"exact",head:true}),
     supabase.from("battles").select("id,creator_handle,battle_date,time_est,opponent_name,league").gte("battle_date",today).order("battle_date").order("time_sort").limit(5),
     supabase.from("campaigns").select("id,title,start_at,end_at,status,audience_type").eq("active",true).order("start_at",{ascending:true}).limit(4),
     supabase.from("announcements").select("id,title,body,starts_at,audience_type").order("starts_at",{ascending:false}).limit(4),
-    supabase.from("metrics_current").select("diamonds,live_days,live_streams"),
     supabase.from("profiles").select("display_name,active_role").eq("id",user.id).single()
   ]);
 
-  const totalDiamonds=(metrics||[]).reduce((sum,row)=>sum+Number(row.diamonds||0),0);
-  const liveDays=(metrics||[]).reduce((sum,row)=>sum+Number(row.live_days||0),0);
   const firstName=(profile?.display_name||"LHS").split(/\s+/)[0];
 
   return <>
@@ -31,16 +29,16 @@ export default async function Dashboard(){
       <div className="hero-copy social-hero-copy">
         <span className="eyebrow light">Life · Health · Strength Creator Network</span>
         <h1>Welcome back, {firstName}.</h1>
-        <p>A creator network should feel alive. Plan, connect, compete, learn, and grow from one bold LHS workspace.</p>
+        <p>This is the LHS creator command center—built for connection, competition, development, and a network that feels as alive as the creators inside it.</p>
         <div className="hero-brand-tags"><span><HeartPulse size={15}/> Community first</span><span><Sparkles size={15}/> Creator growth</span><span><Trophy size={15}/> Win together</span></div>
-        <div className="hero-actions inline-actions"><Link className="btn light" href="/portal/battles"><CalendarClock size={18}/> Battle Central</Link><Link className="btn gold" href="/portal/campaigns"><Sparkles size={18}/> Campaign Hub</Link></div>
+        <div className="hero-actions inline-actions"><Link className="btn light" href="/portal/battles"><CalendarClock size={18}/> Battle Central</Link><Link className="btn gold" href="/portal/community"><Sparkles size={18}/> Enter Community</Link></div>
       </div>
 
       <div className="social-showcase" aria-hidden="true">
-        <div className="showcase-card showcase-main"><img src="/lhs-logo.webp" alt=""/><span>LHS CONNECT</span><strong>CREATE.<br/>CONNECT.<br/>GROW.</strong></div>
+        <div className="showcase-card showcase-main"><img src="/lhs-logo.webp" alt=""/><span>THE CREATOR NETWORK</span><strong>CREATE.<br/>CONNECT.<br/>GROW.</strong></div>
         <div className="showcase-float float-live"><Radio size={18}/><span>LIVE</span><strong>SHOW UP</strong></div>
         <div className="showcase-float float-battle"><Swords size={18}/><span>BATTLE</span><strong>COMPETE</strong></div>
-        <div className="showcase-float float-campaign"><Megaphone size={18}/><span>CAMPAIGN</span><strong>CREATE</strong></div>
+        <div className="showcase-float float-campaign"><Megaphone size={18}/><span>COMMUNITY</span><strong>CONNECT</strong></div>
         <div className="showcase-dots"/>
       </div>
       <div className="hero-color-streak streak-one"/><div className="hero-color-streak streak-two"/><div className="hero-color-streak streak-three"/>
@@ -49,10 +47,10 @@ export default async function Dashboard(){
     <div className="brand-manifesto"><span>CONNECT</span><i/> <span>CREATE</span><i/> <span>COMPETE</span><i/> <span>GROW</span></div>
 
     <section className="kpi-grid branded-kpis">
-      <article className="kpi-card tone-cyan"><div className="kpi-icon"><UsersRound size={21}/></div><div><span>Creators in scope</span><strong>{creators??0}</strong><small>Based on active role</small></div></article>
+      <article className="kpi-card tone-cyan"><div className="kpi-icon"><UsersRound size={21}/></div><div><span>Creators in scope</span><strong>{creators??0}</strong><small>Based on your active role</small></div></article>
       <article className="kpi-card tone-magenta"><div className="kpi-icon"><Radio size={21}/></div><div><span>Next 30-day battles</span><strong>{battles??0}</strong><small>Read-only battle calendar</small></div></article>
-      <article className="kpi-card tone-gold"><div className="kpi-icon"><Trophy size={21}/></div><div><span>Active campaigns</span><strong>{campaigns??0}</strong><small>Current visibility</small></div></article>
-      <article className="kpi-card tone-blue"><div className="kpi-icon"><Gem size={21}/></div><div><span>Current diamonds</span><strong>{totalDiamonds.toLocaleString()}</strong><small>{liveDays.toLocaleString()} live-days recorded</small></div></article>
+      <article className="kpi-card tone-gold"><div className="kpi-icon"><Trophy size={21}/></div><div><span>Active campaigns</span><strong>{campaigns??0}</strong><small>Current campaign visibility</small></div></article>
+      <article className="kpi-card tone-blue"><div className="kpi-icon"><BellRing size={21}/></div><div><span>Network updates</span><strong>{announcementCount??0}</strong><small>Announcements visible to you</small></div></article>
     </section>
 
     <section className="dashboard-grid">
