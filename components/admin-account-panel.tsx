@@ -28,7 +28,7 @@ export function AdminAccountPanel({accounts,teams,creators,currentUser}:{account
   {username:"callmetash1",displayName:"NM Allen",roles:["manager","creator"],team:"NM Allen",creatorHandle:"@callmetash1"},
  ],[]);
 
- const remainingLeadership=leadership.filter(item=>!accounts.some(a=>a.login_username.toLowerCase()===item.username));
+ const remainingLeadership=leadership.filter(item=>item.username!=="mia_i_garcia"&&!accounts.some(a=>a.login_username.toLowerCase()===item.username));
 
  async function copyPassword(){
   if(!credential)return;
@@ -123,7 +123,7 @@ export function AdminAccountPanel({accounts,teams,creators,currentUser}:{account
 
   <div className="leadership-setup-card">
     <div className="leadership-setup-head">
-      <div><span className="section-kicker">Leadership access</span><h3>Manager & Admin setup</h3><p>These roles are mapped to the four production manager teams.</p></div>
+      <div><span className="section-kicker">Leadership access</span><h3>Manager & Admin setup</h3><p>Mia already has an existing account and will never be recreated here. This tool only provisions missing leadership accounts.</p></div>
       <ShieldCheck size={24}/>
     </div>
     <div className="leadership-status-grid">
