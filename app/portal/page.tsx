@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 
 export default async function Dashboard(){
   const supabase=await createClient();
+  const {data:{user}}=await supabase.auth.getUser();
+  if(!user)return null;
   const now=new Date();
   const today=now.toISOString().slice(0,10);
   const in30=new Date(Date.now()+30*86400000).toISOString().slice(0,10);
@@ -20,7 +22,7 @@ export default async function Dashboard(){
     supabase.from("campaigns").select("id,title,start_at,end_at,status,audience_type").eq("active",true).order("start_at",{ascending:true}).limit(4),
     supabase.from("announcements").select("id,title,body,starts_at,audience_type").order("starts_at",{ascending:false}).limit(4),
     supabase.from("metrics_current").select("diamonds,live_days,live_streams"),
-    supabase.from("profiles").select("display_name,active_role").single()
+    supabase.from("profiles").select("display_name,active_role").eq("id",user.id).single()
   ]);
 
   const totalDiamonds=(metrics||[]).reduce((sum,row)=>sum+Number(row.diamonds||0),0);
