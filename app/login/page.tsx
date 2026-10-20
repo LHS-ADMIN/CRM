@@ -13,13 +13,27 @@ function LoginForm(){
     const form=new FormData(e.currentTarget);
     const username=String(form.get("username")||"").trim().toLowerCase();
     const password=String(form.get("password")||"");
-    const {data:signData,error:signError}=await supabase.auth.signInWithPassword({email:`${username}@login.lhs-live.com`,password});
-    if(signError){setError("The username or password is incorrect.");setBusy(false);return}
+
+    const {data,error:loginError}=await supabase.functions.invoke("username-login",{body:{username,password}});
+    if(loginError||data?.error||!data?.access_token||!data?.refresh_token){
+      setError("The username or password is incorrect.");setBusy(false);return;
+    }
+
+    const {data:sessionData,error:sessionError}=await supabase.auth.setSession({
+      access_token:data.access_token,
+      refresh_token:data.refresh_token
+    });
+    const signedInUser=sessionData.user;
+    if(sessionError||!signedInUser){setError("The username or password is incorrect.");setBusy(false);return}
+
     const {error:auditError}=await supabase.rpc("record_login_success");
     if(auditError){await supabase.auth.signOut();setError(auditError.message);setBusy(false);return}
-    const {data:profile,error:profileError}=await supabase.from("profiles").select("active,must_change_password").eq("id",signData.user.id).single();
+
+    const {data:profile,error:profileError}=await supabase.from("profiles").select("active,must_change_password").eq("id",signedInUser.id).single();
     if(profileError||!profile?.active){await supabase.auth.signOut();setError("This LHS account is not active.");setBusy(false);return}
-    router.replace(profile.must_change_password?"/change-password":(params.get("next")||"/portal"));router.refresh();
+
+    router.replace(profile.must_change_password?"/change-password":(params.get("next")||"/portal"));
+    router.refresh();
   }
 
   return <main className="login-shell branded-login">
@@ -36,7 +50,7 @@ function LoginForm(){
         <div className="login-mobile-brand"><img src="/lhs-logo.webp" alt="LHS"/><span>LHS Connect</span></div>
         <span className="eyebrow">Invitation-only access</span>
         <div className="brand">Welcome back.</div>
-        <p className="muted">Use your permanent LHS username to enter the creator network portal.</p>
+        <p className="muted">Sign in with your permanent LHS username. No email address is needed.</p>
         {error&&<div className="error">{error}</div>}
         <form onSubmit={submit}>
           <div className="field"><label>Username</label><input className="input" name="username" autoComplete="username" required placeholder="your.username"/></div>
