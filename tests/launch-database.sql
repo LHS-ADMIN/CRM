@@ -10,7 +10,7 @@ begin
  (c2,'qa-launch-c2@example.invalid','{"login_username":"qa_launch_c2","display_name":"QA Creator Two"}'),
  (m,'qa-launch-manager@example.invalid','{"login_username":"qa_launch_manager","display_name":"QA Manager"}');
  update public.profiles set active=true,must_change_password=false,active_role=case when id=a then 'admin' when id=m then 'manager' else 'creator' end where id in (a,c1,c2,m);
- insert into public.user_roles(user_id,role) values(a,'admin'),(m,'manager'),(c1,'creator'),(c2,'creator');
+ insert into public.user_roles(user_id,role) values(a,'admin'),(m,'manager'),(c1,'creator'),(c1,'manager'),(c2,'creator');
  insert into public.teams(id,name,slug) values(t1,'QA One','qa-launch-one'),(t2,'QA Two','qa-launch-two');
  insert into public.team_memberships(team_id,user_id,membership_role) values(t1,m,'manager');
  insert into public.creators(id,agency_creator_id,auth_user_id,creator_name,tiktok_handle,team_id) values(cr1,'QA-LAUNCH-ONE',c1,'QA One','@qa_launch_one',t1),(cr2,'QA-LAUNCH-TWO',c2,'QA Two','@qa_launch_two',t2);
@@ -47,6 +47,11 @@ begin
  if (select count(*) from public.profile_details where user_id in(current_setting('qa.c1')::uuid,current_setting('qa.c2')::uuid))<>1 then raise exception 'Private details isolation failed';end if;
  begin update public.profiles set must_change_password=false where id=auth.uid();raise exception 'Password flag writable' using errcode='P0002';exception when insufficient_privilege then null;end;
  begin update public.creators set agency_creator_id='QA-STOLEN' where id=current_setting('qa.cr1')::uuid;raise exception 'Permanent ID writable' using errcode='P0002';exception when insufficient_privilege then null;end;
+ begin
+  insert into public.campaigns(title,start_at,end_at,created_by,audience_type)
+    values('QA forbidden targeted campaign',now(),now()+interval '1 day',auth.uid(),'targeted');
+  raise exception 'Inactive Manager role granted campaign creation' using errcode='P0002';
+ exception when insufficient_privilege then null;end;
 end;
 $test$;
 select set_config('request.jwt.claim.sub',current_setting('qa.manager'),true);
@@ -54,8 +59,13 @@ do $test$
 begin
  if (select count(*) from public.creators where agency_creator_id like 'QA-LAUNCH-%')<>1 then raise exception 'Manager team isolation failed';end if;
  if exists(select 1 from public.profile_details where user_id in(current_setting('qa.c1')::uuid,current_setting('qa.c2')::uuid)) then raise exception 'Manager accessed private contacts';end if;
+ insert into public.campaigns(title,start_at,end_at,created_by,audience_type)
+   values('QA permitted Manager campaign',now(),now()+interval '1 day',auth.uid(),'targeted');
 end;
 $test$;
+select set_config('request.jwt.claim.sub',current_setting('qa.admin'),true);
+insert into public.campaigns(title,start_at,end_at,created_by,audience_type)
+  values('QA permitted Admin campaign',now(),now()+interval '1 day',auth.uid(),'targeted');
 reset role;
 update public.profiles set must_change_password=true where id=current_setting('qa.c1')::uuid;
 set local role authenticated;
@@ -76,4 +86,4 @@ end;
 $test$;
 reset role;
 rollback;
-select 'PASS: stable IDs, duplicate rejection, metrics rollback, service-only RPCs, creator isolation, manager scope, private contacts, first-login enforcement, inactive access. All fixtures rolled back.' as result;
+select 'PASS: stable IDs, duplicate rejection, metrics rollback, service-only RPCs, creator isolation, active-role campaign creation, manager scope, private contacts, first-login enforcement, inactive access. All fixtures rolled back.' as result;
