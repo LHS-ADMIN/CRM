@@ -29,7 +29,7 @@ export default async function Dashboard(){
 
   return <>
     <section className="hero-panel brand-dashboard-hero">
-      <div className="hero-brand-medallion"><img src="/lhs-logo.png" alt="LHS"/></div>
+      <div className="hero-brand-medallion"><img src="/lhs-logo.webp" alt="LHS"/></div>
       <div className="hero-copy">
         <span className="eyebrow light">Life · Health · Strength Creator Network</span>
         <h1>Welcome back, {firstName}.</h1>
