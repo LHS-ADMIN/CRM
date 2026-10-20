@@ -1,5 +1,6 @@
 import { MessageCircle, MessagesSquare } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { CommunityComposerShell } from "@/components/community-composer-shell";
 
 export default async function CommunityPage(){
   const supabase=await createClient();
@@ -12,7 +13,7 @@ export default async function CommunityPage(){
 
   return <>
     <div className="page-head"><div><span className="section-kicker">Creator Community</span><h1>Network conversation</h1><p>Community channels are permission-aware: network, team, and leadership discussions stay in the right room.</p></div><div className="head-actions"><span className="chip accent"><MessagesSquare size={14}/>{posts?.length||0} recent posts</span></div></div>
-    <div className="community-layout">
+    <CommunityComposerShell/><div className="community-layout">
       <section className="feed">{(posts||[]).length?(posts||[]).map(p=>{const author=names.get(p.author_user_id);return <article className="post-card" key={p.id}>
         <div className="post-head"><span className="avatar-fallback">{(author?.display_name||"L")[0].toUpperCase()}</span><div><strong>{author?.display_name||"LHS Member"}</strong><span>{new Date(p.created_at).toLocaleString()}</span></div><span className="chip">{p.channel_type}</span></div>
         <p>{p.body}</p>
