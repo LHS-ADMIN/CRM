@@ -60,8 +60,8 @@ export function AdminImportPanel(){
         <option value="creators">Manage Creators roster</option>
         <option value="campaigns">Campaign data</option>
       </select>
-      <label className={busy?"btn disabled":"btn primary"}><UploadCloud size={16}/>{busy?"Importing…":"Choose .xlsx file"}<input hidden type="file" accept=".xlsx" onChange={upload} disabled={busy}/></label>
+      <label className={busy?"btn disabled":"btn primary"}><UploadCloud size={16}/>{busy?"Importing…":"Choose .xlsx file"}<input className="file-picker-input" type="file" accept=".xlsx" onChange={upload} disabled={busy}/></label>
     </div>
-    {msg&&<div className={msg.startsWith("Import completed")?"success":"error"} style={{marginTop:12}}>{msg}</div>}
+    {msg&&<div role="status" aria-live="polite" className={msg.startsWith("Import completed")?"success":"error"} style={{marginTop:12}}>{msg}</div>}
   </section>;
 }

@@ -69,7 +69,7 @@ export function AnnouncementCreatePanel({userId,activeRole,teams}:{userId:string
     <div className="modal-backdrop" onMouseDown={()=>setOpen(false)}>
       <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Create announcement" tabIndex={-1} className="modal-card" onMouseDown={e=>e.stopPropagation()}>
         <div className="modal-head"><div><span className="section-kicker">Leadership communication</span><h2>Create an announcement</h2><p>Share an update with text, a link, and an optional image or file.</p></div><button className="icon-button" aria-label="Close dialog" onClick={()=>setOpen(false)}><X size={20}/></button></div>
-        {msg&&<div className={msg==="Announcement published."?"success":"error"}>{msg}</div>}
+        {msg&&<div role="status" aria-live="polite" className={msg==="Announcement published."?"success":"error"}>{msg}</div>}
         <form onSubmit={submit}>
           <div className="field"><label htmlFor="announcement-create-panel-title">Title</label><input id="announcement-create-panel-title" className="input" name="title" required placeholder="What does the network need to know?"/></div>
           <div className="field"><label htmlFor="announcement-create-panel-body">Message</label><textarea id="announcement-create-panel-body" className="textarea" name="body" rows={6} required placeholder="Write the announcement details…"/></div>
@@ -83,7 +83,7 @@ export function AnnouncementCreatePanel({userId,activeRole,teams}:{userId:string
           </div>
           <div className="upload-field">
             <div><ImagePlus size={20}/><span><strong>Add image or file</strong><small>Images, PDF, Word, Excel or text · up to 20 MB</small></span></div>
-            <label className="btn"><Paperclip size={16}/> Choose file<input hidden type="file" name="attachment" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"/></label>
+            <label className="btn"><Paperclip size={16}/> Choose file<input className="file-picker-input" type="file" name="attachment" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"/></label>
           </div>
           <div className="modal-actions"><button type="button" className="btn" onClick={()=>setOpen(false)}>Cancel</button><button className="btn gold" disabled={busy}>{busy?"Publishing…":"Publish announcement"}</button></div>
         </form>

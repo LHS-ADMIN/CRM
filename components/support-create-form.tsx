@@ -59,7 +59,7 @@ export function SupportCreateForm({userId,creatorId,teamId}:{userId:string;creat
     <div className="modal-backdrop" onMouseDown={()=>setOpen(false)}>
       <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Create support ticket" tabIndex={-1} className="modal-card" onMouseDown={e=>e.stopPropagation()}>
         <div className="modal-head"><div><span className="section-kicker">Support Center</span><h2>Open a support ticket</h2><p>Give leadership enough detail to help quickly. You can include a screenshot, document, or link.</p></div><button className="icon-button" aria-label="Close dialog" onClick={()=>setOpen(false)}><X size={20}/></button></div>
-        {msg&&<div className={msg==="Ticket created."?"success":"error"}>{msg}</div>}
+        {msg&&<div role="status" aria-live="polite" className={msg==="Ticket created."?"success":"error"}>{msg}</div>}
         <form onSubmit={submit}>
           <div className="field"><label htmlFor="support-create-form-subject">Subject</label><input id="support-create-form-subject" className="input" name="subject" required placeholder="What do you need help with?"/></div>
           <div className="field"><label htmlFor="support-create-form-description">Details</label><textarea id="support-create-form-description" className="textarea" name="description" rows={5} placeholder="Explain the issue, what happened, and anything leadership should know."/></div>
@@ -70,7 +70,7 @@ export function SupportCreateForm({userId,creatorId,teamId}:{userId:string;creat
           <div className="field"><label htmlFor="support-create-form-external_url"><Link2 size={15}/> Optional link</label><input id="support-create-form-external_url" className="input" type="url" name="external_url" placeholder="https://…"/></div>
           <div className="upload-field">
             <div><ImagePlus size={20}/><span><strong>Add screenshot or file</strong><small>Images, PDF, Word, Excel or text · up to 20 MB</small></span></div>
-            <label className="btn"><Paperclip size={16}/> Choose file<input hidden type="file" name="attachment" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"/></label>
+            <label className="btn"><Paperclip size={16}/> Choose file<input className="file-picker-input" type="file" name="attachment" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"/></label>
           </div>
           <div className="modal-actions"><button type="button" className="btn" onClick={()=>setOpen(false)}>Cancel</button><button className="btn gold" disabled={busy}>{busy?"Creating…":"Create ticket"}</button></div>
         </form>

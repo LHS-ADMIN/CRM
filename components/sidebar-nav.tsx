@@ -27,7 +27,7 @@ export function SidebarNav({activeRole}:{activeRole:string|null}) {
     {items.map(item=>{
       const active=item.exact?path===item.href:path.startsWith(item.href);
       const Icon=item.icon;
-      return <Link key={item.href} href={item.href} className={active?"side-link active":"side-link"}>
+      return <Link key={item.href} href={item.href} aria-current={active?"page":undefined} className={active?"side-link active":"side-link"}>
         <span className="side-icon"><Icon size={18} strokeWidth={1.9}/></span>
         <span>{item.label}</span>
         {active&&<span className="side-active-dot"/>}

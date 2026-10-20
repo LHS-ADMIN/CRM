@@ -64,13 +64,13 @@ export function ProfileForm({userId,profile,creator,details}:{userId:string;prof
       <h2>{profile?.display_name}</h2>
       <span className="profile-username">@{profile?.login_username}</span>
       <span className="role-badge">{profile?.active_role||"member"}</span>
-      <label className={busy?"btn disabled":"btn"}><Camera size={16}/> Change photo<input hidden type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={imageChange} disabled={busy}/></label>
+      <label className={busy?"btn disabled":"btn"}><Camera size={16}/> Change photo<input className="file-picker-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={imageChange} disabled={busy}/></label>
       <p>JPG, PNG, WEBP or GIF. Maximum 5 MB.</p>
       <div className="privacy-note"><LockKeyhole size={16}/><span>Phone, email, address and birthday are private.</span></div>
     </aside>
 
     <form className="panel card-pad profile-form profile-details-card" onSubmit={submit}>
-      {msg&&<div className={msg.includes("saved")||msg.includes("updated")?"success":"error"}>{msg}</div>}
+      {msg&&<div role="status" aria-live="polite" className={msg.includes("saved")||msg.includes("updated")?"success":"error"}>{msg}</div>}
       <div className="panel-head inner"><div><span className="section-kicker">Profile details</span><h2>Tell LHS who you are</h2><p>Keep your profile current so leadership has the right contact and creator information.</p></div><UserRound size={24}/></div>
 
       <div className="form-grid">

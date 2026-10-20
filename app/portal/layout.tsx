@@ -21,6 +21,7 @@ export default async function PortalLayout({children}:{children:React.ReactNode}
   const active=profile.active_role||roles[0]||null;
 
   return <div className="portal-shell">
+    <a className="skip-link" href="#main-content">Skip to main content</a>
     <aside className="sidebar">
       <div className="brand-lockup branded">
         <div className="brand-logo-wrap"><img src="/lhs-logo.webp" alt="LHS logo"/></div>
@@ -36,7 +37,7 @@ export default async function PortalLayout({children}:{children:React.ReactNode}
     </aside>
     <main className="workspace">
       <PortalTopbar displayName={profile.display_name} roles={roles} activeRole={active} unread={unread||0}/>
-      <div className="content">{children}</div>
+      <div id="main-content" tabIndex={-1} className="content">{children}</div>
     </main>
   </div>;
 }
