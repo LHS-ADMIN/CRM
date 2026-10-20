@@ -1,8 +1,9 @@
 "use client";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { CheckCircle2, Copy, ShieldCheck, UserCog } from "lucide-react";
+import { CheckCircle2, Copy, Plus, ShieldCheck, UserCog, UserPlus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { useDialog } from "@/components/use-dialog";
 
 type Account={id:string;login_username:string;display_name:string;active:boolean;roles:string[];teamIds:string[]};
 type Team={id:string;name:string};
@@ -15,9 +16,11 @@ export function AdminAccountPanel({accounts,teams,creators,currentUser}:{account
  const[busy,setBusy]=useState(false);
  const[credential,setCredential]=useState<Credential|null>(null);
  const[bulkCredentials,setBulkCredentials]=useState<Credential[]>([]);
+ const[addOpen,setAddOpen]=useState(false);
  const credentialPanel=useRef<HTMLDivElement>(null);
  const inFlight=useRef(false);
  const[copied,setCopied]=useState(false);
+ const addDialogRef=useDialog(addOpen,()=>setAddOpen(false));
 
  useEffect(()=>{if(credential){credentialPanel.current?.scrollIntoView({block:"center",behavior:"smooth"});credentialPanel.current?.focus({preventScroll:true});}},[credential]);
 
@@ -67,14 +70,15 @@ export function AdminAccountPanel({accounts,teams,creators,currentUser}:{account
   const creatorId=String(f.get("creatorId")||"");
   if(!roles.length){setMessage("Select at least one role.");return;}
   if(roles.includes("creator")&&!creatorId){setMessage("Choose an imported creator when granting the Creator role, or use Add creator in the roster.");return;}
-  if(await invoke({
+  const ok=await invoke({
     action:"create",
     username:String(f.get("username")),
     displayName:String(f.get("display_name")),
     roles,
     creatorId:creatorId||null,
     teamIds:f.getAll("teamIds")
-  })) form.reset();
+  });
+  if(ok){form.reset();setAddOpen(false);}
  }
 
  async function provisionLeadership(){
@@ -83,34 +87,19 @@ export function AdminAccountPanel({accounts,teams,creators,currentUser}:{account
   const client=createClient();
   const created:Credential[]=[];
   const errors:string[]=[];
-
   for(const person of remainingLeadership){
    const team=teams.find(t=>t.name===person.team);
-   const creator=person.creatorHandle
-    ?creators.find(c=>c.creator_name.toLowerCase()===person.creatorHandle?.toLowerCase())
-    :null;
-
+   const creator=person.creatorHandle?creators.find(c=>c.creator_name.toLowerCase()===person.creatorHandle?.toLowerCase()):null;
    if(!team){errors.push(person.displayName+": team not found");continue;}
    if(person.roles.includes("creator")&&!creator){errors.push(person.displayName+": imported creator record not found");continue;}
-
-   const {data,error}=await client.functions.invoke("admin-users",{body:{
-    action:"create",
-    username:person.username,
-    displayName:person.displayName,
-    roles:person.roles,
-    creatorId:creator?.id||null,
-    teamIds:[team.id]
-   }});
-
+   const {data,error}=await client.functions.invoke("admin-users",{body:{action:"create",username:person.username,displayName:person.displayName,roles:person.roles,creatorId:creator?.id||null,teamIds:[team.id]}});
    if(error||data?.error){
     const detail=error?.context instanceof Response?await error.context.json().catch(()=>null):null;
     errors.push(person.displayName+": "+(data?.error||detail?.error||error?.message||"could not be created"));
     continue;
    }
-
    if(data?.temporaryPassword)created.push({username:person.username,password:data.temporaryPassword});
   }
-
   setBulkCredentials(created);
   if(errors.length)setMessage("Leadership setup finished with issues: "+errors.join(" | "));
   else setMessage("Leadership accounts configured. Copy the temporary passwords below before leaving this page.");
@@ -118,8 +107,7 @@ export function AdminAccountPanel({accounts,teams,creators,currentUser}:{account
  }
 
  return <section className="panel card-pad">
-  <h2>User access & roles</h2>
-  <p>Use usernames for every account. Existing imported creators can receive login access here.</p>
+  <div className="panel-head inner admin-users-head"><div><span className="section-kicker">Access management</span><h2>Users & role assignments</h2><p>Create username-based accounts, assign Creator/Manager/Admin roles, activate or deactivate user access, and assign Manager teams.</p></div><button type="button" className="btn primary" onClick={()=>{setMessage("");setAddOpen(true)}}><UserPlus size={17}/> Add user</button></div>
 
   <div className="leadership-setup-card">
     <div className="leadership-setup-head">
@@ -157,24 +145,27 @@ export function AdminAccountPanel({accounts,teams,creators,currentUser}:{account
     <p>Sign in with the username above. You will then choose a new password.</p>
   </div>}
 
-  <details>
-   <summary>Create user access</summary>
-   <form onSubmit={create} className="form-grid">
-    <label>Username<input className="input" name="username" required pattern="[a-zA-Z0-9][a-zA-Z0-9._-]{2,49}"/></label>
-    <label>Display name<input className="input" name="display_name" required/></label>
-    <fieldset><legend>Roles</legend>{["creator","manager","admin"].map(role=><label key={role}><input type="checkbox" name="roles" value={role}/>{role}</label>)}</fieldset>
-    <label>Imported creator<select className="select" name="creatorId"><option value="">Not applicable</option>{creators.filter(c=>!c.auth_user_id).map(c=><option key={c.id} value={c.id}>{c.creator_name} · {c.agency_creator_id}</option>)}</select></label>
-    <label>Manager teams<select className="select" multiple name="teamIds">{teams.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}</select></label>
-    <div><button className="btn primary" disabled={busy}>Create account</button></div>
-   </form>
-  </details>
+  <div className="admin-account-directory">
+    <div className="account-directory-head"><div><span className="section-kicker">User directory</span><h3>Assign roles & access</h3></div><span className="chip">{accounts.length} users</span></div>
+    <div className="account-list">{accounts.map(a=><details className="account-access-card" key={a.id}><summary><div><strong>{a.display_name}</strong><span>@{a.login_username}</span></div><div className="account-role-summary">{a.roles.map(role=><span className="chip" key={role}>{role}</span>)}<span className={a.active?"status-badge success":"status-badge"}>{a.active?"Active":"Inactive"}</span><span className="manage-roles-label">Manage roles</span></div></summary>
+      <form className="form-grid account-role-form" onSubmit={async e=>{e.preventDefault();const f=new FormData(e.currentTarget);const roles=f.getAll("roles").map(String);if(!roles.length){setMessage("Select at least one role.");return;}if(await invoke({action:"set_roles",userId:a.id,roles}))await invoke({action:"set_teams",userId:a.id,teamIds:f.getAll("teams")});}}>
+        <fieldset><legend>Roles for @{a.login_username}</legend>{["creator","manager","admin"].map(role=><label key={role}><input type="checkbox" name="roles" value={role} defaultChecked={a.roles.includes(role)} disabled={a.id===currentUser}/>{role}</label>)}</fieldset>
+        <label>Manager teams<select className="select" multiple name="teams" defaultValue={a.teamIds}>{teams.map(t=><option value={t.id} key={t.id}>{t.name}</option>)}</select></label>
+        <div className="head-actions"><button className="btn primary" disabled={busy||a.id===currentUser}>Save roles & teams</button><button className="btn" type="button" disabled={busy||a.id===currentUser} onClick={()=>invoke({action:"set_active",userId:a.id,active:!a.active})}>{a.active?"Deactivate user":"Activate user"}</button><button className="btn" type="button" disabled={busy||a.id===currentUser||Boolean(credential)} onClick={()=>{if(window.confirm("Issue a new temporary password for "+a.login_username+"? This replaces every earlier temporary password for this account."))void invoke({action:"reset_password",userId:a.id});}}>Issue temporary password</button></div>
+      </form>
+    </details>)}</div>
+  </div>
 
-  <div className="account-list">{accounts.map(a=><details key={a.id}><summary>{a.display_name} · @{a.login_username} · {a.active?"Active":"Inactive"}</summary>
-   <form className="form-grid" onSubmit={async e=>{e.preventDefault();const f=new FormData(e.currentTarget);const roles=f.getAll("roles").map(String);if(!roles.length){setMessage("Select at least one role.");return;}if(await invoke({action:"set_roles",userId:a.id,roles}))await invoke({action:"set_teams",userId:a.id,teamIds:f.getAll("teams")});}}>
-    <fieldset><legend>Roles for {a.login_username}</legend>{["creator","manager","admin"].map(role=><label key={role}><input type="checkbox" name="roles" value={role} defaultChecked={a.roles.includes(role)} disabled={a.id===currentUser}/>{role}</label>)}</fieldset>
-    <label>Manager teams<select className="select" multiple name="teams" defaultValue={a.teamIds}>{teams.map(t=><option value={t.id} key={t.id}>{t.name}</option>)}</select></label>
-    <div className="head-actions"><button className="btn primary" disabled={busy||a.id===currentUser}>Save permissions</button><button className="btn" type="button" disabled={busy||a.id===currentUser} onClick={()=>invoke({action:"set_active",userId:a.id,active:!a.active})}>{a.active?"Deactivate":"Activate"}</button><button className="btn" type="button" disabled={busy||a.id===currentUser||Boolean(credential)} onClick={()=>{if(window.confirm("Issue a new temporary password for "+a.login_username+"? This replaces every earlier temporary password for this account."))void invoke({action:"reset_password",userId:a.id});}}>Issue temporary password</button></div>
-   </form>
-  </details>)}</div>
+  {addOpen&&<div className="modal-backdrop" onMouseDown={()=>setAddOpen(false)}><div ref={addDialogRef} role="dialog" aria-modal="true" aria-label="Add user" tabIndex={-1} className="modal-card" onMouseDown={e=>e.stopPropagation()}>
+    <div className="modal-head"><div><span className="section-kicker">User access</span><h2>Add a user</h2><p>Create a username-based login and assign one or more roles. Creator-role users can be linked to an imported creator record.</p></div><button className="icon-button" aria-label="Close dialog" onClick={()=>setAddOpen(false)}><X size={20}/></button></div>
+    <form onSubmit={create} className="form-grid">
+      <div className="field"><label>Username</label><input className="input" name="username" required pattern="[a-zA-Z0-9][a-zA-Z0-9._-]{2,49}" placeholder="username"/></div>
+      <div className="field"><label>Display name</label><input className="input" name="display_name" required placeholder="Name shown in LHS"/></div>
+      <fieldset className="role-picker"><legend>Assign roles</legend>{["creator","manager","admin"].map(role=><label key={role}><input type="checkbox" name="roles" value={role}/><span><strong>{role}</strong><small>{role==="creator"?"Creator self-service access":role==="manager"?"Assigned-team management":"Network-wide administration"}</small></span></label>)}</fieldset>
+      <div className="field"><label>Imported creator <span className="muted">(required only for Creator role)</span></label><select className="select" name="creatorId"><option value="">Not applicable</option>{creators.filter(c=>!c.auth_user_id).map(c=><option key={c.id} value={c.id}>{c.creator_name} · {c.agency_creator_id}</option>)}</select></div>
+      <div className="field"><label>Manager teams</label><select className="select" multiple name="teamIds">{teams.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}</select></div>
+      <div className="modal-actions"><button type="button" className="btn" onClick={()=>setAddOpen(false)}>Cancel</button><button className="btn gold" disabled={busy}><Plus size={16}/>{busy?"Creating…":"Create user"}</button></div>
+    </form>
+  </div></div>}
  </section>;
 }
