@@ -4,13 +4,13 @@
 
 **READY FOR LAUNCH**
 
-Final QA and production cleanup are complete. No known critical software blocker remains.
+Final QA, production hardening, approved roster import, and launch-facing cleanup are complete. No known critical software blocker remains.
 
 The existing production architecture was preserved: GitHub `LHS-ADMIN/CRM`, Supabase project `CRM`, and the existing Vercel production project. No replacement app, repository, database, or deployment was created.
 
 Production URL: https://crm-taupe-sigma.vercel.app
 
-A limitation remains in the available automation environment: the full authenticated browser matrix at every device width and 125%/150% browser zoom could not be replayed end-to-end after the browser runtime hit credential-protection limits. This is recorded as an observational limitation, not a known application failure. Source-level responsive/accessibility checks, production browser evidence, database/RLS regressions, CI, deployment, storage controls, and recent backend traffic are all green.
+A limitation remains in the available automation environment: the full authenticated browser matrix at every device width and 125%/150% browser zoom could not be replayed end-to-end after browser credential-protection limits interrupted the prior browser runtime. This is recorded as an observational limitation, not a known application failure. Source-level responsive/accessibility checks, production workflow evidence, database/RLS regressions, CI, deployment status, storage controls, and backend verification are green.
 
 ## 2. VERIFIED WORKING
 
@@ -18,7 +18,7 @@ Production or launch-QA evidence confirms:
 
 - Admin username login, dashboard, Administration access, session persistence, logout, protected-route redirect, and returning sign-in.
 - Username-first creator provisioning without requiring an Admin to enter a creator email address.
-- Supabase Auth/profile/Creator linkage, permanent Agency Creator ID generation, temporary-password handoff, and first-login mandatory password change.
+- Supabase Auth/profile/Creator linkage, permanent Agency Creator ID generation, temporary-password handoff, password reset, and first-login mandatory password change.
 - Creator archive/restore with login activation/deactivation and permanent identity preservation.
 - Creator profile editing and profile-photo update behavior exercised during QA.
 - Creator support-ticket creation exercised during QA.
@@ -28,8 +28,9 @@ Production or launch-QA evidence confirms:
 - Support ticket details/link/private attachment/reply/status controls.
 - TikTok Creator Academy resource presentation.
 - Battle Central month navigation, archive behavior, October-only detail rows, clickable date drilldown, and EST display.
-- Creator roster XLSX safeguards: malformed row accounting, duplicate rejection, stable creator identity, and handle-update preservation.
-- Current metrics XLSX replacement safeguards, including preservation of the prior snapshot on failed/unmatched imports.
+- Creator roster XLSX safeguards: malformed row accounting, duplicate rejection, stable creator identity, handle-update preservation, and transactional rollback.
+- Production creator roster import completed successfully with **194 received, 194 matched, and 0 unmatched**.
+- Metrics backend safeguards remain available, but metrics import is intentionally not exposed in the launch Administration UI.
 - Campaign XLSX import completed successfully during QA.
 - Admin/Creator/Manager authorization behavior across roster, contacts, community, campaigns, announcements, support, attachments, moderation, first-login state, and inactive accounts through committed database regression suites.
 
@@ -44,6 +45,7 @@ Launch hardening included:
 - Added atomic creator, metrics, and campaign import commits and rollback protection.
 - Protected permanent Agency Creator IDs and role/team changes with transactional server-side operations.
 - Enforced active-account and first-password-change restrictions.
+- Added Admin password reset to the standard LHS temporary-password flow.
 - Corrected role/team/attachment/content RLS boundaries.
 - Kept attachment parent authorization as a **RESTRICTIVE** RLS guard.
 - Optimized attachment RLS auth lookups without weakening the parent guard.
@@ -51,32 +53,32 @@ Launch hardening included:
 - Completed campaign attachment, support thread/status, Academy resource, profile, creator edit/restore, Admin account/team/file, and import workflows.
 - Added keyboard-accessible file controls, skip navigation, focus-visible treatment, ARIA live feedback, reduced-motion support, and responsive layout fixes.
 - Increased production typography and interactive target sizes for the visually impaired LHS owner.
+- Removed creator metrics from the launch-facing Administration import selector while retaining the backend for future activation.
 - Removed misleading placeholder/dead-development markers; repository search found no TODO, FIXME, "coming soon", empty `href="#"`, or placeholder remnants.
 
-## 4. FINAL CLEANUP
+## 4. CURRENT PRODUCTION STATE
 
-Disposable launch-QA application data has been removed.
-
-Current production state after cleanup:
+The approved LHS production roster is now loaded. Disposable launch-QA content remains removed.
 
 | Item | Count |
 | --- | ---: |
 | Production battles | **666** |
-| Active creators | **0** |
+| Active creators | **194** |
+| Current metrics rows | **0** |
+| Active teams | **4** |
+| Active user profiles | **5** |
 | Active campaigns | **0** |
 | Active announcements | **0** |
 | Open support tickets | **0** |
-| Visible community test posts | **0** |
+| Visible community posts | **0** |
 | Attachment records | **0** |
-| Import-log QA rows | **0** |
-| QA teams | **0** |
-| QA Auth users | **0** |
-| QA profiles | **0** |
-| QA Storage metadata rows | **0** |
+| Import-log rows | **2** |
+| Duplicate active Agency Creator IDs | **0** |
+| Active creators missing TikTok handles | **0** |
 
-The zero creator/team/campaign counts are intentional before the approved LHS production roster is loaded. No Jeremiah Tasi creator data was imported.
+The import log contains the final successful roster import and the earlier failed import attempt. The failed attempt did not replace the final production roster; audit evidence was retained rather than erased.
 
-Audit evidence was retained rather than erased merely to make production history look empty.
+Metrics remain intentionally empty because metrics import is not enabled for this launch.
 
 ## 5. ROLE MATRIX
 
@@ -84,7 +86,7 @@ Audit evidence was retained rather than erased merely to make production history
 | --- | --- |
 | Creator | Own creator/profile/private details and tickets; permitted network/team content; no leadership content or unauthorized campaign/admin access. Creator login/password/profile/support behavior has production QA evidence; database/RLS scope tests passed. |
 | Manager | Assigned-team roster/content/tickets/attachment metadata and leadership channel; no creator private contacts; scoped campaign management and moderation. Positive and negative database/RLS authorization tests passed. |
-| Admin | Network-wide administration, account/role/team management, creator provisioning/archive/restore, imports, campaigns, announcements, community moderation restore, support, private creator data, and attachments. Admin browser workflows were exercised in production. |
+| Admin | Network-wide administration, account/role/team management, creator provisioning/archive/restore, password reset, roster/campaign imports, campaigns, announcements, community moderation restore, support, private creator data, and attachments. Admin browser workflows were exercised in production. |
 
 ## 6. SECURITY RESULT
 
@@ -96,16 +98,15 @@ Audit evidence was retained rather than erased merely to make production history
 - Admin/import/sync/file-signing Edge Functions require JWT and verify role/account state.
 - The only intentionally unauthenticated Edge Function is `username-login`, which must accept pre-authentication credentials; it performs its own generic credential validation and does not expose the user's underlying Supabase email.
 - Legacy bootstrap/QA functions remain JWT-protected and disabled.
-- The temporary final-cleanup function is JWT-protected and disabled (HTTP 410 behavior).
-- The two committed launch database suites pass after the final RLS optimization/fix.
-- Recent Supabase traffic sampled from 15:30–16:15 UTC showed **0 HTTP 5xx responses and 0 error/fatal-level records** across auth, edge, functions, Postgres, and Storage sources.
+- The temporary final-cleanup function is JWT-protected and disabled.
+- The committed launch database suites passed after the final RLS optimization/fix.
 
 Current Supabase Security Advisor warnings:
 
 1. **Leaked Password Protection disabled.** This is an Auth configuration/plan warning and is non-blocking for launch. Enable it in Supabase Auth settings if the account plan supports it.
 2. **`moderate_community` SECURITY DEFINER callable by authenticated users.** This is intentional. The RPC derives the actor from `auth.uid()`, applies scoped authorization, and restricts restore to Admin. Positive and negative authorization regression tests pass.
 
-Performance Advisor has no remaining attachment auth-initplan warnings. The remaining unused-index notices are informational and expected on an empty/new production roster.
+Performance Advisor currently reports three unused-index informational notices. No performance warning identified in this final pass is launch-blocking.
 
 ## 7. ACCESSIBILITY RESULT
 
@@ -124,33 +125,39 @@ Launch accessibility hardening is deployed:
 
 Sample contrast checks meet WCAG AA for normal text, including muted text, gold labels, sidebar text, focus blue, and error treatment.
 
-The automation environment could not independently replay every authenticated screen at 125% and 150% zoom after credential-protection limits interrupted the browser runtime. No known accessibility blocker remains in the implemented source.
+The automation environment could not independently replay every authenticated screen at 125% and 150% zoom after credential-protection limits interrupted the prior browser runtime. No known accessibility blocker remains in the implemented source.
 
 ## 8. DEPLOYMENT RESULT
 
-Final application/security commit before this certification document:
+Final launch-facing application commit:
 
-`934a58385b60d10132df46bbb00a022d0c5bbba2` — **fix: keep attachment parent guard restrictive**
+`300c4b480430839c741a75aa85b61440f72c7e65` — **fix: remove metrics import from launch UI**
 
 Verification:
 
-- GitHub Actions CI run **39455010678: SUCCESS**
+- GitHub Actions CI run **39510378492: SUCCESS**
 - TypeScript: **PASS**
 - Next.js production build: **PASS**
-- 15 application pages generated: **PASS**
-- npm dependency audit: **0 vulnerabilities**
-- Vercel production deployment `dpl_97R8v9EzuZkKb5TtzALFs5SuDfC2`: **READY**
+- Vercel commit deployment status: **SUCCESS**
 - Supabase project: **ACTIVE_HEALTHY**
-- Database launch regression suites: **PASS**
-- Content/access regression suite: **PASS**
-- Production battles after all tests/cleanup: **666**
+- Production battles: **666**
+- Active creators: **194**
+- Current metrics rows: **0**
+- Duplicate active Agency Creator IDs: **0**
+- Active creators missing TikTok handles: **0**
 
-The Vercel runtime-error endpoint remains inaccessible to the connected Vercel integration because of its team-scope permission. This does not affect the live deployment. Recent Supabase runtime/API logs were checked directly and contained no 5xx/error/fatal activity in the sampled launch window.
+The connected Vercel integration still cannot inspect the `lhs18` team project directly because that connector is missing authorization for the team scope. This does not affect the production deployment; GitHub's Vercel deployment status for the final commit is successful.
 
-## 9. REAL CREATOR IMPORT READINESS
+## 9. PRODUCTION ROSTER IMPORT RESULT
 
-The production database is clean and the roster importer has passed duplicate, malformed-row, stable-ID, update, and transactional rollback tests.
+The approved production LHS roster has been loaded successfully.
 
-Mia's Admin account is active as `miagarcia01`. Her first successful login will require the configured password-change flow before Admin operations.
+- **194** creator rows received.
+- **194** creator rows matched/processed.
+- **0** unmatched rows.
+- **0** duplicate active Agency Creator IDs.
+- **0** active creators missing TikTok handles.
+- All **666** battle records remain intact.
+- Metrics remain intentionally at **0** for this launch.
 
-**Mia may proceed with the production LHS creator import.**
+No additional creator roster import is required before launch.
