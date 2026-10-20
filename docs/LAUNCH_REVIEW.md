@@ -8,6 +8,29 @@ This is an interim certification record. Critical browser workflows and accessib
 
 Outstanding software verification: complete Creator and Manager browser workflows; profile/contact editing and photo upload/replacement/invalid-file checks; cross-role signed attachment delivery; campaign XLSX upload through the UI; new campaign attachment and community moderation controls; full Academy link behavior; authentication expiry/error states; desktop/laptop/tablet/mobile layouts; 100%, 125%, and 150% browser zoom; and application console/network review. These are unfinished QA work, not external data dependencies. Release cleanup remains incomplete while the role-testing account is needed.
 
+## Resume verification — October 20, 2026
+
+**Clearance remains withheld.** The supplied checkpoint was `7943561`; live production and `origin/main` are already at `d9e0180a0f55c73a8e8ae8e5cbbd0b15c42615d6`. The workspace was fast-forwarded after preserving its existing changes in a stash. Those application edits match the later release.
+
+Fresh evidence from this continuation:
+
+| Check | Result | Evidence / limit |
+| --- | --- | --- |
+| Production release | PASS | Vercel `dpl_4mKkSBHkyfPmf3hug6Wk1ua2FSGQ`, READY, production alias, SHA `d9e0180`. GitHub combined status reports Vercel success. This is not a fresh GitHub Actions result. |
+| Admin sign-in | PASS | Secure credential submission followed by visible Pi/Admin dashboard, then My Profile with editable fields and Change photo control. |
+| Profile invalid-file test | BLOCKED | File-chooser command rejected by native retained-credential protection before a chooser or file submission was confirmed; automation kernel reset. Do not count file validation, upload, or replacement as tested. |
+| Browser recovery | BLOCKED | Guidance recovery itself returned: “Browser observation is unavailable because native credential state cannot be safely resumed. Start a new browser runtime to continue.” No repeated credential request or alternate credential entry was attempted. |
+| Local production build | PASS | TypeScript and all 15 generated pages passed using the same public Supabase configuration as CI. Initial build without local environment variables failed; supplying the existing CI configuration resolved it. |
+| Database regression | PASS | Both committed SQL suites rerun successfully; each rolls back all fixtures and audit events. Covers import atomicity, active-role authorization, private contact isolation, content/attachment metadata scope, moderation and restore. Does not certify browser or Storage delivery. |
+| Battle preservation | PASS | Fresh count after both regression runs: **666**. |
+| Database/storage guardrails | PASS | Zero public tables without RLS; `crm-uploads` remains private; zero temporary regression users remain. |
+| Vercel runtime errors | BLOCKED | Fresh `get_runtime_errors` call for project `prj_HJT3415osGI6KArzXgGu8c7B0HCj`, team `lhs18`, last hour: HTTP 403. No Vercel CLI installed for the mapped fallback. |
+| Accessibility | PARTIAL | Source includes skip link, navigation `aria-current`, keyboard-reachable file controls, live feedback, readability and reduced-motion changes. Authenticated zoom, keyboard traversal, contrast and responsive browser checks remain unverified. |
+
+Current QA inventory, superseding the earlier cleanup paragraph: one creator reserved for role testing; one active campaign named `QA Launch Campaign 20261020`; one campaign attachment (`qa-roster.png`) and one corresponding private Storage object; one avatar Storage object; one support ticket; zero announcements. These records were inventoried, not deleted in this continuation. Retain the test account until the role flows are verified; remove the disposable content and Storage objects through supported application/Storage APIs during final release cleanup.
+
+Remaining gate: Creator and Manager browser workflows, profile save/upload/replacement/invalid-file behavior, campaign XLSX and attachment UI flows, cross-role signed-file delivery, moderation UI, Academy destination, session expiry/error handling, console/network review, responsive/zoom/keyboard/contrast checks, then final QA cleanup. Mia must continue holding the real roster import.
+
 ## 2. VERIFIED WORKING
 
 Personally exercised in the production browser earlier in this review:
