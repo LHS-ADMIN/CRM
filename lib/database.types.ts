@@ -82,6 +82,7 @@ export type Database = {
           created_at: string
           created_by: string
           ends_at: string | null
+          external_url: string | null
           id: string
           starts_at: string
           team_id: string | null
@@ -95,6 +96,7 @@ export type Database = {
           created_at?: string
           created_by: string
           ends_at?: string | null
+          external_url?: string | null
           id?: string
           starts_at?: string
           team_id?: string | null
@@ -108,6 +110,7 @@ export type Database = {
           created_at?: string
           created_by?: string
           ends_at?: string | null
+          external_url?: string | null
           id?: string
           starts_at?: string
           team_id?: string | null
@@ -1159,6 +1162,50 @@ export type Database = {
           },
         ]
       }
+      profile_details: {
+        Row: {
+          address: string | null
+          bio: string | null
+          birthday: string | null
+          created_at: string
+          email: string | null
+          niche: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          bio?: string | null
+          birthday?: string | null
+          created_at?: string
+          email?: string | null
+          niche?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          bio?: string | null
+          birthday?: string | null
+          created_at?: string
+          email?: string | null
+          niche?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_details_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_directory: {
         Row: {
           active: boolean
@@ -1343,6 +1390,8 @@ export type Database = {
           closed_at: string | null
           created_at: string
           creator_id: string | null
+          description: string | null
+          external_url: string | null
           id: string
           internal_notes: string | null
           opened_by_user_id: string
@@ -1358,6 +1407,8 @@ export type Database = {
           closed_at?: string | null
           created_at?: string
           creator_id?: string | null
+          description?: string | null
+          external_url?: string | null
           id?: string
           internal_notes?: string | null
           opened_by_user_id: string
@@ -1373,6 +1424,8 @@ export type Database = {
           closed_at?: string | null
           created_at?: string
           creator_id?: string | null
+          description?: string | null
+          external_url?: string | null
           id?: string
           internal_notes?: string | null
           opened_by_user_id?: string
