@@ -1,7 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 const corsHeaders={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"POST, OPTIONS"};
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...corsHeaders,"Content-Type":"application/json","Cache-Control":"no-store"}});
-function temporaryPassword(){const chars="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%";const bytes=crypto.getRandomValues(new Uint8Array(18));return Array.from(bytes,b=>chars[b%chars.length]).join("")}
+const DEFAULT_TEMPORARY_PASSWORD="LHS2026!";
 function normalizeRoles(value:unknown):string[]{const allowed=new Set(["creator","manager","admin"]);if(!Array.isArray(value))return[];return[...new Set(value.map(String).map(x=>x.toLowerCase()).filter(x=>allowed.has(x)))]}
 function normalizeHandle(value:unknown){const raw=String(value??"").trim();if(!raw)return null;return raw.startsWith("@")?raw:`@${raw}`}
 function creatorAgencyId(){return `LHS-${crypto.randomUUID().replaceAll("-","").slice(0,10).toUpperCase()}`}
@@ -36,8 +36,8 @@ Deno.serve(async(req)=>{
       if(createCreator&&!roles.includes("creator"))return json({error:"Creator access requires the creator role."},400);
       const {data:existing}=await admin.from("profiles").select("id").eq("login_username",username).maybeSingle();
       if(existing)return json({error:"Username already exists."},409);
-      const temp=String(body?.temporaryPassword??"")||temporaryPassword();
-      if(temp.length<10)return json({error:"Temporary password must be at least 10 characters."},400);
+      const temp=String(body?.temporaryPassword??"")||DEFAULT_TEMPORARY_PASSWORD;
+      if(temp.length<8)return json({error:"Temporary password must be at least 8 characters."},400);
       const email=`${username}@login.lhs-live.com`;
       const {data:created,error:createError}=await admin.auth.admin.createUser({email,password:temp,email_confirm:true,user_metadata:{login_username:username,display_name:displayName},app_metadata:{lhs_provisioned:true}});
       if(createError||!created.user)throw createError??new Error("User creation failed.");
@@ -59,7 +59,7 @@ Deno.serve(async(req)=>{
     }
     const userId=String(body?.userId??"");if(!userId)return json({error:"userId is required."},400);
     if(userId===actorId&&["set_active","set_roles"].includes(action))return json({error:"Your own access cannot be changed here."},400);
-    if(action==="reset_password"){const temp=String(body?.temporaryPassword??"")||temporaryPassword();if(temp.length<10)return json({error:"Temporary password must be at least 10 characters."},400);const {error}=await admin.auth.admin.updateUserById(userId,{password:temp});if(error)throw error;const {error:flagError}=await admin.from("profiles").update({must_change_password:true}).eq("id",userId);if(flagError)throw flagError;return json({ok:true,temporaryPassword:temp,mustChangePassword:true})}
+    if(action==="reset_password"){const temp=String(body?.temporaryPassword??"")||DEFAULT_TEMPORARY_PASSWORD;if(temp.length<8)return json({error:"Temporary password must be at least 8 characters."},400);const {error}=await admin.auth.admin.updateUserById(userId,{password:temp});if(error)throw error;const {error:flagError}=await admin.from("profiles").update({must_change_password:true}).eq("id",userId);if(flagError)throw flagError;await admin.from("audit_log").insert({actor_user_id:actorId,actor_username:actorProfile?.login_username??null,action:"password_reset",entity_type:"profiles",entity_id:userId,result:"success",metadata:{temporary_password_policy:"LHS standard; change required at next login"}});return json({ok:true,temporaryPassword:temp,mustChangePassword:true})}
     if(action==="set_active"){const active=Boolean(body?.active);const {error}=await admin.from("profiles").update({active}).eq("id",userId);if(error)throw error;return json({ok:true,active})}
     if(action==="set_roles"){
       const roles=normalizeRoles(body?.roles);
