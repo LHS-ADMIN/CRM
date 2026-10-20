@@ -13,11 +13,11 @@ function LoginForm(){
     const form=new FormData(e.currentTarget);
     const username=String(form.get("username")||"").trim().toLowerCase();
     const password=String(form.get("password")||"");
-    const {error:signError}=await supabase.auth.signInWithPassword({email:`${username}@login.lhs-live.com`,password});
+    const {data:signData,error:signError}=await supabase.auth.signInWithPassword({email:`${username}@login.lhs-live.com`,password});
     if(signError){setError("The username or password is incorrect.");setBusy(false);return}
     const {error:auditError}=await supabase.rpc("record_login_success");
     if(auditError){await supabase.auth.signOut();setError(auditError.message);setBusy(false);return}
-    const {data:profile,error:profileError}=await supabase.from("profiles").select("active,must_change_password").single();
+    const {data:profile,error:profileError}=await supabase.from("profiles").select("active,must_change_password").eq("id",signData.user.id).single();
     if(profileError||!profile?.active){await supabase.auth.signOut();setError("This LHS account is not active.");setBusy(false);return}
     router.replace(profile.must_change_password?"/change-password":(params.get("next")||"/portal"));router.refresh();
   }
