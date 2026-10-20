@@ -136,7 +136,7 @@ Deno.serve(async (req) => {
       p_rows: prepared, p_import_id: log.id, p_actor_id: actorId, p_invalid: unmatched.length,
     });
     if (commitError) {
-      await admin.from("import_log").update({status:"failed",completed_at:new Date().toISOString(),metadata:{error:"Replacement rolled back; previous snapshot preserved."}}).eq("id",log.id);
+      await admin.from("import_log").update({status:"failed",completed_at:new Date().toISOString(),metadata:{error:"Replacement rolled back; previous snapshot preserved.",code:commitError.code,reason:commitError.message}}).eq("id",log.id);
       return json({error:"Metrics import failed. The previous metrics remain unchanged. Check duplicate IDs or malformed values."},400);
     }
 

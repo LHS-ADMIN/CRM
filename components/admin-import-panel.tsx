@@ -3,6 +3,7 @@ import { ChangeEvent, useState } from "react";
 import { FileSpreadsheet, UploadCloud } from "lucide-react";
 import { readSheet } from "read-excel-file/browser";
 import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 
 const endpoints={creators:"import-creators",metrics:"import-metrics",campaigns:"import-campaigns"} as const;
 
@@ -18,6 +19,7 @@ function rowsToObjects(rows:unknown[][]){
 }
 
 export function AdminImportPanel(){
+  const router=useRouter();
   const [type,setType]=useState<keyof typeof endpoints>("metrics");
   const [busy,setBusy]=useState(false);
   const [msg,setMsg]=useState("");
@@ -35,13 +37,17 @@ export function AdminImportPanel(){
       const body:Record<string,unknown>={rows,sourceFileName:file.name};
       if(type==="metrics")body.dataPeriod=new Date().toISOString().slice(0,7);
       const {data,error}=await createClient().functions.invoke(endpoints[type],{body});
-      if(error)throw error;
+      if(error){
+        const detail=error.context instanceof Response?await error.context.json().catch(()=>null):null;
+        throw new Error(detail?.error||"Import could not be completed. No replacement was committed.");
+      }
       if(data?.error)throw new Error(data.error);
-      setMsg(`Import completed: ${data.matched??data.valid??data.synced??0} processed, ${data.unmatched??data.invalid??0} unmatched or invalid.`);
+      setMsg(`Import completed: ${data.received??rows.length} received, ${data.matched??data.valid??data.synced??0} processed, ${data.unmatched??data.invalid??0} unmatched or invalid.${type==="creators"?` ${data.created??0} created, ${data.updated??0} updated.`:""}`);
     }catch(err){
       setMsg(err instanceof Error?err.message:"Import failed.");
     }finally{
       setBusy(false);input.value="";
+      router.refresh();
     }
   }
 
@@ -49,7 +55,7 @@ export function AdminImportPanel(){
     <div className="panel-head inner"><div><span className="section-kicker">Data intake</span><h2>Production imports</h2></div><FileSpreadsheet size={20}/></div>
     <p className="muted">Imports use secured backend functions and are recorded in the Import Log. Metrics replace the previous current snapshot.</p>
     <div style={{display:"grid",gridTemplateColumns:"minmax(0,1fr) auto",gap:10,alignItems:"center"}}>
-      <select className="select" value={type} onChange={e=>setType(e.target.value as keyof typeof endpoints)}>
+      <select aria-label="Import type" className="select" disabled={busy} value={type} onChange={e=>setType(e.target.value as keyof typeof endpoints)}>
         <option value="metrics">Creator metrics</option>
         <option value="creators">Manage Creators roster</option>
         <option value="campaigns">Campaign data</option>
