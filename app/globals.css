@@ -385,3 +385,196 @@ html{font-size:18px}
   .brand-dashboard-hero .hero-actions{display:grid;margin-top:20px}
   .brand-logo-wrap{width:54px;height:54px}
 }
+
+
+/* LHS template-style personality + username onboarding */
+.page-head:not(.elevated-head){
+  position:relative;
+  overflow:hidden;
+  padding:24px 26px;
+  border:1px solid #dfe7f0;
+  border-radius:20px;
+  background:
+    radial-gradient(circle at 91% 0%,rgba(54,184,230,.10),transparent 15rem),
+    radial-gradient(circle at 78% 100%,rgba(213,58,127,.07),transparent 18rem),
+    linear-gradient(120deg,#fff,#f9fbfe);
+  box-shadow:0 14px 38px rgba(13,31,55,.055);
+}
+.page-head:not(.elevated-head):before{
+  content:"";
+  position:absolute;
+  left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(180deg,var(--brand-cyan),var(--brand-magenta),var(--brand-gold));
+}
+.page-head:not(.elevated-head):after{
+  content:"";
+  position:absolute;
+  width:180px;height:180px;border-radius:50%;
+  right:-90px;top:-90px;
+  border:22px solid rgba(110,94,213,.035);
+  box-shadow:0 0 0 22px rgba(54,184,230,.025),0 0 0 44px rgba(213,58,127,.018);
+  pointer-events:none;
+}
+
+.social-template-hero{
+  grid-template-columns:minmax(0,1.18fr) minmax(360px,.82fr);
+  min-height:330px;
+  padding:36px 38px;
+  gap:34px;
+}
+.social-hero-copy{align-self:center;position:relative;z-index:3}
+.social-hero-copy h1{font-size:2.75rem;max-width:720px}
+.social-hero-copy>p{font-size:1rem;max-width:690px}
+.inline-actions{justify-content:flex-start;margin-top:22px}
+.social-showcase{
+  position:relative;
+  align-self:stretch;
+  min-height:260px;
+  border-radius:24px;
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.075),rgba(255,255,255,.025)),
+    linear-gradient(135deg,rgba(54,184,230,.05),rgba(213,58,127,.04));
+  border:1px solid rgba(255,255,255,.1);
+  overflow:hidden;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+}
+.social-showcase:before{
+  content:"";
+  position:absolute;inset:0;
+  background-image:radial-gradient(rgba(255,255,255,.12) 1px,transparent 1px);
+  background-size:18px 18px;
+  mask-image:linear-gradient(135deg,rgba(0,0,0,.75),transparent 80%);
+}
+.showcase-main{
+  position:absolute;
+  left:50%;top:50%;
+  transform:translate(-50%,-50%) rotate(-3deg);
+  width:210px;height:220px;
+  border-radius:22px;
+  background:linear-gradient(145deg,#fff,#f7f8fb);
+  padding:18px;
+  box-shadow:0 26px 55px rgba(0,0,0,.28);
+  color:#0b1725;
+  display:flex;flex-direction:column;
+  z-index:2;
+}
+.showcase-main img{width:72px;height:72px;object-fit:contain;margin-bottom:8px}
+.showcase-main span{font-size:.62rem;letter-spacing:.14em;font-weight:900;color:#9a7120}
+.showcase-main strong{font-size:1.65rem;line-height:.95;letter-spacing:-.04em;margin-top:9px}
+.showcase-float{
+  position:absolute;
+  width:130px;
+  min-height:82px;
+  padding:12px;
+  border-radius:16px;
+  color:#fff;
+  box-shadow:0 18px 34px rgba(0,0,0,.24);
+  z-index:3;
+  display:grid;
+  grid-template-columns:auto 1fr;
+  column-gap:7px;
+  align-items:center;
+}
+.showcase-float span{font-size:.55rem;letter-spacing:.13em;font-weight:900;opacity:.8}
+.showcase-float strong{grid-column:1/-1;font-size:.92rem;letter-spacing:-.02em;margin-top:5px}
+.float-live{left:18px;top:25px;background:linear-gradient(135deg,#1db4e0,#17679d);transform:rotate(-7deg)}
+.float-battle{right:18px;top:37px;background:linear-gradient(135deg,#d53a7f,#7d3ca5);transform:rotate(6deg)}
+.float-campaign{right:28px;bottom:22px;background:linear-gradient(135deg,#d3a542,#8f6819);transform:rotate(-5deg)}
+.showcase-dots{
+  position:absolute;left:20px;bottom:24px;width:88px;height:88px;
+  background-image:radial-gradient(#f0d076 2px,transparent 2px);
+  background-size:12px 12px;
+  opacity:.55;
+}
+.brand-manifesto{
+  margin:0 0 18px;
+  display:flex;align-items:center;justify-content:center;gap:13px;
+  padding:10px 14px;
+  border-radius:999px;
+  border:1px solid #dfe6ef;
+  background:#fff;
+  box-shadow:0 8px 24px rgba(13,31,55,.045);
+}
+.brand-manifesto span{font-size:.7rem;font-weight:900;letter-spacing:.13em;color:#24364f}
+.brand-manifesto i{width:7px;height:7px;border-radius:50%;display:block}
+.brand-manifesto i:nth-of-type(1){background:var(--brand-cyan)}
+.brand-manifesto i:nth-of-type(2){background:var(--brand-magenta)}
+.brand-manifesto i:nth-of-type(3){background:var(--brand-gold)}
+
+.creator-head{margin-bottom:14px}
+.username-onboarding-banner{
+  display:flex;align-items:center;gap:14px;
+  margin:0 0 18px;
+  padding:16px 18px;
+  border-radius:16px;
+  background:
+    linear-gradient(110deg,rgba(54,184,230,.11),rgba(110,94,213,.07) 55%,rgba(221,184,93,.10));
+  border:1px solid #d6e3ef;
+}
+.username-banner-icon{
+  width:44px;height:44px;border-radius:13px;
+  background:linear-gradient(135deg,#142a47,#2c5d92);
+  color:#fff;display:grid;place-items:center;
+  font-size:1.15rem;font-weight:900;
+  box-shadow:0 9px 22px rgba(24,52,86,.15);
+}
+.username-onboarding-banner>div:last-child{display:grid;gap:3px}
+.username-onboarding-banner strong{font-size:.82rem}
+.username-onboarding-banner span{font-size:.72rem;color:#66768a;line-height:1.45}
+.creator-add-button{background:linear-gradient(135deg,#10243d,#265f94);border-color:#1a456e}
+
+.creator-onboard-modal{width:min(820px,100%)}
+.creator-username-callout{
+  margin-top:17px;
+  padding:14px 15px;
+  border-radius:12px;
+  background:linear-gradient(120deg,#eefaff,#f8f3ff);
+  border:1px solid #d6e7f0;
+  display:grid;gap:5px;
+}
+.creator-username-callout strong{font-size:.68rem;letter-spacing:.11em;color:#2c5b80}
+.creator-username-callout span{font-size:.74rem;line-height:1.5;color:#647489}
+.credential-card{
+  margin-top:18px;
+  display:grid;
+  grid-template-columns:56px minmax(0,1fr) auto;
+  gap:14px;
+  align-items:center;
+  padding:20px;
+  border-radius:17px;
+  background:
+    radial-gradient(circle at 90% 10%,rgba(221,184,93,.18),transparent 10rem),
+    linear-gradient(135deg,#f9fbfe,#fff);
+  border:1px solid #dbe4ee;
+}
+.credential-badge{width:52px;height:52px;border-radius:15px;background:linear-gradient(145deg,#102640,#2d5d91);color:#fff;display:grid;place-items:center}
+.credential-card>div:nth-child(2)>span{font-size:.63rem;text-transform:uppercase;letter-spacing:.11em;font-weight:900;color:#9a7624}
+.credential-card h3{margin:3px 0;font-size:1.1rem}
+.credential-card p{margin:0;font-size:.7rem;color:#6d7a8c}
+.credential-values{display:grid;gap:5px}
+.credential-values label{font-size:.62rem;text-transform:uppercase;letter-spacing:.09em;color:#7e8998;font-weight:850}
+.credential-values code{font-size:.82rem;padding:8px 10px}
+.credential-values small{font-size:.62rem;color:#6c7888}
+.empty-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
+.danger-action{color:#b33e53;border-color:#f0c8d0}
+.danger-action:hover{background:#fff2f4;border-color:#e5aab6;color:#8e293d}
+
+@media(max-width:1120px){
+  .social-template-hero{grid-template-columns:1fr}
+  .social-showcase{min-height:280px}
+}
+@media(max-width:820px){
+  .social-template-hero{padding:25px}
+  .social-hero-copy h1{font-size:2rem}
+  .brand-manifesto{justify-content:flex-start;overflow:auto}
+  .credential-card{grid-template-columns:52px minmax(0,1fr)}
+  .credential-card .credential-values,.credential-card .btn{grid-column:1/-1}
+}
+@media(max-width:560px){
+  .social-showcase{min-height:250px}
+  .showcase-main{width:170px;height:190px}
+  .showcase-main strong{font-size:1.35rem}
+  .showcase-float{width:108px;min-height:70px;padding:10px}
+  .float-live{left:7px}.float-battle{right:7px}.float-campaign{right:11px}
+  .username-onboarding-banner{align-items:flex-start}
+}
