@@ -1108,3 +1108,14 @@ img{max-width:100%;height:auto}
 @media(max-width:650px){
   .social-profile-avatar{width:80px!important;height:80px!important;max-width:80px;max-height:80px}
 }
+
+
+/* Full social-profile image should show the complete uploaded photo */
+.social-profile-avatar{
+  background:linear-gradient(145deg,#f7f9fc,#ffffff);
+}
+.social-profile-avatar img{
+  object-fit:contain !important;
+  object-position:center center !important;
+  background:#fff;
+}
