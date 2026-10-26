@@ -1119,3 +1119,14 @@ img{max-width:100%;height:auto}
   object-position:center center !important;
   background:#fff;
 }
+
+
+/* Creator directory pagination */
+.directory-range{margin:5px 0 0;color:var(--muted);font-size:.86rem}
+.directory-pagination{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:18px;border-top:1px solid #e6ebf2;background:linear-gradient(180deg,#fff,#fafbfd)}
+.pagination-pages{display:flex;justify-content:center;gap:7px;flex-wrap:wrap}
+.pagination-page,.pagination-button{min-width:42px;min-height:42px;display:inline-flex;align-items:center;justify-content:center;gap:5px;border:1px solid #d9e2ed;border-radius:11px;background:#fff;color:#334963;text-decoration:none;font-weight:850;font-size:.84rem;transition:background .15s ease,border-color .15s ease,transform .15s ease}
+.pagination-button{padding:0 13px}.pagination-page:hover,.pagination-button:hover{background:#f2f7fc;border-color:#bfcde0;transform:translateY(-1px)}
+.pagination-page.active{background:linear-gradient(145deg,#173f70,#6e5ed5);border-color:#5c59b8;color:#fff;box-shadow:0 8px 20px rgba(64,70,150,.18)}
+.pagination-button.disabled{opacity:.42;pointer-events:none}
+@media(max-width:700px){.directory-pagination{grid-template-columns:1fr 1fr}.pagination-pages{grid-column:1/-1;grid-row:1}.pagination-button{width:100%}}
