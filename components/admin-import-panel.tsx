@@ -69,7 +69,8 @@ export function AdminImportPanel(){
         detectedHeaderRow:parsed.headerRow
       };
 
-      const {data,error}=await createClient().functions.invoke(endpoints[type],{body});
+      const client=createClient();
+      const {data,error}=await client.functions.invoke(endpoints[type],{body});
       if(error){
         const detail=error.context instanceof Response?await error.context.json().catch(()=>null):null;
         const headers=Array.isArray(detail?.detectedHeaders)&&detail.detectedHeaders.length
@@ -79,11 +80,37 @@ export function AdminImportPanel(){
       }
       if(data?.error)throw new Error(data.error);
 
+      let accountsCreated=0;
+      const accountWarnings:string[]=[];
+      if(type==="creators"&&Array.isArray(data?.newCreators)){
+        for(const creator of data.newCreators){
+          const username=String(creator?.loginUsername||"").trim().toLowerCase();
+          if(!/^[a-z0-9][a-z0-9._-]{2,49}$/.test(username)){
+            accountWarnings.push(String(creator?.agencyId||"New creator")+": TikTok username cannot be used as a login.");
+            continue;
+          }
+          const {data:userData,error:userError}=await client.functions.invoke("admin-users",{body:{
+            action:"create",
+            username,
+            displayName:String(creator?.displayName||username),
+            roles:["creator"],
+            creatorId:String(creator?.creatorId||"")
+          }});
+          if(userError||userData?.error){
+            accountWarnings.push(String(creator?.agencyId||username)+": creator record imported, but login was not created.");
+          }else accountsCreated++;
+        }
+      }
+
       setMsg(
         "Import completed: "+(data.received??parsed.rows.length)+" received, "+
         (data.matched??data.valid??data.synced??0)+" processed, "+
         (data.unmatched??data.invalid??0)+" unmatched or invalid."+
-        (type==="creators"?" "+(data.created??0)+" created, "+(data.updated??0)+" updated.":"")+
+        (type==="creators"
+          ?" "+(data.created??0)+" new Creator IDs, "+(data.updated??0)+" existing Creator IDs updated. "+
+            accountsCreated+" new login"+(accountsCreated===1?"":"s")+" created."+
+            (accountWarnings.length?" "+accountWarnings.length+" login warning"+(accountWarnings.length===1?"":"s")+"; creator records were still imported.":"")
+          :"")+
         " Header row: "+(data.detectedHeaderRow??parsed.headerRow)+"."
       );
     }catch(err){
