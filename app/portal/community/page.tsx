@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MessageCircle, MessagesSquare, Sparkles, UsersRound } from "lucide-react";
+import { MessageCircle, MessagesSquare, Search, Sparkles, UsersRound } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { CommunityReplyForm } from "@/components/community-reply-form";
 import { CommunityComposerShell } from "@/components/community-composer-shell";
@@ -34,7 +34,7 @@ export default async function CommunityPage(){
     <div className="page-head"><div><span className="section-kicker">Creator Community</span><h1>Network conversation</h1><p>Share statuses, join conversations, discover creators across LHS, and stay connected without friend requests.</p></div><div className="head-actions"><Link className="btn primary" href="/portal/community/creators"><UsersRound size={16}/> Creator Directory</Link><span className="chip accent"><MessagesSquare size={14}/>{posts?.length||0} recent posts</span></div></div>
 
     <section className="community-network-banner">
-      <div><span className="section-kicker light">Your LHS network</span><h2>{creatorCount||0} creators. One connected community.</h2><p>Everyone in LHS is already connected. Browse profiles, learn what other creators do, and see the Network statuses they share.</p><Link className="btn light" href="/portal/community/creators"><UsersRound size={16}/> See all creators</Link></div>
+      <div><span className="section-kicker light">Your LHS network</span><h2>{creatorCount||0} creators. One connected community.</h2><p>Everyone in LHS is already connected. Browse profiles, learn what other creators do, and see the Network statuses they share.</p><form className="community-network-search" action="/portal/community/creators"><Search size={17}/><input name="q" aria-label="Search LHS creator network" placeholder="Search creator name, TikTok username, or niche…"/><button className="btn gold">Search creators</button></form><Link className="btn light" href="/portal/community/creators"><UsersRound size={16}/> See all creators</Link></div>
       <div className="community-creator-preview">{(creatorPreview||[]).map((c,i)=><Link href={"/portal/community/creators/"+c.creator_id} className={"preview-creator p"+(i%4)} key={c.creator_id} title={c.display_name}>{c.avatar_url?<img src={c.avatar_url} alt=""/>:<span>{c.display_name[0]?.toUpperCase()||"L"}</span>}</Link>)}<div className="preview-network-orb"><Sparkles size={20}/></div></div>
     </section>
 
