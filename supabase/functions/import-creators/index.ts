@@ -159,8 +159,8 @@ Deno.serve(async (req) => {
         renewed_management_relationship_dates: str(pick(row, "Renewed management relationship dates", "Renewed Management Relationship Dates", "renewed_management_relationship_dates")),
         source_imported_at: now,
         source_import_file_name: sourceFileName,
-        status: current?.status ?? "active",
-        active: current?.active ?? true,
+        status: "active",
+        active: true,
       });
     }
 
