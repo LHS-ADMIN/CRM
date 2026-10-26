@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, MessageCircle, Sparkles, UsersRound } from "lucide-react";
+import { ArrowLeft, MessageCircle, Search, Sparkles, UsersRound } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { CommunityReplyForm } from "@/components/community-reply-form";
 import { CommunityStatusComposer } from "@/components/community-status-composer";
@@ -33,7 +33,7 @@ export default async function CreatorSocialProfile({params}:{params:Promise<{id:
   const authorMap=new Map((replyAuthors||[]).map(a=>[a.user_id,a]));
 
   return <>
-    <Link className="btn" href="/portal/community/creators"><ArrowLeft size={16}/> Creator Directory</Link>
+    <div className="social-profile-toolbar"><Link className="btn" href="/portal/community/creators"><ArrowLeft size={16}/> Creator Directory</Link><form className="search-form social-profile-search" action="/portal/community/creators"><Search size={16}/><input name="q" aria-label="Search LHS creators" placeholder="Search LHS creators…"/></form></div>
     <section className="social-profile-hero">
       <div className="social-profile-cover"><div className="cover-orb one"/><div className="cover-orb two"/><div className="cover-grid"/></div>
       <div className="social-profile-main">
