@@ -991,3 +991,25 @@ small,.eyebrow,.section-kicker,.role-badge,.role-select,.brand-copy span,.brand-
   .social-showcase{min-height:205px}
   .showcase-main{width:150px;height:170px}
 }
+
+
+/* Internal creator notes */
+.creator-profile-panel{margin-bottom:18px;border-top:5px solid var(--lhs-cyan,#36b8e6)}
+.creator-private-divider{height:1px;background:linear-gradient(90deg,#dfe6ef,transparent);margin:24px 0}
+.creator-notes-panel{position:relative;overflow:hidden;border-top:5px solid var(--lhs-purple,#6e5ed5);background:radial-gradient(circle at 100% 0%,rgba(213,58,127,.06),transparent 15rem),#fff}
+.creator-notes-panel:after{content:"NOTES";position:absolute;right:20px;top:-22px;font-size:5rem;font-weight:950;letter-spacing:-.07em;color:rgba(110,94,213,.035);pointer-events:none}
+.creator-notes-head{position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+.creator-notes-title{display:flex;gap:13px;align-items:flex-start}.creator-notes-icon{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(145deg,#143b68,#6e5ed5 68%,#d53a7f);color:#fff;box-shadow:0 12px 28px rgba(72,71,155,.2)}
+.creator-notes-title h2{font-size:1.2rem;margin:3px 0 4px}.creator-notes-title p{font-size:.9rem;color:var(--muted);margin:0}
+.internal-only-badge{display:inline-flex;align-items:center;gap:6px;padding:8px 10px;border-radius:999px;background:#f4f1ff;border:1px solid #ddd6f6;color:#5b4da6;font-size:.82rem;font-weight:850;white-space:nowrap}
+.creator-note-composer{margin:18px 0;padding:18px;border:1px solid #dce4ee;border-radius:16px;background:linear-gradient(135deg,#f8fbff,#fff 58%,#fff8fc)}
+.creator-note-composer>label{display:block;font-weight:850;margin-bottom:8px}.creator-note-composer .textarea{background:#fff;resize:vertical}
+.creator-note-composer-footer{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:10px}.creator-note-composer-footer>span{font-size:.82rem;color:var(--muted);max-width:650px}
+.creator-note-history{display:grid;gap:12px}.creator-note-history-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.creator-note-history-head>strong{font-size:1rem}.creator-note-history-head>span{font-size:.82rem;color:var(--muted)}
+.creator-note-card{position:relative;padding:16px 17px;border:1px solid #e0e6ef;border-radius:14px;background:#fff;box-shadow:0 8px 24px rgba(13,31,55,.045)}
+.creator-note-card:before{content:"";position:absolute;left:0;top:13px;bottom:13px;width:4px;border-radius:0 999px 999px 0;background:linear-gradient(180deg,var(--lhs-cyan,#36b8e6),var(--lhs-purple,#6e5ed5))}
+.creator-note-meta{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding-left:5px}.creator-note-meta>div:first-child{display:grid;gap:3px}.creator-note-meta strong{font-size:.9rem}.creator-note-meta span{display:flex;align-items:center;gap:5px;color:var(--muted);font-size:.78rem}
+.creator-note-actions{display:flex;gap:6px}.creator-note-actions .icon-button{min-height:40px;min-width:40px;width:40px;height:40px}.note-delete{color:#a43a50}.note-delete:hover{background:#fff1f4;border-color:#efc7d0}
+.creator-note-card>p{white-space:pre-wrap;overflow-wrap:anywhere;margin:12px 5px 2px;color:#2f4057;font-size:.95rem;line-height:1.65}.creator-note-card>small{display:block;margin:8px 5px 0;color:#8a96a5;font-size:.76rem}
+.creator-note-editor{display:grid;gap:10px;margin-top:12px}.creator-notes-empty{display:flex;align-items:center;gap:12px;padding:22px;border:1px dashed #ccd6e3;border-radius:14px;background:#f9fbfd;color:#68778a}.creator-notes-empty>div{display:grid;gap:3px}.creator-notes-empty strong{color:#26384f}.creator-notes-empty span{font-size:.86rem}
+@media(max-width:700px){.creator-notes-head,.creator-note-composer-footer{align-items:flex-start;flex-direction:column}.internal-only-badge{white-space:normal}.creator-note-meta{flex-direction:column}.creator-note-actions{align-self:flex-end}.creator-notes-panel:after{display:none}}
