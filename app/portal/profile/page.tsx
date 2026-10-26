@@ -1,6 +1,9 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import { UsersRound } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileForm } from "./profile-form";
+import { CommunityStatusComposer } from "@/components/community-status-composer";
 
 export default async function ProfilePage(){
   const supabase=await createClient();
@@ -31,8 +34,10 @@ export default async function ProfilePage(){
 
   return <>
     <div className="page-head elevated-head">
-      <div><span className="section-kicker">Account & identity</span><h1>My profile</h1><p>Build a complete LHS profile with your public creator identity and your private real name and contact information. Private details are limited to you and active Admin users.</p></div>
+      <div><span className="section-kicker">Account & identity</span><h1>My profile</h1><p>Build your public LHS creator identity while keeping your real name and contact information private.</p></div>
+      {creator&&<div className="head-actions"><Link className="btn primary" href={"/portal/community/creators/"+creator.id}><UsersRound size={16}/> View my LHS profile</Link></div>}
     </div>
     <ProfileForm userId={user.id} profile={profile} creator={creator} details={merged}/>
+    {creator&&<section className="panel card-pad my-status-panel"><CommunityStatusComposer userId={user.id} displayName={creator.display_name||profile?.display_name||"Creator"}/></section>}
   </>;
 }
