@@ -124,7 +124,7 @@ export function AdminImportPanel(){
 
   return <section className="panel card-pad">
     <div className="panel-head inner"><div><span className="section-kicker">Data intake</span><h2>Production imports</h2></div><FileSpreadsheet size={20}/></div>
-    <p className="muted">Roster and campaign imports use secured backend functions and are recorded in the Import Log. Creator metrics are intentionally not enabled in this launch.</p>
+    <p className="muted">Roster and campaign imports use secured backend functions and are recorded in the Import Log. Creator metrics are intentionally not enabled in this launch. <strong>Important:</strong> a creator deactivated in the CRM stays deactivated even if that Creator ID appears in a later roster import. Only an Admin can reactivate them from the CRM.</p>
     <div style={{display:"grid",gridTemplateColumns:"minmax(0,1fr) auto",gap:10,alignItems:"center"}}>
       <select aria-label="Import type" className="select" disabled={busy} value={type} onChange={e=>setType(e.target.value as keyof typeof endpoints)}>
         <option value="creators">Manage Creators roster</option>
