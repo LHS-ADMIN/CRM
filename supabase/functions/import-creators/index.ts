@@ -107,6 +107,7 @@ Deno.serve(async (req) => {
     const existingMap = new Map((existing ?? []).map((x) => [String(x.agency_creator_id), x]));
     const now = new Date().toISOString();
     const prepared: Record<string, unknown>[] = [];
+    const newCreatorCandidates: { agencyId: string; loginUsername: string; displayName: string }[] = [];
     let invalid = 0;
     let created = 0;
     let updated = 0;
@@ -132,7 +133,15 @@ Deno.serve(async (req) => {
 
       const handle = usernameRaw.startsWith("@") ? usernameRaw : "@" + usernameRaw;
       const current = existingMap.get(agencyId);
-      if (current) updated++; else created++;
+      if (current) updated++;
+      else {
+        created++;
+        newCreatorCandidates.push({
+          agencyId,
+          loginUsername: handle.replace(/^@/, "").trim().toLowerCase(),
+          displayName: handle.replace(/^@/, ""),
+        });
+      }
 
       prepared.push({
         agency_creator_id: agencyId,
@@ -193,6 +202,25 @@ Deno.serve(async (req) => {
       return json({ error: "Import failed. No roster changes were saved. Check for duplicate IDs or malformed rows." }, 400);
     }
 
+    let newCreators: { creatorId: string; agencyId: string; loginUsername: string; displayName: string }[] = [];
+    if (newCreatorCandidates.length) {
+      const ids = newCreatorCandidates.map(x => x.agencyId);
+      const { data: createdRows, error: createdRowsError } = await admin
+        .from("creators")
+        .select("id,agency_creator_id")
+        .in("agency_creator_id", ids);
+      if (createdRowsError) throw createdRowsError;
+      const idMap = new Map((createdRows ?? []).map(x => [String(x.agency_creator_id), String(x.id)]));
+      newCreators = newCreatorCandidates
+        .filter(x => idMap.has(x.agencyId))
+        .map(x => ({
+          creatorId: idMap.get(x.agencyId)!,
+          agencyId: x.agencyId,
+          loginUsername: x.loginUsername,
+          displayName: x.displayName,
+        }));
+    }
+
     return json({
       ok: true,
       importId: log.id,
@@ -201,6 +229,8 @@ Deno.serve(async (req) => {
       invalid,
       created,
       updated,
+      newCreators,
+      identityRule: "Creator ID is permanent. TikTok username may update. Login username is never changed by roster import.",
       detectedHeaderRow,
     });
   } catch (error) {
