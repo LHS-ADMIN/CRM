@@ -1052,3 +1052,59 @@ small,.eyebrow,.section-kicker,.role-badge,.role-select,.brand-copy span,.brand-
 .community-network-search{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:9px;max-width:720px;margin:16px 0 12px;padding:8px;border:1px solid rgba(255,255,255,.15);border-radius:15px;background:rgba(255,255,255,.09);backdrop-filter:blur(8px)}
 .community-network-search>svg{margin-left:5px;color:#d8e6f3}.community-network-search input{min-width:0;width:100%;border:0;outline:0;background:#fff;color:#13253d;border-radius:10px;padding:11px 12px;font:inherit}.community-network-search .btn{white-space:nowrap}
 @media(max-width:700px){.social-profile-toolbar{align-items:stretch;flex-direction:column}.social-profile-search{width:100%;min-width:0}.community-network-search{grid-template-columns:auto minmax(0,1fr)}.community-network-search .btn{grid-column:1/-1;width:100%;justify-content:center}}
+
+
+/* Image containment hardening: keep uploaded creator images inside responsive UI frames */
+img{max-width:100%;height:auto}
+.social-profile-avatar,
+.creator-social-avatar,
+.mini-social-avatar,
+.preview-creator,
+.avatar-fallback,
+.profile-photo{
+  overflow:hidden;
+  isolation:isolate;
+}
+.social-profile-avatar{
+  aspect-ratio:1/1;
+  min-width:0;
+  min-height:0;
+  flex:0 0 auto;
+}
+.social-profile-avatar img,
+.creator-social-avatar img,
+.mini-social-avatar img,
+.preview-creator img,
+.avatar-fallback img,
+.profile-photo img{
+  display:block;
+  width:100%;
+  height:100%;
+  max-width:100%;
+  max-height:100%;
+  min-width:0;
+  min-height:0;
+  object-fit:cover;
+  object-position:center;
+}
+.social-profile-main{min-width:0}
+.social-profile-copy{min-width:0}
+.social-profile-copy h1,
+.social-profile-handle,
+.social-profile-bio p{
+  overflow-wrap:anywhere;
+}
+.creator-social-card,
+.creator-social-body,
+.profile-status-card,
+.social-reply{
+  min-width:0;
+}
+.creator-social-card img,
+.profile-status-card img,
+.social-reply img{
+  max-width:100%;
+}
+@media(max-width:650px){
+  .social-profile-avatar{width:80px!important;height:80px!important;max-width:80px;max-height:80px}
+}
