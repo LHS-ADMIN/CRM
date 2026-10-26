@@ -703,6 +703,50 @@ export type Database = {
           },
         ]
       }
+      creator_directory: {
+        Row: {
+          active: boolean
+          avatar_url: string | null
+          bio: string | null
+          creator_id: string
+          display_name: string
+          niche: string | null
+          tiktok_handle: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          active?: boolean
+          avatar_url?: string | null
+          bio?: string | null
+          creator_id: string
+          display_name: string
+          niche?: string | null
+          tiktok_handle?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          active?: boolean
+          avatar_url?: string | null
+          bio?: string | null
+          creator_id?: string
+          display_name?: string
+          niche?: string | null
+          tiktok_handle?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_directory_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: true
+            referencedRelation: "creators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       creator_notes: {
         Row: {
           active: boolean
