@@ -25,6 +25,72 @@ Deno.serve(async(req)=>{
     ]);
     if(!roleRow||actorProfile?.active!==true||actorProfile?.active_role!=="admin"||actorProfile?.must_change_password!==false)return json({error:"Admin role must be active"},403);
     const body=await req.json();const action=String(body?.action??"");
+
+    if(action==="provision_creator_batch"){
+      const ids=Array.isArray(body?.creatorIds)?[...new Set(body.creatorIds.map(String))]:[];
+      if(!ids.length||ids.length>10||ids.some(id=>!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))){
+        return json({error:"Select between 1 and 10 valid creators per batch."},400);
+      }
+      const createdLogins:{username:string;temporaryPassword:string;creatorId:string}[]=[];
+      const skipped:{creatorId:string;reason:string}[]=[];
+      for(const creatorId of ids){
+        const {data:creator,error:lookupError}=await admin.from("creators")
+          .select("id,active,auth_user_id,tiktok_handle,creator_name,display_name")
+          .eq("id",creatorId).maybeSingle();
+        if(lookupError||!creator||!creator.active||creator.auth_user_id){
+          skipped.push({creatorId,reason:"Creator is missing, inactive, or already has login access."});continue;
+        }
+        const username=String(creator.tiktok_handle||"").replace(/^@/,"").trim().toLowerCase();
+        if(!/^[a-z0-9][a-z0-9._-]{2,49}$/.test(username)){
+          skipped.push({creatorId,reason:"TikTok username must be corrected in the roster first."});continue;
+        }
+        const {data:existing,error:existingError}=await admin.from("profiles")
+          .select("id").eq("login_username",username).maybeSingle();
+        if(existingError||existing){
+          skipped.push({creatorId,reason:"Username already has an LHS login. Review before linking."});continue;
+        }
+        const password=temporaryPassword();
+        const displayName=String(creator.display_name||creator.creator_name||username).trim()||username;
+        const email=username+"@login.lhs-live.com";
+        const {data:created,error:createError}=await admin.auth.admin.createUser({
+          email,password,email_confirm:true,
+          user_metadata:{login_username:username,display_name:displayName},
+          app_metadata:{lhs_provisioned:true,creator_bulk_activation:true}
+        });
+        if(createError||!created.user){
+          skipped.push({creatorId,reason:"Could not provision login; review Auth status."});continue;
+        }
+        const userId=created.user.id;
+        try{
+          const {error:roleError}=await admin.from("user_roles")
+            .insert({user_id:userId,role:"creator",assigned_by:actorId});
+          if(roleError)throw roleError;
+          const {data:profileUpdated,error:profileError}=await admin.from("profiles")
+            .update({
+              active:true,active_role:"creator",
+              must_change_password:true,display_name:displayName,login_username:username
+            }).eq("id",userId).select("id").single();
+          if(profileError||!profileUpdated)throw profileError??new Error("Missing profile");
+          const {data:linked,error:linkError}=await admin.from("creators")
+            .update({auth_user_id:userId})
+            .eq("id",creatorId).eq("active",true).is("auth_user_id",null)
+            .select("id").single();
+          if(linkError||!linked)throw linkError??new Error("Creator link failed");
+          await admin.from("creator_login_invites").delete().eq("creator_id",creatorId);
+          await admin.from("audit_log").insert({
+            actor_user_id:actorId,actor_username:actorProfile?.login_username??null,
+            action:"creator_account_create",entity_type:"creators",
+            entity_id:creatorId,result:"success",
+            metadata:{username,creatorId,provisioning:"admin_bulk_unique_temp"}
+          });
+          createdLogins.push({username,temporaryPassword:password,creatorId});
+        }catch(error){
+          await admin.auth.admin.deleteUser(userId);
+          skipped.push({creatorId,reason:"Account setup failed. Try individually or contact support."});
+        }
+      }
+      return json({ok:true,created:createdLogins,skipped});
+    }
     if(action==="create"){
       const username=String(body?.username??"").trim().toLowerCase(),displayName=String(body?.displayName??"").trim();
       const roles=normalizeRoles(body?.roles),teamIds=Array.isArray(body?.teamIds)?[...new Set(body.teamIds.map(String))]:[];
