@@ -44,6 +44,12 @@ Deno.serve(async(req)=>{
 
       if(!creator?.id)return json({error:"Invalid username or password."},401);
 
+      const {data:invite}=await admin.from("creator_login_invites")
+        .select("creator_id")
+        .eq("creator_id",creator.id)
+        .maybeSingle();
+      if(!invite?.creator_id)return json({error:"Your LHS login has not been activated yet. Please contact LHS leadership."},403);
+
       const displayName=String(creator.display_name||creator.creator_name||creator.tiktok_handle||username).replace(/^@/,"").trim()||username;
       const email=`${username}@login.lhs-live.com`;
       const {data:created,error:createError}=await admin.auth.admin.createUser({
@@ -91,6 +97,7 @@ Deno.serve(async(req)=>{
           result:"success",
           metadata:{creator_id:creator.id,team_id:creator.team_id}
         });
+        await admin.from("creator_login_invites").delete().eq("creator_id",creator.id);
 
         profile={id:userId,active:true};
       }catch(error){
