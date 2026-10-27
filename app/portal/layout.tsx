@@ -36,7 +36,7 @@ export default async function PortalLayout({children}:{children:React.ReactNode}
       </div>
     </aside>
     <main className="workspace">
-      <PortalTopbar displayName={profile.display_name} roles={roles} activeRole={active} unread={unread||0}/>
+      <PortalTopbar displayName={profile.display_name} avatarUrl={profile.avatar_url} roles={roles} activeRole={active} unread={unread||0}/>
       <div id="main-content" tabIndex={-1} className="content">{children}</div>
     </main>
   </div>;

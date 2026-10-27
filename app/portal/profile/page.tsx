@@ -11,8 +11,8 @@ export default async function ProfilePage(){
   if(!user)redirect("/login");
 
   const [{data:profile},{data:creator},{data:details}]=await Promise.all([
-    supabase.from("profiles").select("display_name,avatar_url,active_role,login_username").eq("id",user.id).single(),
-    supabase.from("creators").select("id,display_name,niche,bio,profile_photo_url").eq("auth_user_id",user.id).maybeSingle(),
+    supabase.from("profiles").select("display_name,avatar_url,avatar_original_url,active_role,login_username").eq("id",user.id).single(),
+    supabase.from("creators").select("id,agency_creator_id,display_name,niche,bio,profile_photo_url").eq("auth_user_id",user.id).maybeSingle(),
     supabase.from("profile_details").select("real_name,email,phone,address,birthday,bio,niche").eq("user_id",user.id).maybeSingle()
   ]);
 

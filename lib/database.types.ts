@@ -1292,6 +1292,7 @@ export type Database = {
         Row: {
           active: boolean
           active_role: string | null
+          avatar_original_url: string | null
           avatar_url: string | null
           created_at: string
           display_name: string
@@ -1304,6 +1305,7 @@ export type Database = {
         Insert: {
           active?: boolean
           active_role?: string | null
+          avatar_original_url?: string | null
           avatar_url?: string | null
           created_at?: string
           display_name: string
@@ -1316,6 +1318,7 @@ export type Database = {
         Update: {
           active?: boolean
           active_role?: string | null
+          avatar_original_url?: string | null
           avatar_url?: string | null
           created_at?: string
           display_name?: string

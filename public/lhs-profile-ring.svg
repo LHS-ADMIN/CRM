@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
+  <defs>
+    <linearGradient id="navy" x1="120" y1="70" x2="930" y2="1010" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#152E50"/>
+      <stop offset=".48" stop-color="#07111F"/>
+      <stop offset="1" stop-color="#102743"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="240" y1="110" x2="840" y2="980" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F6E4AA"/>
+      <stop offset=".34" stop-color="#D4AE57"/>
+      <stop offset=".68" stop-color="#B8862E"/>
+      <stop offset="1" stop-color="#F0D895"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#06101D" flood-opacity=".38"/>
+    </filter>
+  </defs>
+
+  <circle cx="540" cy="540" r="505" fill="none" stroke="url(#navy)" stroke-width="94" filter="url(#shadow)"/>
+  <circle cx="540" cy="540" r="466" fill="none" stroke="url(#gold)" stroke-width="18"/>
+  <circle cx="540" cy="540" r="430" fill="none" stroke="#FFFFFF" stroke-opacity=".92" stroke-width="8"/>
+  <circle cx="540" cy="540" r="417" fill="none" stroke="#D4AE57" stroke-opacity=".8" stroke-width="5"/>
+
+  <g filter="url(#shadow)">
+    <path d="M373 54h334c32 0 58 26 58 58v74c0 32-26 58-58 58H373c-32 0-58-26-58-58v-74c0-32 26-58 58-58Z" fill="url(#navy)" stroke="url(#gold)" stroke-width="10"/>
+    <path d="M354 161h372" stroke="#D4AE57" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+    <text x="540" y="153" text-anchor="middle" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="86" font-weight="900" letter-spacing="8">LHS</text>
+    <text x="540" y="207" text-anchor="middle" fill="#F0D895" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" letter-spacing="7">CREATOR NETWORK</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <path d="M259 874c71 67 166 108 281 108s210-41 281-108l43 59c-83 80-193 129-324 129S299 1013 216 933l43-59Z" fill="url(#navy)" stroke="url(#gold)" stroke-width="10"/>
+    <text x="540" y="1008" text-anchor="middle" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="800" letter-spacing="4">LIFE • HEALTH • STRENGTH</text>
+  </g>
+
+  <g fill="url(#gold)">
+    <path d="M150 315l12 24 27 4-20 19 5 27-24-13-24 13 5-27-20-19 27-4 12-24Z"/>
+    <path d="M930 315l12 24 27 4-20 19 5 27-24-13-24 13 5-27-20-19 27-4 12-24Z"/>
+  </g>
+</svg>
