@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Archive, CalendarDays, ChevronLeft, ChevronRight, Clock3, Swords } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { BattleCalendarActions } from "./battle-calendar-actions";
 
 function easternToday(){
   const parts=new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date());
@@ -40,8 +41,20 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
   const days=Array.from({length:42},(_,i)=>{const d=new Date(gridStart);d.setUTCDate(gridStart.getUTCDate()+i);return d});
 
   const supabase=await createClient();
+  const {data:{user}}=await supabase.auth.getUser();
+  let activeRole:string|null=null;
+  let ownCreatorId:string|null=null;
+  if(user){
+    const [{data:profile},{data:ownCreator}]=await Promise.all([
+      supabase.from("profiles").select("active_role").eq("id",user.id).maybeSingle(),
+      supabase.from("creators").select("id").eq("auth_user_id",user.id).eq("active",true).maybeSingle()
+    ]);
+    activeRole=profile?.active_role||null;
+    ownCreatorId=ownCreator?.id||null;
+  }
+
   const {data:monthBattles}=await supabase.from("battles")
-    .select("id,creator_handle,battle_date,time_est,time_sort,opponent_name,opponent_agency,diamond_range,league,lhs_manager,status")
+    .select("id,creator_id,creator_handle,battle_date,time_est,time_sort,opponent_name,opponent_agency,diamond_range,league,lhs_manager,status,updated_at")
     .gte("battle_date",ymd(month))
     .lt("battle_date",ymd(next))
     .order("battle_date")
@@ -69,6 +82,7 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
         <span className="section-kicker">Battle Central</span>
         <h1>{isArchived?"Archived battle calendar":"Battle calendar"}</h1>
         <p>Leadership schedules battles in the A/B League source sheets. The CRM remains read-only and displays all battle times in EST. Select any date to view that day's battles.</p>
+        <div className="calendar-sync-note"><CalendarDays size={17}/><span><strong>Calendar sync:</strong> Assigned battles can be added to Google Calendar or Apple/iCal. This version creates a calendar copy; later Battle Central changes do not automatically rewrite an event already added to your personal calendar.</span></div>
       </div>
       <div className="head-actions">
         {isArchived&&<span className="chip archive-chip"><Archive size={15}/> Archived month</span>}
@@ -138,7 +152,7 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
 
       <div className="table-wrap">
         <table className="table battle-table">
-          <thead><tr><th>Date</th><th>Time</th><th>LHS Creator</th><th>Manager</th><th>Opponent</th><th>Opponent Agency</th><th>Diamond Range</th><th>League</th></tr></thead>
+          <thead><tr><th>Date</th><th>Time</th><th>LHS Creator</th><th>Manager</th><th>Opponent</th><th>Opponent Agency</th><th>Diamond Range</th><th>League</th><th>Calendar</th></tr></thead>
           <tbody>{detailRows.length?detailRows.map(b=><tr key={b.id}>
             <td>{new Date(b.battle_date+"T12:00:00").toLocaleDateString()}</td>
             <td><strong>{b.time_est}</strong></td>
@@ -148,7 +162,26 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
             <td>{b.opponent_agency||"—"}</td>
             <td>{b.diamond_range||"—"}</td>
             <td><span className="chip accent">{b.league}</span></td>
-          </tr>):<tr><td colSpan={8}><div className="empty-state compact">No battles are scheduled for this date.</div></td></tr>}</tbody>
+            <td>{(() => {
+              const status=String(b.status||"").toLowerCase();
+              const canSync=activeRole==="admin"||activeRole==="manager"||(activeRole==="creator"&&Boolean(ownCreatorId&&b.creator_id===ownCreatorId));
+              if(!canSync)return <span className="calendar-sync-unavailable">Not assigned to you</span>;
+              if(status==="cancelled"||status==="canceled")return <span className="calendar-sync-unavailable">Cancelled</span>;
+              return <BattleCalendarActions battle={{
+                id:b.id,
+                creatorHandle:b.creator_handle,
+                battleDate:b.battle_date,
+                timeEst:b.time_est,
+                timeSort:b.time_sort,
+                opponentName:b.opponent_name,
+                opponentAgency:b.opponent_agency,
+                diamondRange:b.diamond_range,
+                league:b.league,
+                lhsManager:b.lhs_manager,
+                updatedAt:b.updated_at
+              }}/>;
+            })()}</td>
+          </tr>):<tr><td colSpan={9}><div className="empty-state compact">No battles are scheduled for this date.</div></td></tr>}</tbody>
         </table>
       </div>
     </section>

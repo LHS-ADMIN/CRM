@@ -1,0 +1,10 @@
+/* Battle Calendar Sync */
+.calendar-sync-note{display:flex;align-items:flex-start;gap:9px;margin-top:14px;max-width:780px;padding:11px 13px;border:1px solid #d8e8ff;border-radius:12px;background:#f6faff;color:#53647b;font-size:.76rem;line-height:1.45}
+.calendar-sync-note svg{flex:0 0 auto;margin-top:1px;color:#2768c7}.calendar-sync-note strong{color:#17345c}
+.battle-calendar-actions{display:flex;flex-wrap:wrap;gap:6px;min-width:180px}
+.calendar-action{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:32px;padding:6px 9px;border:1px solid #d8e0eb;border-radius:9px;background:#fff;color:#263a55;font-size:.68rem;font-weight:760;text-decoration:none;white-space:nowrap;cursor:pointer;font-family:inherit}
+.calendar-action:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(21,50,85,.1)}
+.calendar-action.google{border-color:#bfd5ff;background:#f5f9ff;color:#174f9d}
+.calendar-action.apple{border-color:#d9d9e2;background:#fafafd;color:#262635}
+.calendar-sync-unavailable{display:inline-block;max-width:130px;color:#8a96a8;font-size:.66rem;line-height:1.35}
+@media(max-width:720px){.battle-calendar-actions{min-width:150px}.calendar-action{width:100%}}

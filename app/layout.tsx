@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./profile-ring.css";
+import "./battle-calendar.css";
 
 export const metadata: Metadata = {
   title: "LHS Creator Network CRM",
