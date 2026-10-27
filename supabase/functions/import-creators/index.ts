@@ -202,6 +202,24 @@ Deno.serve(async (req) => {
       return json({ error: "Import failed. No roster changes were saved. Check for duplicate IDs or malformed rows." }, 400);
     }
 
+    const { data: managerTeams, error: managerTeamsError } = await admin
+      .from("teams")
+      .select("source_manager_email")
+      .eq("active", true)
+      .not("source_manager_email", "is", null);
+    if (managerTeamsError) throw managerTeamsError;
+
+    const knownManagers = new Set(
+      (managerTeams ?? [])
+        .map(x => String(x.source_manager_email ?? "").trim().toLowerCase())
+        .filter(Boolean)
+    );
+    const unmappedManagers = [...new Set(
+      prepared
+        .map(row => String(row.creator_network_manager ?? "").trim().toLowerCase())
+        .filter(email => email && !knownManagers.has(email))
+    )];
+
     let newCreators: { creatorId: string; agencyId: string; loginUsername: string; displayName: string }[] = [];
     if (newCreatorCandidates.length) {
       const ids = newCreatorCandidates.map(x => x.agencyId);
@@ -230,6 +248,8 @@ Deno.serve(async (req) => {
       created,
       updated,
       newCreators,
+      unmappedManagers,
+      managerAssignmentRule: "The Manager email in the current roster controls creator team assignment. If the manager changes, the creator moves teams while all Creator ID history and notes remain attached.",
       identityRule: "Creator ID is permanent. TikTok username may update. Login username is never changed by roster import.",
       detectedHeaderRow,
     });
