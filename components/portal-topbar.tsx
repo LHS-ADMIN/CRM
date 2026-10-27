@@ -16,7 +16,7 @@ export function PortalTopbar({
       <span className="workspace-spark"><Sparkles size={16}/></span>
     </div>
     <div className="topbar-actions">
-      <Link href="/portal/announcements" className="icon-button" aria-label="View announcements">
+      <Link href="/portal/notifications" className="icon-button" aria-label="View notifications">
         <Bell size={19}/>
         {unread>0&&<span className="notification-count">{unread>9?"9+":unread}</span>}
       </Link>

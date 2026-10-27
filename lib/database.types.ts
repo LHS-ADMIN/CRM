@@ -1161,9 +1161,12 @@ export type Database = {
           announcement_id: string | null
           body: string | null
           created_at: string
+          dedupe_key: string | null
           id: string
           notification_type: string
           read_at: string | null
+          source_id: string | null
+          source_type: string | null
           title: string
           user_id: string
         }
@@ -1172,9 +1175,12 @@ export type Database = {
           announcement_id?: string | null
           body?: string | null
           created_at?: string
+          dedupe_key?: string | null
           id?: string
           notification_type?: string
           read_at?: string | null
+          source_id?: string | null
+          source_type?: string | null
           title: string
           user_id: string
         }
@@ -1183,9 +1189,12 @@ export type Database = {
           announcement_id?: string | null
           body?: string | null
           created_at?: string
+          dedupe_key?: string | null
           id?: string
           notification_type?: string
           read_at?: string | null
+          source_id?: string | null
+          source_type?: string | null
           title?: string
           user_id?: string
         }

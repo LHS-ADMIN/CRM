@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, UsersRound, Swords, Megaphone, MessagesSquare,
-  GraduationCap, LifeBuoy, UserRound, ShieldCheck, Target, BellRing
+  GraduationCap, LifeBuoy, UserRound, ShieldCheck, Target, BellRing, Bell
 } from "lucide-react";
 
 const base = [
@@ -13,6 +13,7 @@ const base = [
   { href:"/portal/campaigns", label:"Campaigns", icon:Target },
   { href:"/portal/community", label:"Community", icon:MessagesSquare },
   { href:"/portal/announcements", label:"Announcements", icon:BellRing },
+  { href:"/portal/notifications", label:"Notifications", icon:Bell },
   { href:"/portal/academy", label:"Creator Academy", icon:GraduationCap },
   { href:"/portal/support", label:"Support", icon:LifeBuoy },
   { href:"/portal/profile", label:"My Profile", icon:UserRound },
