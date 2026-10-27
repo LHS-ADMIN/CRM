@@ -42,6 +42,7 @@ function displayTimeEst(value: string | null | undefined) {
 
 function normalizeCreatorHandle(value: unknown) {
   const clean = String(value ?? "").trim().toLowerCase().replace(/^@/, "");
+  if (clean.includes("&")) return clean;
   const match = clean.match(/^([a-z0-9._]+)/);
   return match?.[1] ?? clean;
 }
