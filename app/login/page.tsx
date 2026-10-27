@@ -52,7 +52,7 @@ function LoginForm(){
         <div className="login-mobile-brand"><img src="/lhs-logo.webp" alt="LHS"/><span>LHS Connect</span></div>
         <span className="eyebrow">Invitation-only access</span>
         <div className="brand">Welcome back.</div>
-        <p className="muted">Sign in with your permanent LHS username. No email address is needed.</p>
+        <p className="muted">Sign in using your TikTok username without the @ symbol. No email address is needed.</p>
         {error&&<div className="error">{error}</div>}
         <form onSubmit={submit}>
           <div className="field"><label htmlFor="page-username">Username</label><input id="page-username" className="input" name="username" autoComplete="username" required placeholder="your.username"/></div>
