@@ -109,7 +109,10 @@ export function AdminImportPanel(){
         (type==="creators"
           ?" "+(data.created??0)+" new Creator IDs, "+(data.updated??0)+" existing Creator IDs updated. "+
             accountsCreated+" new login"+(accountsCreated===1?"":"s")+" created."+
-            (accountWarnings.length?" "+accountWarnings.length+" login warning"+(accountWarnings.length===1?"":"s")+"; creator records were still imported.":"")
+            (accountWarnings.length?" "+accountWarnings.length+" login warning"+(accountWarnings.length===1?"":"s")+"; creator records were still imported.":"")+
+            (Array.isArray(data.unmappedManagers)&&data.unmappedManagers.length
+              ?" Manager warning: "+data.unmappedManagers.join(", ")+" did not match an active LHS Manager team, so those creators were left unassigned."
+              :"")
           :"")+
         " Header row: "+(data.detectedHeaderRow??parsed.headerRow)+"."
       );
@@ -124,7 +127,7 @@ export function AdminImportPanel(){
 
   return <section className="panel card-pad">
     <div className="panel-head inner"><div><span className="section-kicker">Data intake</span><h2>Production imports</h2></div><FileSpreadsheet size={20}/></div>
-    <p className="muted">Roster and campaign imports use secured backend functions and are recorded in the Import Log. Creator metrics are intentionally not enabled in this launch. <strong>Important:</strong> a creator deactivated in the CRM stays deactivated even if that Creator ID appears in a later roster import. Only an Admin can reactivate them from the CRM.</p>
+    <p className="muted">Roster and campaign imports use secured backend functions and are recorded in the Import Log. Creator metrics are intentionally not enabled in this launch. <strong>Manager assignment:</strong> the Manager email on each imported creator row automatically sets that creator's team and replaces the previous Manager assignment. Existing internal notes remain attached to the Creator ID for the new Manager to review. <strong>Deactivation:</strong> a creator deactivated in the CRM stays deactivated even if that Creator ID appears in a later roster import. Only an Admin can reactivate them.</p>
     <div style={{display:"grid",gridTemplateColumns:"minmax(0,1fr) auto",gap:10,alignItems:"center"}}>
       <select aria-label="Import type" className="select" disabled={busy} value={type} onChange={e=>setType(e.target.value as keyof typeof endpoints)}>
         <option value="creators">Manage Creators roster</option>
