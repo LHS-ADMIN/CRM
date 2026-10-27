@@ -30,81 +30,14 @@ Deno.serve(async(req)=>{
       .maybeSingle();
 
     if(!profile?.id){
-      const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(password));
-      const passwordHash=Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,"0")).join("");
-      const expectedFirstLoginHash="0b0a2d58a32348a414da81c623a269edd8f81fb0d945174d269e98672bfcb29d";
-      if(passwordHash!==expectedFirstLoginHash)return json({error:"Invalid username or password."},401);
-
-      const {data:creator}=await admin.from("creators")
-        .select("id,creator_name,display_name,tiktok_handle,team_id,active,auth_user_id")
+      const {data:unlinkedCreator}=await admin.from("creators")
+        .select("id")
         .ilike("tiktok_handle","@"+username)
         .eq("active",true)
         .is("auth_user_id",null)
         .maybeSingle();
-
-      if(!creator?.id)return json({error:"Invalid username or password."},401);
-
-      const {data:invite}=await admin.from("creator_login_invites")
-        .select("creator_id")
-        .eq("creator_id",creator.id)
-        .maybeSingle();
-      if(!invite?.creator_id)return json({error:"Your LHS login has not been activated yet. Please contact LHS leadership."},403);
-
-      const displayName=String(creator.display_name||creator.creator_name||creator.tiktok_handle||username).replace(/^@/,"").trim()||username;
-      const email=`${username}@login.lhs-live.com`;
-      const {data:created,error:createError}=await admin.auth.admin.createUser({
-        email,
-        password,
-        email_confirm:true,
-        user_metadata:{login_username:username,display_name:displayName},
-        app_metadata:{lhs_provisioned:true,first_login_self_provisioned:true}
-      });
-      if(createError||!created.user)return json({error:"Your LHS account could not be opened. Please contact LHS support."},500);
-
-      const userId=created.user.id;
-      try{
-        const {error:profileError}=await admin.from("profiles").upsert({
-          id:userId,
-          login_username:username,
-          display_name:displayName,
-          active:true,
-          active_role:"creator",
-          must_change_password:true
-        },{onConflict:"id"});
-        if(profileError)throw profileError;
-
-        const {error:roleError}=await admin.from("user_roles").insert({
-          user_id:userId,
-          role:"creator"
-        });
-        if(roleError)throw roleError;
-
-        const {data:linked,error:linkError}=await admin.from("creators")
-          .update({auth_user_id:userId})
-          .eq("id",creator.id)
-          .is("auth_user_id",null)
-          .eq("active",true)
-          .select("id")
-          .single();
-        if(linkError||!linked)throw linkError||new Error("Creator login could not be linked.");
-
-        await admin.from("audit_log").insert({
-          actor_user_id:userId,
-          actor_username:username,
-          action:"creator_first_login_provision",
-          entity_type:"profiles",
-          entity_id:userId,
-          result:"success",
-          metadata:{creator_id:creator.id,team_id:creator.team_id}
-        });
-        await admin.from("creator_login_invites").delete().eq("creator_id",creator.id);
-
-        profile={id:userId,active:true};
-      }catch(error){
-        await admin.auth.admin.deleteUser(userId);
-        console.error(error);
-        return json({error:"Your LHS account could not be opened. Please contact LHS support."},500);
-      }
+      if(unlinkedCreator?.id)return json({error:"Your LHS login has not been activated. Contact your LHS manager for your personal temporary password."},403);
+      return json({error:"Invalid username or password."},401);
     }
 
     if(profile.active!==true)return json({error:"Invalid username or password."},401);

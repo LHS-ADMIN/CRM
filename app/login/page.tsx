@@ -16,7 +16,15 @@ function LoginForm(){
 
     const {data,error:loginError}=await supabase.functions.invoke("username-login",{body:{username,password}});
     if(loginError||data?.error||!data?.access_token||!data?.refresh_token){
-      setError("The username or password is incorrect.");setBusy(false);return;
+      let message=String(data?.error||"");
+      if(loginError?.context instanceof Response){
+        const detail=await loginError.context.json().catch(()=>null);
+        message=String(detail?.error||message);
+      }
+      setError(message.includes("has not been activated")
+        ?"Your LHS login has not been activated yet. Ask your LHS manager for your personal temporary password."
+        :"The username or password is incorrect.");
+      setBusy(false);return;
     }
 
     const {data:sessionData,error:sessionError}=await supabase.auth.setSession({
@@ -53,6 +61,7 @@ function LoginForm(){
         <span className="eyebrow">Invitation-only access</span>
         <div className="brand">Welcome back.</div>
         <p className="muted">Sign in using your TikTok username without the @ symbol. No email address is needed.</p>
+        <p style={{fontSize:".92rem",lineHeight:1.5,color:"#32415b",marginTop:10}}>First-time creator? Your LHS manager must activate your account and give you a personal temporary password.</p>
         {error&&<div className="error">{error}</div>}
         <form onSubmit={submit}>
           <div className="field"><label htmlFor="page-username">Username</label><input id="page-username" className="input" name="username" autoComplete="username" required placeholder="your.username"/></div>
