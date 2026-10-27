@@ -1256,6 +1256,7 @@ export type Database = {
       profile_directory: {
         Row: {
           active: boolean
+          admin_only: boolean
           avatar_url: string | null
           display_name: string
           updated_at: string
@@ -1263,6 +1264,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          admin_only?: boolean
           avatar_url?: string | null
           display_name: string
           updated_at?: string
@@ -1270,6 +1272,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          admin_only?: boolean
           avatar_url?: string | null
           display_name?: string
           updated_at?: string
@@ -1560,6 +1563,7 @@ export type Database = {
           id: string
           name: string
           slug: string
+          source_manager_email: string | null
           updated_at: string
         }
         Insert: {
@@ -1569,6 +1573,7 @@ export type Database = {
           id?: string
           name: string
           slug: string
+          source_manager_email?: string | null
           updated_at?: string
         }
         Update: {
@@ -1578,6 +1583,7 @@ export type Database = {
           id?: string
           name?: string
           slug?: string
+          source_manager_email?: string | null
           updated_at?: string
         }
         Relationships: []
