@@ -12,9 +12,19 @@ const json = (body: unknown, status = 200) =>
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 
+function normalizeTimeInput(value: string | null | undefined) {
+  if (!value) return "";
+  return value
+    .replace(/\./g, "")
+    .replace(/\s*EST\s*$/i, "")
+    .trim()
+    .replace(/(AM|PM)$/i, " $1")
+    .replace(/\s+/g, " ");
+}
+
 function timeTo24(value: string | null | undefined) {
-  if (!value) return null;
-  const clean = value.replace(/\s+EST$/i, "").trim();
+  const clean = normalizeTimeInput(value);
+  if (!clean) return null;
   const m = clean.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
   if (!m) return null;
   let hour = Number(m[1]);
@@ -23,6 +33,17 @@ function timeTo24(value: string | null | undefined) {
   if (ap === "PM" && hour !== 12) hour += 12;
   if (ap === "AM" && hour === 12) hour = 0;
   return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}:00`;
+}
+
+function displayTimeEst(value: string | null | undefined) {
+  const clean = normalizeTimeInput(value);
+  return clean ? `${clean} EST` : "";
+}
+
+function normalizeCreatorHandle(value: unknown) {
+  const clean = String(value ?? "").trim().toLowerCase().replace(/^@/, "");
+  const match = clean.match(/^([a-z0-9._]+)/);
+  return match?.[1] ?? clean;
 }
 
 Deno.serve(async (req) => {
@@ -76,7 +97,7 @@ Deno.serve(async (req) => {
 
     const creatorMap = new Map<string, any>();
     for (const c of creators ?? []) {
-      const key = String(c.tiktok_handle ?? "").trim().toLowerCase().replace(/^@/, "");
+      const key = normalizeCreatorHandle(c.tiktok_handle);
       if (key) creatorMap.set(key, c);
     }
 
@@ -89,7 +110,7 @@ Deno.serve(async (req) => {
       if (!sourceKey || !/^\d{4}-\d{2}-\d{2}$/.test(battleDate) || !timeEst || !["A","B"].includes(league)) continue;
 
       const creatorHandle = String(row?.creatorHandle ?? "").trim();
-      const matchKey = creatorHandle.toLowerCase().replace(/^@/, "");
+      const matchKey = normalizeCreatorHandle(creatorHandle);
       const creator = creatorMap.get(matchKey);
 
       prepared.push({
@@ -99,12 +120,12 @@ Deno.serve(async (req) => {
         source_row: Number.isFinite(Number(row?.sourceRow)) ? Number(row.sourceRow) : null,
         source_confirm: row?.sourceConfirm ? String(row.sourceConfirm) : null,
         creator_id: creator?.id ?? null,
-        creator_handle: creatorHandle || null,
+        creator_handle: (creator?.tiktok_handle ?? creatorHandle) || null,
         team_id: creator?.team_id ?? null,
         team_name: creator?.teams?.name ?? (row?.teamName ? String(row.teamName) : null),
         lhs_manager: row?.lhsManager ? String(row.lhsManager) : null,
         battle_date: battleDate,
-        time_est: /EST$/i.test(timeEst) ? timeEst : `${timeEst} EST`,
+        time_est: displayTimeEst(timeEst),
         time_sort: timeTo24(timeEst),
         opponent_name: row?.opponentName ? String(row.opponentName) : null,
         opponent_agency: row?.opponentAgency ? String(row.opponentAgency) : null,
