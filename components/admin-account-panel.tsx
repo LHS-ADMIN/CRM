@@ -16,6 +16,10 @@ export function AdminAccountPanel({accounts,teams,creators,currentUser}:{account
  const[busy,setBusy]=useState(false);
  const[credential,setCredential]=useState<Credential|null>(null);
  const[bulkCredentials,setBulkCredentials]=useState<Credential[]>([]);
+ const[creatorCredentials,setCreatorCredentials]=useState<Credential[]>([]);
+ const[activationSearch,setActivationSearch]=useState("");
+ const[activationProgress,setActivationProgress]=useState("");
+ const[activationErrors,setActivationErrors]=useState<string[]>([]);
  const[addOpen,setAddOpen]=useState(false);
  const[editOpen,setEditOpen]=useState(false);
  const[editingUserId,setEditingUserId]=useState<string|null>(null);
@@ -36,6 +40,11 @@ export function AdminAccountPanel({accounts,teams,creators,currentUser}:{account
 
  const remainingLeadership=leadership.filter(item=>item.username!=="mia_i_garcia"&&!accounts.some(a=>a.login_username.toLowerCase()===item.username));
  const editingUser=editingUserId?accounts.find(a=>a.id===editingUserId)||null:null;
+ const creatorsWithoutLogin=useMemo(()=>creators.filter(c=>!c.auth_user_id),[creators]);
+ const filteredCreators=useMemo(()=>creatorsWithoutLogin.filter(c=>(
+  c.creator_name.toLowerCase().includes(activationSearch.toLowerCase().trim())||
+  c.agency_creator_id.toLowerCase().includes(activationSearch.toLowerCase().trim())
+ )).slice(0,8),[creatorsWithoutLogin,activationSearch]);
 
  async function copyPassword(){
   if(!credential)return;
@@ -55,7 +64,7 @@ export function AdminAccountPanel({accounts,teams,creators,currentUser}:{account
    }
    if(data?.error)throw new Error(data.error);
    if(data.temporaryPassword){setCopied(false);setCredential({username:data.username||accounts.find(a=>a.id===body.userId)?.login_username||"",password:data.temporaryPassword});}
-   setMessage(data.temporaryPassword?"Password reset to the LHS temporary password. The user must change it at the next sign-in.":"Account updated.");
+   setMessage(data.temporaryPassword?"A new temporary password was generated. Copy it securely; the user must change it at their next sign-in.":"Account updated.");
    router.refresh();
    return true;
   }catch(e){
@@ -76,6 +85,74 @@ export function AdminAccountPanel({accounts,teams,creators,currentUser}:{account
   if(roles.includes("creator")&&!creatorId){setMessage("Choose an imported creator when granting the Creator role, or use Add creator in the roster.");return;}
   const ok=await invoke({action:"create",username:String(f.get("username")),displayName:String(f.get("display_name")),roles,creatorId:creatorId||null,teamIds:f.getAll("teamIds")});
   if(ok){form.reset();setAddOpen(false);}
+ }
+
+
+ async function activateCreators(selectedIds:string[]){
+  if(busy||inFlight.current||!selectedIds.length)return;
+  if(creatorCredentials.length){
+   setMessage("Download and securely deliver the current temporary passwords before starting another activation.");
+   return;
+  }
+  inFlight.current=true;setBusy(true);
+  setMessage("");setActivationErrors([]);
+  const credentials:Credential[]=[];
+  const problems:string[]=[];
+  let processed=0;
+  const client=createClient();
+  try{
+   for(let offset=0;offset<selectedIds.length;offset+=8){
+    const batch=selectedIds.slice(offset,offset+8);
+    setActivationProgress("Activating "+(processed+1)+"–"+Math.min(processed+batch.length,selectedIds.length)+" of "+selectedIds.length+" creators");
+    const {data,error}=await client.functions.invoke("admin-users",{
+     body:{action:"provision_creator_batch",creatorIds:batch}
+    });
+    if(error||data?.error){
+     const detail=error?.context instanceof Response?await error.context.json().catch(()=>null):null;
+     problems.push("Batch "+(Math.floor(offset/8)+1)+": "+(data?.error||detail?.error||"Unable to activate these creators"));
+    }else{
+     for(const item of data?.created||[]){
+      if(item?.username&&item?.temporaryPassword){
+       credentials.push({username:String(item.username),password:String(item.temporaryPassword)});
+      }
+     }
+     for(const item of data?.skipped||[]){
+      const creator=creators.find(c=>c.id===item.creatorId);
+      problems.push((creator?.creator_name||"Creator")+": "+String(item.reason||"Account was not activated"));
+     }
+    }
+    processed+=batch.length;
+   }
+   setCreatorCredentials(credentials);
+   setActivationErrors(problems);
+   setActivationProgress(credentials.length+" creator logins created. "+problems.length+" need review.");
+   setMessage(credentials.length
+    ?"New creators were activated. Download and privately distribute the unique temporary passwords below."
+    :"No creator logins were created. Review the activation errors.");
+   router.refresh();
+  }catch(e){
+   setCreatorCredentials(credentials);
+   setActivationErrors([...problems,e instanceof Error?e.message:"Activation interrupted"]);
+   setActivationProgress("Activation interrupted after "+processed+" of "+selectedIds.length+" creators.");
+  }finally{
+   inFlight.current=false;setBusy(false);
+  }
+ }
+
+ function downloadCreatorCredentials(){
+  if(!creatorCredentials.length)return;
+  const quoted=(v:string)=>'"'+v.replace(/"/g,'""')+'"';
+  const lines=[
+   "TikTok username,Temporary password,Change on first login",
+   ...creatorCredentials.map(c=>[quoted(c.username),quoted(c.password),"Yes"].join(","))
+  ];
+  const blob=new Blob(["\uFEFF"+lines.join("\r\n")],{type:"text/csv;charset=utf-8"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download="LHS-private-creator-logins-"+new Date().toISOString().slice(0,10)+".csv";
+  document.body.appendChild(a);a.click();a.remove();
+  window.setTimeout(()=>URL.revokeObjectURL(url),1000);
  }
 
  async function saveExisting(e:FormEvent<HTMLFormElement>){
@@ -148,6 +225,68 @@ export function AdminAccountPanel({accounts,teams,creators,currentUser}:{account
     {!remainingLeadership.length&&<div className="success">All four leadership accounts are configured.</div>}
   </div>
 
+
+  <div className="panel card-pad" style={{marginTop:20,border:"2px solid #b9d3e9",borderRadius:16}}>
+   <div className="panel-head inner">
+    <div>
+     <span className="section-kicker">Creator onboarding</span>
+     <h3>Activate missing creator logins</h3>
+     <p style={{fontSize:"1rem",lineHeight:1.55}}>
+      <strong>{creatorsWithoutLogin.length} active roster accounts need activation.</strong>
+      Each account keeps its existing Creator ID and team. Each new login receives its own temporary password.
+     </p>
+    </div>
+    <UserPlus size={23}/>
+   </div>
+   <p style={{fontSize:".9rem",lineHeight:1.55}}>
+    Search for a creator to activate just that account, or activate all remaining creators.
+    The passwords appear only after creation. Save and send them privately.
+   </p>
+   <div className="field" style={{maxWidth:520}}>
+    <label htmlFor="activation-creator-search">Find creator by TikTok username or Creator ID</label>
+    <input id="activation-creator-search" className="input" value={activationSearch}
+     onChange={e=>setActivationSearch(e.target.value)}
+     placeholder="Example: torsha969905" disabled={busy} />
+   </div>
+   {activationSearch.trim()&&<div style={{display:"grid",gap:8,maxWidth:600,marginTop:8}}>
+    {filteredCreators.length===0&&<p>No unlinked active creator matched this search.</p>}
+    {filteredCreators.map(c=><div key={c.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,flexWrap:"wrap",padding:"10px 12px",border:"1px solid #d9e3ed",borderRadius:10}}>
+     <div><strong>{c.creator_name}</strong><small style={{display:"block"}}>Creator ID: {c.agency_creator_id}</small></div>
+     <button className="btn primary" type="button" disabled={busy||creatorCredentials.length>0}
+      onClick={()=>activateCreators([c.id])}>Activate login</button>
+    </div>)}
+   </div>}
+   <div style={{display:"flex",gap:12,flexWrap:"wrap",marginTop:14}}>
+    <button className="btn gold" type="button" disabled={busy||!creatorsWithoutLogin.length||creatorCredentials.length>0}
+     onClick={()=>{if(window.confirm("Activate "+creatorsWithoutLogin.length+" missing creator logins with unique temporary passwords? You must download and privately distribute the passwords after creation."))void activateCreators(creatorsWithoutLogin.map(c=>c.id));}}>
+     {busy?"Activating…":"Activate all "+creatorsWithoutLogin.length+" missing creator logins"}
+    </button>
+   </div>
+   {activationProgress&&<p role="status" aria-live="polite" style={{fontSize:"1rem",fontWeight:600,marginTop:12}}>{activationProgress}</p>}
+   {creatorCredentials.length>0&&<div className="bulk-credential-panel" style={{marginTop:14}}>
+    <h3>One-time creator login credentials</h3>
+    <p style={{fontSize:".95rem"}}>Download this private file before leaving. These passwords are not stored for later viewing. Each creator must change their password immediately after signing in.</p>
+    <button type="button" className="btn primary" onClick={downloadCreatorCredentials}>
+     <Copy size={16}/> Download private login CSV ({creatorCredentials.length} accounts)
+    </button>
+    <div style={{marginTop:12}}>
+     {creatorCredentials.slice(0,6).map(c=><div key={c.username} className="bulk-credential-row">
+      <strong>@{c.username}</strong>
+      <code>{c.password}</code>
+      <button type="button" className="btn" onClick={()=>navigator.clipboard.writeText("Username: "+c.username+"\nTemporary password: "+c.password)}>Copy</button>
+     </div>)}
+     {creatorCredentials.length>6&&<p>Download the file to see the remaining {creatorCredentials.length-6} accounts.</p>}
+    </div>
+    <button className="btn" type="button" onClick={()=>{if(window.confirm("Have you saved the passwords? Dismissing permanently clears the one-time credentials from this screen.")){setCreatorCredentials([]);setActivationProgress("");setActivationErrors([]);router.refresh();}}}>
+      I saved the passwords — clear this list
+    </button>
+   </div>}
+   {activationErrors.length>0&&<details style={{marginTop:12}}>
+    <summary><strong>{activationErrors.length} accounts need review</strong></summary>
+    <ul>{activationErrors.map((e,i)=><li key={i}>{e}</li>)}</ul>
+   </details>}
+  </div>
+
   {message&&<p className={message.includes("updated")||message.includes("reset")?"success":"error"} role="status" aria-live="polite">{message}</p>}
 
   {bulkCredentials.length>0&&<div className="bulk-credential-panel" role="status" aria-live="polite">
@@ -159,7 +298,7 @@ export function AdminAccountPanel({accounts,teams,creators,currentUser}:{account
   {credential&&<div ref={credentialPanel} tabIndex={-1} className="credential-values temporary-login-panel" aria-label="Latest temporary login details">
     <h3>Latest temporary login</h3>
     <p>Username: <strong>{credential.username}</strong></p>
-    <p>This resets the account to the standard LHS temporary password. The user must change it at the next sign-in.</p>
+    <p>This is a unique temporary password. It must be given privately to the account holder, who must change it at first login.</p>
     <code aria-label="Temporary password">{credential.password}</code>
     <div className="head-actions"><button type="button" className="btn primary" onClick={copyPassword}>{copied?"Password copied":"Copy password"}</button><button type="button" className="btn" onClick={()=>{setCredential(null);setCopied(false);}}>Dismiss login details</button></div>
   </div>}
@@ -172,7 +311,7 @@ export function AdminAccountPanel({accounts,teams,creators,currentUser}:{account
       <div className="user-access-actions">
        {a.id===currentUser?<span className="self-access-note">Your account · another Admin must change your roles</span>:<button type="button" className="btn primary" onClick={()=>openEditor(a.id)}><Edit3 size={16}/> Edit access</button>}
        <button className="btn" type="button" disabled={busy||a.id===currentUser} onClick={()=>invoke({action:"set_active",userId:a.id,active:!a.active})}>{a.active?"Deactivate":"Activate"}</button>
-       <button className="btn" type="button" disabled={busy||a.id===currentUser||Boolean(credential)} onClick={()=>{if(window.confirm("Reset the password for "+a.login_username+" to LHS2026!? The user will be required to choose a new password at the next sign-in."))void invoke({action:"reset_password",userId:a.id});}}>Reset password</button>
+       <button className="btn" type="button" disabled={busy||a.id===currentUser||Boolean(credential)} onClick={()=>{if(window.confirm("Generate a new temporary password for "+a.login_username+"? Their previous password will stop working immediately."))void invoke({action:"reset_password",userId:a.id});}}>Reset password</button>
       </div>
     </article>)}</div>
   </div>
