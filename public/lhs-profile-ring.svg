@@ -1,40 +1,68 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
   <defs>
-    <linearGradient id="navy" x1="120" y1="70" x2="930" y2="1010" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#152E50"/>
-      <stop offset=".48" stop-color="#07111F"/>
-      <stop offset="1" stop-color="#102743"/>
+    <radialGradient id="cosmic" cx="50%" cy="42%" r="62%">
+      <stop offset="0" stop-color="#ff35f2"/>
+      <stop offset=".28" stop-color="#cb16e8"/>
+      <stop offset=".58" stop-color="#7a11c7"/>
+      <stop offset=".82" stop-color="#4c078e"/>
+      <stop offset="1" stop-color="#26004f"/>
+    </radialGradient>
+    <linearGradient id="cyan" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#80fbff"/>
+      <stop offset=".38" stop-color="#17eaff"/>
+      <stop offset="1" stop-color="#00aaf7"/>
     </linearGradient>
-    <linearGradient id="gold" x1="240" y1="110" x2="840" y2="980" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#F6E4AA"/>
-      <stop offset=".34" stop-color="#D4AE57"/>
-      <stop offset=".68" stop-color="#B8862E"/>
-      <stop offset="1" stop-color="#F0D895"/>
+    <linearGradient id="creatorGold" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#fff35c"/>
+      <stop offset=".42" stop-color="#ffd11e"/>
+      <stop offset="1" stop-color="#ff8a00"/>
     </linearGradient>
-    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
-      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#06101D" flood-opacity=".38"/>
+    <filter id="pinkGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="14" result="b"/>
+      <feColorMatrix in="b" values="1 0 0 0 0.95  0 0 0 0 0.05  0 0 1 0 0.95  0 0 0 1 0" result="g"/>
+      <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
+    <filter id="blueGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="7" result="b"/>
+      <feColorMatrix in="b" values="0 0 0 0 0  0 1 1 0 0.75  0 1 1 0 1  0 0 0 .85 0" result="g"/>
+      <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="goldGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8" result="b"/>
+      <feColorMatrix in="b" values="1 0 0 0 1  0 .45 0 0 .25  0 0 .1 0 0  0 0 0 .9 0" result="g"/>
+      <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <path id="topArc" d="M 108 530 A 432 432 0 0 1 972 530"/>
+    <path id="bottomArc" d="M 154 778 A 462 462 0 0 0 926 778"/>
   </defs>
 
-  <circle cx="540" cy="540" r="505" fill="none" stroke="url(#navy)" stroke-width="94" filter="url(#shadow)"/>
-  <circle cx="540" cy="540" r="466" fill="none" stroke="url(#gold)" stroke-width="18"/>
-  <circle cx="540" cy="540" r="430" fill="none" stroke="#FFFFFF" stroke-opacity=".92" stroke-width="8"/>
-  <circle cx="540" cy="540" r="417" fill="none" stroke="#D4AE57" stroke-opacity=".8" stroke-width="5"/>
+  <circle cx="540" cy="540" r="486" fill="none" stroke="#fff" stroke-width="22" filter="url(#pinkGlow)"/>
+  <circle cx="540" cy="540" r="461" fill="none" stroke="url(#cosmic)" stroke-width="150"/>
+  <circle cx="540" cy="540" r="386" fill="none" stroke="#ff4df4" stroke-width="22" filter="url(#pinkGlow)"/>
+  <circle cx="540" cy="540" r="374" fill="none" stroke="#fff" stroke-width="7" opacity=".96"/>
 
-  <g filter="url(#shadow)">
-    <path d="M373 54h334c32 0 58 26 58 58v74c0 32-26 58-58 58H373c-32 0-58-26-58-58v-74c0-32 26-58 58-58Z" fill="url(#navy)" stroke="url(#gold)" stroke-width="10"/>
-    <path d="M354 161h372" stroke="#D4AE57" stroke-width="3" stroke-linecap="round" opacity=".8"/>
-    <text x="540" y="153" text-anchor="middle" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="86" font-weight="900" letter-spacing="8">LHS</text>
-    <text x="540" y="207" text-anchor="middle" fill="#F0D895" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" letter-spacing="7">CREATOR NETWORK</text>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" opacity=".98">
+    <path d="M150 280l25 20-18 24 30 22-22 25 29 24" stroke="#ffb61f" stroke-width="8" filter="url(#goldGlow)"/>
+    <path d="M105 540l30-20 18 27 25-18 22 33 27-19" stroke="#ff39f4" stroke-width="7" filter="url(#pinkGlow)"/>
+    <path d="M178 744l20-27 24 18 18-31 27 16 20-29" stroke="#ff9c18" stroke-width="8" filter="url(#goldGlow)"/>
+    <path d="M930 290l-24 24 17 21-31 24 22 25-27 23" stroke="#ffb61f" stroke-width="8" filter="url(#goldGlow)"/>
+    <path d="M976 538l-28-21-19 28-25-18-22 31-28-18" stroke="#ff46f5" stroke-width="7" filter="url(#pinkGlow)"/>
+    <path d="M902 744l-21-27-23 18-20-31-26 17-21-29" stroke="#ffac19" stroke-width="8" filter="url(#goldGlow)"/>
   </g>
 
-  <g filter="url(#shadow)">
-    <path d="M259 874c71 67 166 108 281 108s210-41 281-108l43 59c-83 80-193 129-324 129S299 1013 216 933l43-59Z" fill="url(#navy)" stroke="url(#gold)" stroke-width="10"/>
-    <text x="540" y="1008" text-anchor="middle" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="800" letter-spacing="4">LIFE • HEALTH • STRENGTH</text>
+  <g fill="#fff" opacity=".48">
+    <circle cx="214" cy="188" r="3"/><circle cx="270" cy="216" r="2"/><circle cx="838" cy="206" r="3"/>
+    <circle cx="896" cy="249" r="2"/><circle cx="148" cy="648" r="2.5"/><circle cx="936" cy="666" r="3"/>
+    <circle cx="274" cy="878" r="3"/><circle cx="810" cy="884" r="2.5"/>
   </g>
 
-  <g fill="url(#gold)">
-    <path d="M150 315l12 24 27 4-20 19 5 27-24-13-24 13 5-27-20-19 27-4 12-24Z"/>
-    <path d="M930 315l12 24 27 4-20 19 5 27-24-13-24 13 5-27-20-19 27-4 12-24Z"/>
-  </g>
+  <text font-family="Arial Black, Impact, Arial, sans-serif" font-size="80" font-weight="900" letter-spacing="1.2" fill="url(#cyan)" stroke="#0956c9" stroke-width="5" paint-order="stroke" filter="url(#blueGlow)">
+    <textPath href="#topArc" startOffset="50%" text-anchor="middle">LIFE, HEALTH, AND STRENGTH</textPath>
+  </text>
+
+  <text x="540" y="246" text-anchor="middle" font-family="Arial Black, Impact, Arial, sans-serif" font-size="68" font-weight="900" letter-spacing="3" fill="url(#creatorGold)" stroke="#e63d00" stroke-width="7" paint-order="stroke" filter="url(#goldGlow)">CREATOR</text>
+
+  <text font-family="Arial Black, Impact, Arial, sans-serif" font-size="83" font-weight="900" letter-spacing="1.5" fill="url(#cyan)" stroke="#0956c9" stroke-width="5" paint-order="stroke" filter="url(#blueGlow)">
+    <textPath href="#bottomArc" startOffset="50%" text-anchor="middle">CREATOR NETWORK</textPath>
+  </text>
 </svg>

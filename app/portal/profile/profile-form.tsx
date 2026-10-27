@@ -2,11 +2,11 @@
 
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AtSign, CalendarDays, Camera, IdCard, Image as ImageIcon, LockKeyhole, MapPin, Move, Phone, RefreshCw, Save, Sparkles, UserRound, ZoomIn } from "lucide-react";
+import { AtSign, CalendarDays, Camera, Download, IdCard, Image as ImageIcon, LockKeyhole, MapPin, Move, Phone, RefreshCw, Save, Sparkles, UserRound, ZoomIn } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 const CANVAS_SIZE=1080;
-const PHOTO_DIAMETER=820;
+const PHOTO_DIAMETER=760;
 const RING_ASSET="/lhs-profile-ring.svg";
 
 function loadImage(src:string){
@@ -48,6 +48,12 @@ async function drawComposite(canvas:HTMLCanvasElement,src:string,zoom:number,off
 function canvasBlob(canvas:HTMLCanvasElement){
   return new Promise<Blob>((resolve,reject)=>{
     canvas.toBlob(blob=>blob?resolve(blob):reject(new Error("The finished profile image could not be generated.")),"image/webp",0.94);
+  });
+}
+
+function canvasPngBlob(canvas:HTMLCanvasElement){
+  return new Promise<Blob>((resolve,reject)=>{
+    canvas.toBlob(blob=>blob?resolve(blob):reject(new Error("The PNG profile image could not be generated.")),"image/png");
   });
 }
 
@@ -170,6 +176,49 @@ export function ProfileForm({userId,profile,creator,details}:{userId:string;prof
     }
   }
 
+  async function exportRingedPhoto(){
+    if(!sourceUrl||!canvasRef.current||!previewReady)return;
+    setBusy(true);
+    setMsg("");
+    try{
+      await drawComposite(canvasRef.current,sourceUrl,zoom,offsetX,offsetY);
+      const blob=await canvasPngBlob(canvasRef.current);
+      const safeName=String(profile?.login_username||creator?.agency_creator_id||"creator")
+        .replace(/[^a-z0-9_-]+/gi,"-")
+        .replace(/^-+|-+$/g,"")||"creator";
+      const filename=`LHS-${safeName}-profile.png`;
+      const file=new File([blob],filename,{type:"image/png"});
+      const shareData={files:[file],title:"LHS Creator Network profile image"};
+
+      if(typeof navigator!=="undefined" && typeof navigator.share==="function" && typeof navigator.canShare==="function" && navigator.canShare(shareData)){
+        try{
+          await navigator.share(shareData);
+          setMsg("LHS profile image ready to save or share.");
+        }catch(error){
+          if(error instanceof DOMException && error.name==="AbortError"){
+            setMsg("Export canceled.");
+          }else{
+            throw error;
+          }
+        }
+      }else{
+        const url=URL.createObjectURL(blob);
+        const anchor=document.createElement("a");
+        anchor.href=url;
+        anchor.download=filename;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+        setMsg("LHS profile image exported as PNG.");
+      }
+    }catch(error){
+      setMsg(error instanceof Error?error.message:"The LHS profile image could not be exported.");
+    }finally{
+      setBusy(false);
+    }
+  }
+
   async function submit(e:FormEvent<HTMLFormElement>){
     e.preventDefault();
     setBusy(true);
@@ -241,8 +290,11 @@ export function ProfileForm({userId,profile,creator,details}:{userId:string;prof
           <button type="button" className="btn ring-reset" onClick={resetPosition} disabled={busy}>Reset position</button>
         </div>}
 
-        <button type="button" className="btn gold ring-save-button" onClick={saveRingedPhoto} disabled={busy||!sourceUrl||!previewReady}><Sparkles size={17}/>{busy?"Saving…":"Generate & save LHS image"}</button>
-        <p className="ring-help">Your normal photo is preserved. LHS saves a separate finished ringed image for your public avatar.</p>
+        <div className="ring-final-actions">
+          <button type="button" className="btn gold ring-save-button" onClick={saveRingedPhoto} disabled={busy||!sourceUrl||!previewReady}><Sparkles size={17}/>{busy?"Working…":"Generate & use in LHS"}</button>
+          <button type="button" className="btn ring-export-button" onClick={exportRingedPhoto} disabled={busy||!sourceUrl||!previewReady}><Download size={17}/> Export / save PNG</button>
+        </div>
+        <p className="ring-help">Your normal photo is preserved. Use the finished image inside LHS, then export the same ringed avatar to save or share on TikTok and other social profiles.</p>
       </div>
 
       <span className="role-badge">{profile?.active_role||"member"}</span>
@@ -250,7 +302,7 @@ export function ProfileForm({userId,profile,creator,details}:{userId:string;prof
     </aside>
 
     <form className="panel card-pad profile-form profile-details-card" onSubmit={submit}>
-      {msg&&<div role="status" aria-live="polite" className={msg.includes("saved")||msg.includes("updated")? "success":"error"}>{msg}</div>}
+      {msg&&<div role="status" aria-live="polite" className={msg.includes("saved")||msg.includes("updated")||msg.includes("exported")||msg.includes("ready to save")? "success":"error"}>{msg}</div>}
       <div className="panel-head inner"><div><span className="section-kicker">Profile details</span><h2>Tell LHS who you are</h2><p>Your display name and creator information are public inside LHS. Your real name and contact details stay private.</p></div><UserRound size={24}/></div>
 
       <div className="form-grid">
