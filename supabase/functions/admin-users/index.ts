@@ -1,7 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 const corsHeaders={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"POST, OPTIONS"};
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...corsHeaders,"Content-Type":"application/json","Cache-Control":"no-store"}});
-function temporaryPassword(){const alphabet="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";const bytes=crypto.getRandomValues(new Uint8Array(14));let body="";for(const byte of bytes)body+=alphabet[byte%alphabet.length];return `Lh!${body}7`;}
+function temporaryPassword() {return "LHS2026!";}
 function normalizeRoles(value:unknown):string[]{const allowed=new Set(["creator","manager","admin"]);if(!Array.isArray(value))return[];return[...new Set(value.map(String).map(x=>x.toLowerCase()).filter(x=>allowed.has(x)))]}
 function normalizeHandle(value:unknown){const raw=String(value??"").trim();if(!raw)return null;return raw.startsWith("@")?raw:`@${raw}`}
 function creatorAgencyId(){return `LHS-${crypto.randomUUID().replaceAll("-","").slice(0,10).toUpperCase()}`}
