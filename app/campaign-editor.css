@@ -1,0 +1,43 @@
+
+/* Dedicated campaign editor: document scroll only, never an in-page modal. */
+.portal-shell:has(.campaign-editor-page){display:block!important;min-width:0}
+.portal-shell:has(.campaign-editor-page) .sidebar,
+.portal-shell:has(.campaign-editor-page) .topbar{display:none!important}
+.portal-shell:has(.campaign-editor-page) .workspace{min-height:100dvh;width:100%;min-width:0}
+.portal-shell:has(.campaign-editor-page) .content{max-width:none!important;width:100%;padding:0!important;margin:0!important;min-width:0}
+.campaign-editor-page{min-height:100dvh;background:#f4f7fb;color:#122741;width:100%;min-width:0;overflow-wrap:break-word;padding-bottom:env(safe-area-inset-bottom)}
+.campaign-editor-header{background:#0d2037;border-bottom:4px solid #cfab5d;color:#fff;padding:20px clamp(16px,4vw,42px)}
+.campaign-editor-header-inner,.campaign-editor-main{max-width:920px;margin:0 auto}
+.campaign-editor-header-inner{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.campaign-editor-header p{font-size:.8rem;font-weight:850;color:#ead298;letter-spacing:.09em;text-transform:uppercase;margin:0}
+.campaign-editor-header h1{color:#fff;font-size:clamp(1.55rem,3.5vw,2.1rem);line-height:1.2;margin:4px 0 0}
+.campaign-editor-back{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:10px 16px;background:#fff;color:#17324f;border-radius:12px;border:1px solid #dce4ed;font-size:1rem;font-weight:800}
+.campaign-editor-main{padding:24px clamp(15px,3vw,28px) 44px}
+.campaign-editor-intro{font-size:1rem;line-height:1.55;color:#43556e;margin:0 0 22px}
+.campaign-editor-form{display:grid;gap:18px;min-width:0}
+.campaign-editor-section{min-width:0;padding:clamp(18px,3vw,28px);background:#fff;border:1px solid #dce5ef;border-radius:17px;box-shadow:0 6px 22px rgba(12,30,55,.045)}
+.campaign-editor-section h2{font-size:clamp(1.2rem,2.5vw,1.42rem);line-height:1.35;color:#172d4a;margin:0 0 5px}
+.campaign-editor-section>p{font-size:.91rem;color:#506078;line-height:1.55;margin:0 0 20px}
+.campaign-editor-fields{display:grid;gap:18px;min-width:0}
+.campaign-editor-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.campaign-editor-field{display:grid;gap:8px;min-width:0;font-size:1rem;font-weight:750;color:#1b3651}
+.campaign-editor-field input,.campaign-editor-field select,.campaign-editor-field textarea{display:block;width:100%;min-width:0;max-width:100%;box-sizing:border-box;border:1px solid #adbed0;border-radius:12px;background:#fff;color:#132b48;padding:12px 14px;font:inherit;font-size:16px;line-height:1.5;font-weight:500;min-height:50px;outline-offset:2px}
+.campaign-editor-field textarea{resize:vertical}
+.campaign-editor-field input[type="file"]{height:auto}
+.campaign-editor-field input:focus,.campaign-editor-field select:focus,.campaign-editor-field textarea:focus{outline:3px solid #176fc1;border-color:#176fc1}
+.campaign-editor-scope{padding:14px 16px;border:1px solid #b6d7ca;border-radius:12px;background:#effaf5;color:#225742;font-weight:700;font-size:.9rem;line-height:1.55}
+.campaign-editor-error{padding:14px 16px;border:1px solid #e1a1a1;border-radius:12px;background:#fff2f2;color:#802727;font-size:1rem;font-weight:700;line-height:1.5}
+.campaign-editor-actions{display:flex;justify-content:flex-end;gap:12px;flex-wrap:wrap;padding:14px 0 4px}
+.campaign-editor-actions a,.campaign-editor-actions button{min-height:52px;padding:11px 20px;display:inline-flex;justify-content:center;align-items:center;border-radius:12px;font-size:1rem;font-weight:800}
+.campaign-editor-actions a{background:#fff;color:#23394d;border:1px solid #c7d2df}
+.campaign-editor-actions button{background:#143c6c;color:#fff;border:1px solid #143c6c;cursor:pointer}
+.campaign-editor-actions button:disabled{opacity:.55;cursor:wait}
+@media(max-width:640px){
+ .campaign-editor-header{padding:16px}
+ .campaign-editor-header-inner{align-items:flex-start}
+ .campaign-editor-main{padding:16px 13px 36px}
+ .campaign-editor-section{padding:18px 16px;border-radius:14px}
+ .campaign-editor-grid{grid-template-columns:minmax(0,1fr)}
+ .campaign-editor-actions{display:grid;grid-template-columns:1fr}
+ .campaign-editor-actions a,.campaign-editor-actions button{width:100%}
+}
