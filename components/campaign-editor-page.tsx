@@ -1,5 +1,6 @@
 "use client";
 import {FormEvent,useState} from "react";
+import "@/app/campaign-editor.css";
 import Link from "next/link";
 import {useRouter} from "next/navigation";
 import {createClient} from "@/lib/supabase/client";
