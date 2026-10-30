@@ -16,7 +16,7 @@ type Team={id:string;name:string};
 function localDate(iso?:string){
  if(!iso)return "";
  const d=new Date(iso);
- return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+ return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
 }
 export function CampaignEditorPage({userId,activeRole,teams,existing}:{
  userId:string;activeRole:"admin"|"manager";teams:Team[];existing?:EditableCampaign;
@@ -37,9 +37,15 @@ export function CampaignEditorPage({userId,activeRole,teams,existing}:{
    const scope=activeRole==="manager"?(existing?.audience_type==="targeted"?"targeted":"team"):audience;
    const team=scope==="team"?String(f.get("team_id")||""):null;
    if(scope==="team"&&!team)throw new Error("Choose a manager / team to continue.");
-   const start=new Date(String(f.get("start_at")||""));
-   const end=new Date(String(f.get("end_at")||""));
-   if(!Number.isFinite(start.getTime())||!Number.isFinite(end.getTime())||end<=start)throw new Error("The campaign end must be after its start.");
+   const startDay=String(f.get("start_at")||"");
+   const endDay=String(f.get("end_at")||"");
+   if(!/^\d{4}-\d{2}-\d{2}$/.test(startDay)||!/^\d{4}-\d{2}-\d{2}$/.test(endDay)||endDay<startDay)
+     throw new Error("Choose a valid start and end date. The end date cannot be before the start date.");
+   // The API stores timestamps. Use the entire selected end date without showing time inputs.
+   const start=new Date(startDay+"T00:00:00");
+   const end=new Date(endDay+"T23:59:59.999");
+   if(!Number.isFinite(start.getTime())||!Number.isFinite(end.getTime()))
+     throw new Error("Choose valid campaign dates.");
    const title=String(f.get("title")||"").trim();
    if(!title)throw new Error("Enter a campaign title.");
    const file=f.get("attachment");
@@ -148,13 +154,13 @@ export function CampaignEditorPage({userId,activeRole,teams,existing}:{
         </div>
       </section>
       <section className="campaign-editor-section" aria-labelledby="editor-dates">
-        <h2 id="editor-dates">3. Start and end</h2><p>Choose when the campaign will run.</p>
+        <h2 id="editor-dates">3. Start and end dates</h2><p>Select dates only. The campaign includes the entire end date.</p>
         <div className="campaign-editor-grid">
           <label className="campaign-editor-field">Start
-            <input name="start_at" type="datetime-local" required defaultValue={localDate(existing?.start_at)}/>
+            <input name="start_at" type="date" required defaultValue={localDate(existing?.start_at)}/>
           </label>
           <label className="campaign-editor-field">End
-            <input name="end_at" type="datetime-local" required defaultValue={localDate(existing?.end_at)}/>
+            <input name="end_at" type="date" required defaultValue={localDate(existing?.end_at)}/>
           </label>
         </div>
       </section>
