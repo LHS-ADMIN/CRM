@@ -1,5 +1,5 @@
 "use client";
-import {FormEvent,useState} from "react";
+import {FormEvent,useState,type CSSProperties} from "react";
 import {useRouter} from "next/navigation";
 import {createClient} from "@/lib/supabase/client";
 import {useDialog} from "@/components/use-dialog";
@@ -31,12 +31,12 @@ export function CampaignCreatePanel({userId,activeRole,teams,existing}:{userId:s
   }catch(e){setMsg(e instanceof Error?e.message:"Campaign could not be saved.");router.refresh();}finally{setBusy(false);}
  }
 
- const sectionStyle={background:"#fff",border:"1px solid #dce4ee",borderRadius:20,padding:"clamp(20px, 3vw, 32px)",boxShadow:"0 8px 28px rgba(9,27,47,.06)"};
- const labelStyle={display:"grid",gap:9,fontSize:17,fontWeight:750,color:"#183049"};
- const fieldStyle={fontSize:17,minHeight:51,borderRadius:12,border:"1px solid #bac8d9",width:"100%",padding:"13px 14px",color:"#132a43",background:"#fff"};
- const rowStyle={display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(min(100%, 275px), 1fr))",gap:20};
- const sectionHeading={fontSize:23,lineHeight:1.25,fontWeight:850,letterSpacing:"-.02em",margin:"0 0 8px",color:"#142741"};
- const sectionDescription={fontSize:16,color:"#52657b",lineHeight:1.5,margin:"0 0 22px"};
+ const sectionStyle:CSSProperties={background:"#fff",border:"1px solid #dce4ee",borderRadius:20,padding:"clamp(20px, 3vw, 32px)",boxShadow:"0 8px 28px rgba(9,27,47,.06)"};
+ const labelStyle:CSSProperties={display:"grid",gap:9,fontSize:17,fontWeight:750,color:"#183049"};
+ const fieldStyle:CSSProperties={fontSize:17,minHeight:51,borderRadius:12,border:"1px solid #bac8d9",width:"100%",padding:"13px 14px",color:"#132a43",background:"#fff"};
+ const rowStyle:CSSProperties={display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(min(100%, 275px), 1fr))",gap:20};
+ const sectionHeading:CSSProperties={fontSize:23,lineHeight:1.25,fontWeight:850,letterSpacing:"-.02em",margin:"0 0 8px",color:"#142741"};
+ const sectionDescription:CSSProperties={fontSize:16,color:"#52657b",lineHeight:1.5,margin:"0 0 22px"};
  const audienceIsNetwork=activeRole==="admin"&&audience==="network";
  return <>
   <button className="btn primary" type="button" onClick={()=>{setMsg("");setOpen(true);}}>{existing?"Edit campaign":"New campaign"}</button>
