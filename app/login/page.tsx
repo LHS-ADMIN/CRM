@@ -22,7 +22,9 @@ function LoginForm(){
         const detail=await loginError.context.json().catch(()=>null);
         message=String(detail?.error||message);
       }
-      setError(data?.locked||data?.requiresReset?"Account locked after incorrect sign-ins. Use Forgot password and contact your manager for a temporary password.":message.includes("has not been activated")
+      const locked=Boolean(data?.locked||data?.requiresReset||message.toLowerCase().includes("locked")||message.includes("3 incorrect passwords"));
+      if(locked){setBusy(false);router.replace("/forgot-password");return;}
+      setError(message.includes("has not been activated")
         ?"Your LHS login has not been activated yet. Ask your LHS manager for your personal temporary password."
         :"The username or password is incorrect.");
       setBusy(false);return;
