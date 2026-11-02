@@ -270,6 +270,8 @@ export type Database = {
       battles: {
         Row: {
           battle_date: string
+          alert_reason: string | null
+          alert_at: string | null
           battle_sheet_url: string | null
           created_at: string
           creator_handle: string | null
@@ -296,6 +298,8 @@ export type Database = {
         }
         Insert: {
           battle_date: string
+          alert_reason?: string | null
+          alert_at?: string | null
           battle_sheet_url?: string | null
           created_at?: string
           creator_handle?: string | null
@@ -322,6 +326,8 @@ export type Database = {
         }
         Update: {
           battle_date?: string
+          alert_reason?: string | null
+          alert_at?: string | null
           battle_sheet_url?: string | null
           created_at?: string
           creator_handle?: string | null

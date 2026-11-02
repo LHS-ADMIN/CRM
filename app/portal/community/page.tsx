@@ -27,7 +27,7 @@ export default async function CommunityPage(){
   const [{data:directory},{data:socialAuthors}]=authorIds.length?await Promise.all([
     supabase.from("profile_directory").select("user_id,display_name,avatar_url").in("user_id",authorIds),
     supabase.from("creator_directory").select("creator_id,user_id,display_name,avatar_url").in("user_id",authorIds)
-  ]):[{data:[] as {user_id:string;display_name:string;avatar_url:string|null}[]},{data:[] as {creator_id:string;user_id:string|null}[]}];
+  ]):[{data:[] as {user_id:string;display_name:string;avatar_url:string|null}[]},{data:[] as {creator_id:string;user_id:string|null;display_name:string;avatar_url:string|null}[]}];
 
   const names=new Map((directory||[]).map(p=>[p.user_id,p]));
   for(const a of socialAuthors||[]){if(a.user_id)names.set(a.user_id,{user_id:a.user_id,display_name:a.display_name,avatar_url:a.avatar_url});}
