@@ -1,0 +1,21 @@
+import {createClient} from "npm:@supabase/supabase-js@2";
+const cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"POST, OPTIONS"};
+Deno.serve(async(req)=>{
+ if(req.method==="OPTIONS")return new Response("ok",{headers:cors});
+ if(req.method!=="POST")return new Response("Method not allowed",{status:405,headers:cors});
+ const url=Deno.env.get("SUPABASE_URL")??"";
+ const key=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
+ const admin=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
+ const bearer=req.headers.get("Authorization")?.replace(/^Bearer /,"")??"";
+ const {data,error}=await admin.auth.getUser(bearer);
+ if(error||!data.user)return new Response(JSON.stringify({error:"Not authorized"}),{status:401,headers:{...cors,"Content-Type":"application/json"}});
+ const body=await req.json();
+ const hint=String(body?.hint??"").trim().toLowerCase();
+ if(!/^[a-z0-9]{2,40}$/.test(hint))return new Response(JSON.stringify({error:"Please enter one word with 2–40 letters or numbers."}),{status:400,headers:{...cors,"Content-Type":"application/json"}});
+ const pepper=new TextEncoder().encode(key);
+ const hmac=await crypto.subtle.importKey("raw",pepper,{name:"HMAC",hash:"SHA-256"},false,["sign"]);
+ const digest=new Uint8Array(await crypto.subtle.sign("HMAC",hmac,new TextEncoder().encode(data.user.id+":"+hint)));
+ const hash=Array.from(digest,x=>x.toString(16).padStart(2,"0")).join("");
+ const {error:save}=await admin.from("account_recovery").upsert({user_id:data.user.id,hint_hash:hash,hint_attempts:0,hint_locked:false,updated_at:new Date().toISOString()},{onConflict:"user_id"});
+ return new Response(JSON.stringify(save?{error:"Could not save hint."}:{ok:true}),{status:save?500:200,headers:{...cors,"Content-Type":"application/json"}});
+});

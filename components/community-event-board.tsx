@@ -4,10 +4,10 @@ import { useRouter } from "next/navigation";
 import { CalendarDays,FileUp,Plus,CheckCircle2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 export type CommunityEvent={id:string;title:string;details:string;event_type:string;starts_at:string;ends_at:string|null;team_id:string|null;file_path:string|null;file_name:string|null;require_ack:boolean};
-export function CommunityEventBoard({events,userId,activeRole,teams}:{events:CommunityEvent[];userId:string;activeRole:string;teams:string[]}){
+export function CommunityEventBoard({events,userId,activeRole,teams,initialGoing}:{events:CommunityEvent[];userId:string;activeRole:string;teams:string[];initialGoing:string[]}){
  const router=useRouter();const[showForm,setShowForm]=useState(false);
  const[busy,setBusy]=useState(false);const[message,setMessage]=useState("");
- const[attending,setAttending]=useState<Record<string,boolean>>({});
+ const[attending,setAttending]=useState<Record<string,boolean>>(()=>Object.fromEntries(initialGoing.map(id=>[id,true])));
  const canCreate=activeRole==="admin"||activeRole==="manager";
  async function createEvent(e:FormEvent<HTMLFormElement>){
   e.preventDefault();const form=e.currentTarget;const f=new FormData(form);

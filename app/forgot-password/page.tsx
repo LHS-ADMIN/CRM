@@ -9,7 +9,7 @@ export default function ForgotPasswordPage(){
   <span className="eyebrow">Account recovery</span><div className="brand">Forgot your password?</div>
   <p>Enter your LHS/TikTok username below. For security, a one-word hint cannot independently reset access.</p>
   <div className="field"><label htmlFor="forgot-username">Username (no @ symbol)</label><input id="forgot-username" className="input" value={username} onChange={e=>setUsername(e.target.value)} placeholder="your.username" autoComplete="username"/></div>
-  <div className="field"><label htmlFor="forgot-hint">Your private Hint word</label><input id="forgot-hint" className="input" type="password" autoComplete="off" placeholder="The word saved in your Profile"/><small>Hints are stored securely. A hint alone does not verify who is using this page.</small></div>
+  <p className="muted">If you saved a Hint word in your profile, it remains protected. For your security, we will not ask you to reveal it here without an additional verification step.</p>
   <div className="panel card-pad">
    <h2>Request a temporary password</h2>
    <p>Contact your LHS manager and provide your username{username?" ("+username+")":""}. They can generate a unique temporary password in <strong>Password Help</strong> inside the CRM.</p>

@@ -19,6 +19,7 @@ export default async function CommunityPage(){
     supabase.from("creator_directory").select("*",{count:"exact",head:true}).eq("active",true)
   ]);
   const {data:upcomingEvents}=await (supabase as any).from("community_events").select("*").gte("starts_at",new Date().toISOString()).order("starts_at").limit(30);
+  const {data:ownRsvps}=await (supabase as any).from("event_rsvps").select("event_id").eq("user_id",user.id).eq("status","going");
   const managedTeams=new Set((memberships||[]).map(m=>m.team_id));
   const admin=profile?.active_role==="admin";
   const canModerateTeam=(p:{channel_type:string;team_id:string|null})=>profile?.active_role==="manager"&&p.channel_type==="team"&&p.team_id!==null&&managedTeams.has(p.team_id);
@@ -42,7 +43,7 @@ export default async function CommunityPage(){
       <div className="community-creator-preview">{(creatorPreview||[]).map((c,i)=><Link href={"/portal/community/creators/"+c.creator_id} className={"preview-creator p"+(i%4)} key={c.creator_id} title={c.display_name}>{c.avatar_url?<img src={c.avatar_url} alt=""/>:<span>{c.display_name[0]?.toUpperCase()||"L"}</span>}</Link>)}<div className="preview-network-orb"><Sparkles size={20}/></div></div>
     </section>
 
-    <CommunityEventBoard events={(upcomingEvents||[]) as CommunityEvent[]} userId={user.id} activeRole={profile?.active_role||"creator"} teams={(memberships||[]).map(m=>m.team_id)}/>
+    <CommunityEventBoard events={(upcomingEvents||[]) as CommunityEvent[]} userId={user.id} activeRole={profile?.active_role||"creator"} teams={(memberships||[]).map(m=>m.team_id)} initialGoing={(ownRsvps||[]).map((r:{event_id:string})=>r.event_id)}/>
     <CommunityComposerShell/><div className="community-layout">
       <section className="feed">{(posts||[]).length?(posts||[]).map(p=>{const author=names.get(p.author_user_id);const creatorId=socialByUser.get(p.author_user_id);return <article className="post-card" key={p.id}>
         <div className="post-head">{creatorId?<Link href={"/portal/community/creators/"+creatorId} className="post-profile-link"><span className="avatar-fallback">{author?.avatar_url?<img src={author.avatar_url} alt=""/>:(author?.display_name||"L")[0].toUpperCase()}</span><div><strong>{author?.display_name||"LHS Member"}</strong><span>{new Date(p.created_at).toLocaleString()}</span></div></Link>:<><span className="avatar-fallback">{author?.avatar_url?<img src={author.avatar_url} alt=""/>:(author?.display_name||"L")[0].toUpperCase()}</span><div><strong>{author?.display_name||"LHS Member"}</strong><span>{new Date(p.created_at).toLocaleString()}</span></div></>}{p.channel_type!=="network"&&<span className="chip">{p.channel_type}</span>}</div>
