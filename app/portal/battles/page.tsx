@@ -54,7 +54,7 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
   }
 
   const {data:monthBattles}=await supabase.from("battles")
-    .select("id,creator_id,creator_handle,battle_date,time_est,time_sort,opponent_name,opponent_agency,diamond_range,league,lhs_manager,status,updated_at,alert_reason,alert_at,source_confirm,alert_previous_opponent,alert_new_opponent,alert_previous_time,alert_new_time")
+    .select("id,creator_id,creator_handle,battle_date,time_est,time_sort,opponent_name,opponent_agency,diamond_range,league,lhs_manager,status,updated_at,synced_at,alert_reason,alert_at,source_confirm,alert_previous_opponent,alert_new_opponent,alert_previous_time,alert_new_time")
     .gte("battle_date",ymd(month))
     .lt("battle_date",ymd(next))
     .order("battle_date")
@@ -84,6 +84,7 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
     if(statusOf(b)==="Alert")categoryCounts.alerts++;
   }
   const alertBattles=(monthBattles||[]).filter(b=>statusOf(b)==="Alert");
+  const lastSynced=(monthBattles||[]).map(b=>b.synced_at).filter((value):value is string=>Boolean(value)).sort().at(-1)||null;
   const byDate=new Map<string,NonNullable<typeof monthBattles>>();
   for(const battle of monthBattles||[]){
     const rows=byDate.get(battle.battle_date)||[];
@@ -111,6 +112,7 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
         {isArchived&&<span className="chip archive-chip"><Archive size={15}/> Archived month</span>}
         <span className="chip accent"><Clock3 size={15}/> EST only</span>
         <span className="chip"><Swords size={15}/> {monthBattles?.length||0} this month</span>
+        {lastSynced&&<span className="chip battle-sync-timestamp" title="Google Sheets are checked automatically every five minutes"><Clock3 size={15}/> Last synced: {new Date(lastSynced).toLocaleString("en-US",{timeZone:"America/New_York",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})} ET</span>}
       </div>
     </div>
 
