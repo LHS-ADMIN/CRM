@@ -197,7 +197,7 @@ html[data-theme="dark"] :is(.input,.textarea,.select,input:not([type="checkbox"]
  border-color:#69819e!important;
 }
 html[data-theme="dark"] input::placeholder,html[data-theme="dark"] textarea::placeholder{color:#c5d4e7!important;opacity:1}
-html[data-theme="dark"] :is(.btn:not(.gold),button:not(.btn):not(.calendar-day-link):not(.mobile-menu-toggle):not(.return-top),.resource-link,.attachment-file){
+html[data-theme="dark"] :is(.btn:not(.gold),button:not(.btn):not(.calendar-day-link):not(.mobile-menu-toggle):not(.return-top):not(.show-post-more),.resource-link,.attachment-file){
  background-color:#2b4565!important;color:#fff!important;border-color:#7188a3!important
 }
 html[data-theme="dark"] .btn.gold{background:#59431e!important;color:#fff4d4!important;border-color:#ac8642!important}
