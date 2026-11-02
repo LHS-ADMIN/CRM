@@ -9,10 +9,11 @@ import { RichPost } from "@/components/rich-post";
 
 export default async function CommunityPage(){
   const supabase=await createClient();
+  const sixtyDaysAgo=new Date(Date.now()-60*24*60*60*1000).toISOString();
   const {data:{user}}=await supabase.auth.getUser();
   if(!user)return null;
   const [{data:posts},{data:profile},{data:memberships},{data:creatorPreview},{count:creatorCount}]=await Promise.all([
-    supabase.from("community_posts").select("id,body,channel_type,team_id,active,created_at,author_user_id").order("created_at",{ascending:false}).limit(100),
+    supabase.from("community_posts").select("id,body,channel_type,team_id,active,created_at,author_user_id").gte("created_at",sixtyDaysAgo).order("created_at",{ascending:false}).limit(100),
     supabase.from("profiles").select("active_role").eq("id",user.id).single(),
     supabase.from("team_memberships").select("team_id").eq("user_id",user.id).eq("active",true),
     supabase.from("creator_directory").select("creator_id,user_id,display_name,tiktok_handle,avatar_url,niche").eq("active",true).order("display_name").limit(8),
@@ -36,8 +37,9 @@ export default async function CommunityPage(){
   const replyCount=new Map<string,number>(); for(const r of replies||[])replyCount.set(r.post_id,(replyCount.get(r.post_id)||0)+1);
 
   return <>
-    <div className="page-head"><div><span className="section-kicker">Creator Community</span><h1>Network conversation</h1><p>Share statuses, join conversations, discover creators across LHS, and stay connected without friend requests.</p></div><div className="head-actions"><Link className="btn primary" href="/portal/community/creators"><UsersRound size={16}/> Creator Directory</Link><span className="chip accent"><MessagesSquare size={14}/>{posts?.length||0} recent posts</span></div></div>
+    <div className="page-head"><div><span className="section-kicker">Creator Community</span><h1>Network conversation</h1><p>Share statuses, join conversations, discover creators across LHS, and stay connected without friend requests.</p></div><div className="head-actions"><Link className="btn primary" href="/portal/community/creators"><UsersRound size={16}/> Creator Directory</Link><span className="chip accent"><MessagesSquare size={14}/>{posts?.length||0} posts in the last 60 days</span></div></div>
 
+    <section className="community-top-tools" aria-label="Community quick guide and creator directory"><div className="panel card-pad"><span className="section-kicker">Channel guide</span><h3>Keep conversation organized</h3><div className="channel-guide"><div><span className="channel-dot network"/><p><strong>Network</strong><small>Visible across LHS and on your creator profile</small></p></div><div><span className="channel-dot team"/><p><strong>Team</strong><small>Scoped to your community</small></p></div><div><span className="channel-dot leadership"/><p><strong>Leadership</strong><small>Managers and Admin</small></p></div></div></div><div className="panel card-pad community-directory-side"><UsersRound size={24}/><h3>Meet the network</h3><p>Browse every active LHS creator and see their public profile and statuses.</p><Link className="btn" href="/portal/community/creators">Open Creator Directory</Link></div></section>
     <section className="community-network-banner">
       <div><span className="section-kicker light">Your LHS network</span><h2>{creatorCount||0} creators. One connected community.</h2><p>Everyone in LHS is already connected. Browse profiles, learn what other creators do, and see the Network statuses they share.</p><form className="community-network-search" action="/portal/community/creators"><Search size={17}/><input name="q" aria-label="Search LHS creator network" placeholder="Search creator name, TikTok username, or niche…"/><button className="btn gold">Search creators</button></form><Link className="btn light" href="/portal/community/creators"><UsersRound size={16}/> See all creators</Link></div>
       <div className="community-creator-preview">{(creatorPreview||[]).map((c,i)=><Link href={"/portal/community/creators/"+c.creator_id} className={"preview-creator p"+(i%4)} key={c.creator_id} title={c.display_name}>{c.avatar_url?<img src={c.avatar_url} alt=""/>:<span>{c.display_name[0]?.toUpperCase()||"L"}</span>}</Link>)}<div className="preview-network-orb"><Sparkles size={20}/></div></div>
@@ -54,7 +56,7 @@ export default async function CommunityPage(){
         {(replies||[]).filter(r=>r.post_id===p.id).map(r=><div className="community-reply" key={r.id}><strong>{names.get(r.author_user_id)?.display_name||"LHS Member"}</strong><time>{new Date(r.created_at).toLocaleString()}</time><RichPost text={r.body}/>{!r.active&&<p className="chip">Hidden from channel</p>}{(admin||(r.active&&(r.author_user_id===user.id||canModerateTeam(p))))&&<CommunityModeration kind="reply" id={r.id} hidden={!r.active}/>}</div>)}
         {p.active&&<CommunityReplyForm postId={p.id} userId={user.id}/>}
       </article>}):<div className="panel empty-state">No community posts yet.</div>}</section>
-      <aside className="community-side"><div className="panel card-pad"><span className="section-kicker">Channel guide</span><h3>Keep conversation organized</h3><div className="channel-guide"><div><span className="channel-dot network"/><p><strong>Network</strong><small>Visible across LHS and on your creator profile</small></p></div><div><span className="channel-dot team"/><p><strong>Team</strong><small>Scoped to your community</small></p></div><div><span className="channel-dot leadership"/><p><strong>Leadership</strong><small>Managers and Admin</small></p></div></div></div><div className="panel card-pad community-directory-side"><UsersRound size={24}/><h3>Meet the network</h3><p>Browse every active LHS creator and see their public profile and statuses.</p><Link className="btn" href="/portal/community/creators">Open Creator Directory</Link></div></aside>
+      
     </div>
   </>;
 }

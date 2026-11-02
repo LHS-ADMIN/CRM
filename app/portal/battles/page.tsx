@@ -73,13 +73,14 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
     return battleAt>now&&battleAt<=now+48*3600*1000;
   };
   const statusOf=(b:NonNullable<typeof monthBattles>[number])=>{
-    if(b.alert_reason||((b.status==="open"||b.status==="filled")&&isSoon(b)))return "Alert";
+    if((b.status==="filled"&&b.alert_reason)||((b.status==="open"||b.status==="filled")&&isSoon(b)))return "Alert";
     return b.status==="open"?"Open":b.status==="filled"?"Filled":b.status==="confirmed"?"Confirmed":b.status;
   };
-  const categoryCounts={open:0,filled:0,alerts:0};
+  const categoryCounts={open:0,filled:0,confirmed:0,alerts:0};
   for(const b of monthBattles||[]){
     if(b.status==="open")categoryCounts.open++;
     if(b.status==="filled")categoryCounts.filled++;
+    if(b.status==="confirmed")categoryCounts.confirmed++;
     if(statusOf(b)==="Alert")categoryCounts.alerts++;
   }
   const byDate=new Map<string,NonNullable<typeof monthBattles>>();
@@ -119,6 +120,7 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
     <section className="battle-alert-summary panel" aria-label="Battle status summary">
       <span><strong>{categoryCounts.open}</strong> Open</span>
       <span><strong>{categoryCounts.filled}</strong> Filled</span>
+      <span className="battle-confirmed-count"><strong>{categoryCounts.confirmed}</strong> Confirmed</span>
       <span className={categoryCounts.alerts?"battle-alert-count active":"battle-alert-count"}><strong>{categoryCounts.alerts}</strong> Alerts</span>
     </section>
     <section className="panel calendar-panel">

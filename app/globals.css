@@ -1189,3 +1189,59 @@ html[data-theme="dark"] .battle-alert-summary>span{background:#273d59;color:#fff
 .manager-password-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px;border-bottom:1px solid #dfe6ef}
 .manager-password-row>div{display:grid;gap:4px}.manager-password-row strong{font-size:1.05rem}.manager-password-row small{font-size:.9rem}
 @media(max-width:640px){.manager-password-row{align-items:flex-start;flex-direction:column}.manager-password-row button{width:100%;min-height:48px}}
+
+/* Community: make the guide and creator directory top-level, before the feed */
+.community-top-tools{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin:18px 0}
+.community-top-tools>.panel{min-width:0;padding:20px}
+.community-top-tools .channel-guide{display:flex;flex-wrap:wrap;gap:10px 22px}
+.community-top-tools .channel-guide>div{min-width:135px;flex:1 1 145px}
+.community-top-tools .community-directory-side{display:flex;flex-direction:column;align-items:flex-start}
+.community-top-tools .community-directory-side .btn{margin-top:auto}
+.community-layout{grid-template-columns:minmax(0,1fr)!important}
+@media(max-width:760px){.community-top-tools{grid-template-columns:1fr}.community-top-tools .channel-guide{display:grid;grid-template-columns:1fr}}
+/* Dark mode: never put pale text on pale cards or pale buttons */
+html[data-theme="dark"]{--paper:#192940;--ink:#f1f6ff;--muted:#c1cde0;--line:#435777;--line2:#40536e}
+html[data-theme="dark"] :is(.campaign-card,.announcement-card,.composer,.social-status-composer,.rich-announcements .announcement-card,.community-top-tools>.panel,.community-directory-side,.community-side .panel,.calendar-toolbar,.calendar-weekdays,.calendar-grid,.calendar-day,.table th,.table td,.social-profile-side .panel,.calendar-panel,.battle-detail-panel){
+ background:#1d2f49!important;
+ color:#f3f8ff!important;
+ border-color:#506581!important;
+}
+html[data-theme="dark"] :is(.calendar-day.today,.calendar-day.selected){background:#284668!important}
+html[data-theme="dark"] .calendar-day.outside{background:#15243a!important}
+html[data-theme="dark"] :is(.campaign-card h2,.campaign-card p,.campaign-card>p,.campaign-card strong,.campaign-card .muted,.announcement-card h2,.announcement-card p,.calendar-toolbar strong,.calendar-toolbar span,.calendar-weekdays span,.calendar-date,.calendar-date small,.calendar-day strong,.calendar-day small,.calendar-day span,.community-top-tools h3,.community-top-tools p,.community-top-tools strong,.channel-guide small,.table td,.table th,.post-head span,.post-footer,.post-footer span,.community-reply p,.community-reply strong){
+ color:#eef5ff!important;
+}
+html[data-theme="dark"] :is(.post-head div span,.community-reply time,.campaign-card .muted,.channel-guide small,.calendar-toolbar span){color:#c7d5e8!important}
+html[data-theme="dark"] :is(.campaign-card,.announcement-card,.post-card,.community-reply,.event-card){background:#1d2f49!important}
+html[data-theme="dark"] :is(.btn:not(.primary):not(.gold):not(.light),.icon-button.bordered,.rich-editor-toolbar button,.rich-editor-toolbar select){
+ background:#29405e!important;
+ color:#ffffff!important;
+ border-color:#7486a1!important;
+}
+html[data-theme="dark"] .battle-source-links .btn{background:#2b466b!important;color:#fff!important;border-color:#8b9cb8!important;font-weight:800}
+html[data-theme="dark"] .battle-source-links .btn:hover{background:#355981!important}
+html[data-theme="dark"] :is(.battle-alert-summary>span,.battle-status.filled,.battle-status.open,.battle-status.confirmed,.battle-status.alert,.chip,.status-badge){
+ background:#34516f!important;
+ color:#f5faff!important;
+ border-color:#59748e!important;
+}
+html[data-theme="dark"] .calendar-event,html[data-theme="dark"] .battle-event{background:#2b4160!important;color:#f4f8ff!important}
+html[data-theme="dark"] .calendar-date>span{color:#fefefe!important}
+html[data-theme="dark"] :is(.no-battles,.more-events,.ticket-description,.post-footer a,.resource-link){color:#d2e4ff!important}
+html[data-theme="dark"] .page-head :is(p,span){color:#e7f1ff}
+html[data-theme="dark"] .calendar-sync-note{background:#233c5a;color:#e6f2ff;border-color:#52799b}
+html[data-theme="dark"] .calendar-sync-note strong{color:#fff}
+html[data-theme="dark"] .calendar-panel .calendar-toolbar{border-bottom-color:#506581}
+html[data-theme="dark"] .calendar-panel .calendar-grid{border-color:#506581}
+html[data-theme="dark"] .event-card time{color:#d8ebff!important}
+html[data-theme="dark"] .community-network-banner .btn.light{background:#2c4565!important;color:#fff!important}
+html[data-theme="dark"] :is(.post-card>p,.post-rich-text,.post-head strong,.post-profile-link strong){color:#f4f8ff!important}
+html[data-theme="dark"] .composer-main textarea::placeholder{color:#c1cee0}
+html[data-theme="dark"] .social-status-composer .textarea::placeholder{color:#c1cee0}
+.battle-alert-summary .battle-confirmed-count{background:#e6f5ed;color:#176a43}
+.battle-alert-summary{gap:9px}
+@media(max-width:760px){
+ .battle-alert-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .return-top{bottom:calc(85px + env(safe-area-inset-bottom,0px));right:12px;width:52px;height:52px;padding:0;justify-content:center}
+ .return-top span{display:none}
+}

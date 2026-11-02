@@ -19,3 +19,5 @@
 .battle-status.confirmed{background:#e1f6e9;color:#17653a}.battle-status.alert{background:#fff1e4;color:#9b3e18}
 .calendar-events .battle-status{font-size:.7rem;padding:3px 6px}
 @media(max-width:760px){.battle-source-links a{flex:1 1 100%}.battle-alert-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:10px}.battle-alert-summary>span{padding:8px;display:grid;text-align:center;gap:2px;font-size:.8rem}}
+
+@media(max-width:760px){.battle-alert-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}

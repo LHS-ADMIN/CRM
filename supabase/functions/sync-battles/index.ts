@@ -25,10 +25,11 @@ function normalizeTimeInput(value: string | null | undefined) {
 function timeTo24(value: string | null | undefined) {
   const clean = normalizeTimeInput(value);
   if (!clean) return null;
-  const m = clean.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  const m = clean.match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/i);
   if (!m) return null;
   let hour = Number(m[1]);
-  const minute = Number(m[2]);
+  const minute = Number(m[2] ?? "0");
+  if (hour < 1 || hour > 12 || minute < 0 || minute > 59) return null;
   const ap = m[3].toUpperCase();
   if (ap === "PM" && hour !== 12) hour += 12;
   if (ap === "AM" && hour === 12) hour = 0;
@@ -84,7 +85,7 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const sourceSpreadsheetId = String(body?.sourceSpreadsheetId ?? "").trim();
     const rows = Array.isArray(body?.rows) ? body.rows : [];
-    const replaceSource = body?.replaceSource !== false;
+    const replaceSource = body?.replaceSource === true;
 
     if (!sourceSpreadsheetId) return json({ error: "sourceSpreadsheetId is required" }, 400);
     if (!rows.length) return json({ error: "No battle rows supplied" }, 400);
@@ -108,9 +109,15 @@ Deno.serve(async (req) => {
       const battleDate = String(row?.battleDate ?? "").trim();
       const timeEst = String(row?.timeEst ?? "").trim();
       const league = String(row?.league ?? "").trim().toUpperCase();
-      if (!sourceKey || !/^\d{4}-\d{2}-\d{2}$/.test(battleDate) || !timeEst || !["A","B"].includes(league)) continue;
+      if (!sourceKey || !/^\d{4}-\d{2}-\d{2}$/.test(battleDate) || !["A","B"].includes(league)) continue;
 
       const creatorHandle = String(row?.creatorHandle ?? "").trim();
+      if (!creatorHandle) continue;
+      const opponent = String(row?.opponentName ?? "").trim();
+      const sourceConfirm = String(row?.sourceConfirm ?? "").trim();
+      const notes = String(row?.notes ?? "").trim();
+      const confirmed = opponent.length > 0 && (league === "B" ? sourceConfirm.toUpperCase() === "YES" : /^CONFIRMED!?$/i.test(notes));
+      const computedStatus = !opponent ? "open" : confirmed ? "confirmed" : "filled";
       const matchKey = normalizeCreatorHandle(creatorHandle);
       const creator = creatorMap.get(matchKey);
 
@@ -119,22 +126,22 @@ Deno.serve(async (req) => {
         source_spreadsheet_id: sourceSpreadsheetId,
         source_sheet_name: row?.sourceSheetName ? String(row.sourceSheetName) : null,
         source_row: Number.isFinite(Number(row?.sourceRow)) ? Number(row.sourceRow) : null,
-        source_confirm: row?.sourceConfirm ? String(row.sourceConfirm) : null,
+        source_confirm: sourceConfirm || null,
         creator_id: creator?.id ?? null,
         creator_handle: (creator?.tiktok_handle ?? creatorHandle) || null,
         team_id: creator?.team_id ?? null,
         team_name: creator?.teams?.name ?? (row?.teamName ? String(row.teamName) : null),
         lhs_manager: row?.lhsManager ? String(row.lhsManager) : null,
         battle_date: battleDate,
-        time_est: displayTimeEst(timeEst),
+        time_est: displayTimeEst(timeEst) || "Time TBD",
         time_sort: timeTo24(timeEst),
-        opponent_name: row?.opponentName ? String(row.opponentName) : null,
+        opponent_name: opponent || null,
         opponent_agency: row?.opponentAgency ? String(row.opponentAgency) : null,
         diamond_range: row?.diamondRange ? String(row.diamondRange) : null,
         league,
         battle_sheet_url: row?.battleSheetUrl ? String(row.battleSheetUrl) : null,
-        notes: row?.notes ? String(row.notes) : null,
-        status: row?.status ? String(row.status).toLowerCase() : "scheduled",
+        notes: notes || null,
+        status: computedStatus,
         synced_at: new Date().toISOString(),
       });
     }
@@ -152,7 +159,8 @@ Deno.serve(async (req) => {
       const { data: existing, error: existingError } = await admin
         .from("battles")
         .select("id,source_key")
-        .eq("source_spreadsheet_id", sourceSpreadsheetId);
+        .eq("source_spreadsheet_id", sourceSpreadsheetId)
+        .in("source_sheet_name", [...new Set(prepared.map((row) => row.source_sheet_name).filter(Boolean))]);
       if (existingError) throw existingError;
 
       const stale = (existing ?? []).filter((x) => !keys.includes(String(x.source_key))).map((x) => x.id);
