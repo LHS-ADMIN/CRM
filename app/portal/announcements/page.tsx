@@ -32,7 +32,7 @@ export default async function AnnouncementsPage(){
         <article className="announcement-card rich-card" key={a.id}>
           <div className="announcement-card-icon"><Megaphone size={22}/></div>
           <div className="announcement-body">
-            <div className="split-line"><span className="chip">{a.audience_type}</span><small>{new Date(a.starts_at).toLocaleDateString()}</small></div>
+            <div className="split-line"><span className="chip">{a.audience_type==="network"?"LHS":a.audience_type}</span><small>{new Date(a.starts_at).toLocaleDateString()}</small></div>
             <h2>{a.title}</h2>
             <p>{a.body}</p>
             {a.external_url&&<a className="resource-link" href={a.external_url} target="_blank" rel="noreferrer"><ExternalLink size={16}/> Open attached link</a>}

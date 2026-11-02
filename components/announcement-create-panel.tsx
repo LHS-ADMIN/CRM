@@ -1,6 +1,7 @@
 "use client";
 import { useDialog } from "@/components/use-dialog";
 import { FormEvent, useState } from "react";
+import { createPortal } from "react-dom";
 import { ImagePlus, Link2, Megaphone, Paperclip, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -65,9 +66,9 @@ export function AnnouncementCreatePanel({userId,activeRole,teams}:{userId:string
     setBusy(false);form.reset();router.refresh();
   }
 
-  return <><button className="btn primary" onClick={()=>setOpen(true)}><Megaphone size={17}/> Publish announcement</button>{open&&
-    <div className="modal-backdrop" onMouseDown={()=>setOpen(false)}>
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Create announcement" tabIndex={-1} className="modal-card" onMouseDown={e=>e.stopPropagation()}>
+  return <><button className="btn primary" onClick={()=>setOpen(true)}><Megaphone size={17}/> Publish announcement</button>{open&&createPortal(
+    <div className="modal-backdrop announcement-editor-overlay" onClick={e=>{if(e.target===e.currentTarget)setOpen(false)}}>
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Create announcement" tabIndex={-1} className="modal-card announcement-editor-modal">
         <div className="modal-head"><div><span className="section-kicker">Leadership communication</span><h2>Create an announcement</h2><p>Share an update with text, a link, and an optional image or file.</p></div><button className="icon-button" aria-label="Close dialog" onClick={()=>setOpen(false)}><X size={20}/></button></div>
         {msg&&<div role="status" aria-live="polite" className={msg==="Announcement published."?"success":"error"}>{msg}</div>}
         <form onSubmit={submit}>
@@ -88,6 +89,6 @@ export function AnnouncementCreatePanel({userId,activeRole,teams}:{userId:string
           <div className="modal-actions"><button type="button" className="btn" onClick={()=>setOpen(false)}>Cancel</button><button className="btn gold" disabled={busy}>{busy?"Publishing…":"Publish announcement"}</button></div>
         </form>
       </div>
-    </div>}
+    </div>,document.body)}
   </>;
 }

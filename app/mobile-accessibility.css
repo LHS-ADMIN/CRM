@@ -276,3 +276,108 @@ html[data-theme="dark"] .battle-alert-day-link{color:#b6dfff!important}
 .inline-file-frame{width:100%;height:min(74dvh,780px);min-height:360px;border:0;background:#1d304a}
 .inline-file-download{padding:22px}
 html[data-theme="dark"] .inline-image-dialog,html[data-theme="dark"] .inline-image-toolbar{background:#172a43!important;color:white!important}
+
+
+/* LHS dark-mode audit — every content surface stays navy, with readable text. */
+html[data-theme="dark"] .content :is(
+ .empty-feature,.creator-empty-state,.creator-directory-panel,.creator-directory-panel .panel-head,
+ .tiktok-academy-card,.academy-hero,.academy-empty,.academy-resource,.academy-grid .resource-card,
+ .resource-card,.resource-footer,.notification-summary,.notification-summary>div,
+ .upload-field,.upload-field>div,.search-form,.creator-table code,.table code,.credential-card,
+ .ring-controls,.ring-builder,.ring-preview-shell,.ring-help,.ring-actions,
+ .ring-final-actions,.enhanced-private,.private-section,.profile-details-card,.profile-details-card .panel-head,
+ .announcement-card,.announcement-body,.announcement-grid .rich-card,.attachment-display,
+ .attachment-image,.attachment-file,.ticket-card,.ticket-grid .ticket-card,.ticket-top,
+ .campaign-card,.campaign-grid .campaign-card,.prize-box,.rules,.post-card,.social-reply,
+ .community-reply,.profile-status-replies,.profile-status-card,.social-status-feed,
+ .community-top-tools>.panel,.event-create-form,.event-card,.card-pad,.profile-form,
+ .creator-onboard-modal,.creator-username-callout,.academy-section-head,
+ .notification-card,.notification-list,.empty-state,.page-head .calendar-sync-note,
+ .account-access-card,.privacy-note,.form-grid,.form-grid>.field,
+ .file-drop-zone,.file-upload-box,.photo-adjustments
+) {
+ background:#203550!important;
+ background-image:none!important;
+ color:#f3f7ff!important;
+ border-color:#526985!important;
+}
+html[data-theme="dark"] .content :is(
+ .empty-feature,.creator-empty-state,.creator-directory-panel,.creator-directory-panel .panel-head,
+ .tiktok-academy-card,.academy-empty,.resource-card,.notification-summary,.ring-controls,
+ .ring-builder,.ring-help,.upload-field,.search-form,.announcement-card,
+ .support-card,.ticket-card,.profile-details-card,.private-section
+) :is(h1,h2,h3,h4,p,small,span,strong,label,dt,dd,time,code) {
+ color:#f2f7ff!important;
+ opacity:1!important;
+}
+html[data-theme="dark"] .content :is(
+ .notification-summary small,.notification-summary>div small,.tiktok-academy-card p,
+ .academy-empty p,.resource-card p,.empty-feature p,.creator-directory-panel p,
+ .ring-help,.ring-controls label,.ring-builder p,.upload-field small,.upload-field strong,
+ .privacy-note,.profile-details-card small,.profile-details-card .muted,
+ .social-reply time,.social-reply p
+) {color:#d2dfed!important;opacity:1!important}
+html[data-theme="dark"] .content :is(
+ .search-form input,.input,.textarea,.select,.ring-controls input,
+ .ring-controls select,.file-drop-zone input,.upload-field input
+) {background-color:#2b4463!important;color:#fff!important;border-color:#748ca9!important}
+html[data-theme="dark"] .content :is(.input,.textarea,.select,textarea,input)::placeholder{color:#c1d3ea!important}
+html[data-theme="dark"] .content code{background:#2b4360!important;color:#e6f1ff!important;border-color:#69809b!important}
+html[data-theme="dark"] .content :is(.upload-field>div,.ring-controls>div,.prize-row,.notification-summary>div){background:#253c59!important;color:#fff!important}
+html[data-theme="dark"] .content .resource-card .section-kicker{color:#ffd981!important}
+html[data-theme="dark"] .content .resource-card .resource-footer{border-color:#57708b!important}
+html[data-theme="dark"] .content .creator-directory-panel .panel-head .search-form{min-width:0;max-width:100%;width:100%;background:#2a4260!important}
+html[data-theme="dark"] .content .creator-directory-panel .panel-head .search-form svg{color:#c8d8eb!important}
+html[data-theme="dark"] .content .creator-directory-panel .panel-head .search-form input{background:#2a4260!important;min-width:0;color:#fff!important}
+html[data-theme="dark"] .content .empty-feature:after{color:rgba(255,255,255,.04)!important}
+
+/* Announcement editor: top-level modal so touches/scroll can't reach the page behind it. */
+.announcement-editor-overlay{
+ position:fixed!important;inset:0!important;z-index:12000!important;
+ padding:16px!important;
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ overflow:auto!important;overscroll-behavior:contain!important;
+ background:rgba(2,10,23,.88)!important;
+}
+.announcement-editor-modal{
+ position:relative!important;
+ flex:0 1 min(760px,100%)!important;
+ width:min(760px,100%)!important;
+ max-height:calc(100dvh - 32px)!important;
+ overflow-x:hidden!important;overflow-y:auto!important;
+ -webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;
+ touch-action:pan-y!important;
+ padding:18px!important;isolation:isolate!important;
+ scroll-padding-top:75px!important;
+}
+.announcement-editor-modal .modal-head{
+ position:sticky!important;top:-18px!important;z-index:2!important;
+ padding:13px 0!important;background:inherit!important;
+}
+.announcement-editor-modal :is(input,select,textarea,button,label){pointer-events:auto!important;touch-action:manipulation}
+.announcement-editor-modal .modal-actions{
+ position:sticky;bottom:-18px;z-index:2;
+ background:inherit!important;padding:14px 0!important;flex-wrap:wrap
+}
+.announcement-editor-modal .upload-field{min-height:100px!important}
+.announcement-editor-modal .upload-field .btn{min-height:48px!important;width:auto!important;padding:12px 18px!important}
+html[data-theme="dark"] .announcement-editor-modal{background:#203550!important;background-image:none!important;color:#f4f8ff!important;border:1px solid #6b83a0!important}
+html[data-theme="dark"] .announcement-editor-modal :is(.modal-head,.modal-actions,.upload-field){background:#203550!important;color:#f4f8ff!important;border-color:#566f8b!important}
+html[data-theme="dark"] .announcement-editor-modal :is(.upload-field strong,.upload-field small,.modal-head p,.field label){color:#e9f3ff!important}
+html[data-theme="dark"] .announcement-editor-modal :is(.input,.select,.textarea){background:#2b4463!important;color:#fff!important;border-color:#7890ac!important}
+html[data-theme="dark"] .announcement-editor-modal :is(.input,.select,.textarea)::placeholder{color:#cbd9ec!important;opacity:1}
+@media(max-width:760px){
+ .announcement-editor-overlay{padding:0!important;align-items:stretch!important}
+ .announcement-editor-modal{
+  width:100%!important;max-width:100%!important;flex:1 1 auto!important;
+  max-height:100dvh!important;min-height:0!important;
+  border-radius:0!important;padding:14px 16px calc(25px + env(safe-area-inset-bottom,0px))!important
+ }
+ .announcement-editor-modal .modal-head{top:-14px!important}
+ .announcement-editor-modal .modal-actions{bottom:calc(-25px - env(safe-area-inset-bottom,0px))}
+ .announcement-editor-modal .upload-field{display:grid!important;gap:14px!important}
+ .announcement-editor-modal .upload-field label.btn{min-width:150px!important;width:max-content!important}
+ .creator-directory-panel .panel-head{display:flex;flex-wrap:wrap;align-items:stretch}
+ .creator-directory-panel .panel-head .search-form{min-width:0!important;width:100%!important}
+ .creator-directory-panel .table-wrap{max-width:100%;overflow-x:auto!important;-webkit-overflow-scrolling:touch}
+}

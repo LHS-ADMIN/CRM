@@ -73,7 +73,7 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
     return battleAt>now&&battleAt<=now+48*3600*1000;
   };
   const statusOf=(b:NonNullable<typeof monthBattles>[number])=>{
-    if(b.status==="filled"&&(b.alert_reason||isSoon(b)))return "Alert";
+    if(b.status==="filled"&&(b.alert_reason||(activeRole==="manager"&&isSoon(b))))return "Alert";
     return b.status==="open"?"Open":b.status==="filled"?"Filled":b.status==="confirmed"?"Confirmed":b.status;
   };
   const categoryCounts={open:0,filled:0,confirmed:0,alerts:0};
