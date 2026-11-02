@@ -5,7 +5,7 @@
 html[data-theme="dark"] {color-scheme:dark}
 .mobile-battle-day-list {display:none}
 .rich-format-disclosure {display:block;max-width:100%;margin:5px 0 12px}
-.rich-format-disclosure summary {display:inline-flex;align-items:center;gap:7px;cursor:pointer;padding:9px 13px;border:1px solid #ccd6e4;border-radius:11px;background:#f6f8fc;color:#19324e;font:750 .92rem/1.3 inherit;list-style:none;min-height:42px}
+.rich-format-disclosure summary {display:inline-flex;align-items:center;gap:7px;cursor:pointer;padding:9px 13px;border:1px solid #ccd6e4;border-radius:11px;background:#f6f8fc;color:#19324e;font-size:.92rem;font-weight:750;line-height:1.3;font-family:inherit;list-style:none;min-height:42px}
 .rich-format-disclosure summary::-webkit-details-marker {display:none}
 .rich-format-disclosure summary::marker {content:""}
 .rich-format-disclosure[open] summary {background:#e8f0fa;border-color:#9cbbdc}
@@ -113,7 +113,7 @@ html[data-theme="dark"] .rich-format-disclosure .rich-editor-toolbar {background
 }
 
 /* Month-at-a-glance, not an endless list of dates. On phones, tap a day. */
-@media (max-width:1024px) and (pointer:coarse){
+@media (max-width:1024px){
  .battles-page .calendar-grid{display:grid!important;grid-template-columns:repeat(7,minmax(0,1fr))!important;overflow:visible!important}
  .battles-page .calendar-weekdays{display:grid!important;grid-template-columns:repeat(7,minmax(0,1fr))!important}
  .battles-page .calendar-weekdays span{font-size:.77rem!important;padding:10px 2px!important;letter-spacing:0!important}
