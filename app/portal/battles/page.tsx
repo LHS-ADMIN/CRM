@@ -98,7 +98,7 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
     ?`Battles for ${prettyDate(selectedDay)}`
     :`${month.toLocaleDateString("en-US",{month:"long",year:"numeric",timeZone:"UTC"})} battles`;
 
-  return <>
+  return <div className={"battles-page"+(selectedDay?" has-selected-day":"")}>
     <div className="page-head">
       <div>
         <span className="section-kicker">Battle Central</span>
@@ -145,7 +145,7 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
         const inner=<>
           <div className="calendar-date">
             <span>{d.getUTCDate()}</span>
-            {rows.length>0&&<small>{rows.length} {rows.length===1?"battle":"battles"}</small>}
+            {rows.length>0&&<small title={`${rows.length} scheduled ${rows.length===1?"battle":"battles"}`}>{rows.length} {rows.length===1?"battle":"battles"}</small>}
           </div>
           <div className="calendar-events">
             {rows.slice(0,3).map(b=><div className="battle-event" key={b.id} title={`${b.creator_handle||"LHS"} vs ${b.opponent_name||"TBD"}`}>
@@ -179,9 +179,21 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
             :"Only battles from this month are shown here. Previous months remain available through the calendar archive."
           }</p>
         </div>
-        {selectedDay&&<Link className="btn" href={`/portal/battles?month=${monthKey}#schedule-detail`}><CalendarDays size={17}/> Show full month</Link>}
+        {selectedDay&&<Link className="btn battle-day-close" href={`/portal/battles?month=${monthKey}`}><CalendarDays size={17}/> Back to month</Link>}
       </div>
 
+      {selectedDay&&<div className="mobile-battle-day-list" aria-label={"Battles for "+prettyDate(selectedDay)}>
+        {detailRows.length?detailRows.map(b=><article className="mobile-day-battle" key={b.id}>
+          <div className="mobile-day-battle-top"><strong>{b.time_est}</strong><span className={"battle-status "+statusOf(b).toLowerCase()}>{statusOf(b)}</span></div>
+          <div className="mobile-day-battle-names"><strong>{b.creator_handle||"LHS Creator"}</strong><span>vs.</span><strong>{b.opponent_name||"Opponent not assigned"}</strong></div>
+          <div className="mobile-day-battle-meta">
+            <span>{b.league} League</span>
+            {b.lhs_manager&&<span>Manager: {b.lhs_manager}</span>}
+            {b.opponent_agency&&<span>Agency: {b.opponent_agency}</span>}
+            {b.diamond_range&&<span>Diamonds: {b.diamond_range}</span>}
+          </div>
+        </article>):<p className="mobile-day-empty">No battles are scheduled for this day.</p>}
+      </div>}
       <div className="table-wrap">
         <table className="table battle-table">
           <thead><tr><th>Date</th><th>Time</th><th>LHS Creator</th><th>Manager</th><th>Opponent</th><th>Opponent Agency</th><th>Diamond Range</th><th>League</th><th>Status</th><th>Calendar</th></tr></thead>
@@ -218,5 +230,5 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
         </table>
       </div>
     </section>
-  </>;
+  </div>;
 }

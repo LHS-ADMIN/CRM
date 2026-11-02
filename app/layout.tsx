@@ -3,6 +3,7 @@ import "./globals.css";
 import "./profile-ring.css";
 import "./battle-calendar.css";
 import "./notifications.css";
+import "./mobile-accessibility.css";
 
 export const metadata: Metadata = {
   title: "LHS Creator Network CRM",

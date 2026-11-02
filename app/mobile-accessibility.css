@@ -1,0 +1,174 @@
+
+/* LHS 2026 mobile readability and accessible theme correction.
+   Kept separate from legacy globals so the final cascade is explicit. */
+:root {color-scheme:light}
+html[data-theme="dark"] {color-scheme:dark}
+.mobile-battle-day-list {display:none}
+.rich-format-disclosure {display:block;max-width:100%;margin:5px 0 12px}
+.rich-format-disclosure summary {display:inline-flex;align-items:center;gap:7px;cursor:pointer;padding:9px 13px;border:1px solid #ccd6e4;border-radius:11px;background:#f6f8fc;color:#19324e;font:750 .92rem/1.3 inherit;list-style:none;min-height:42px}
+.rich-format-disclosure summary::-webkit-details-marker {display:none}
+.rich-format-disclosure summary::marker {content:""}
+.rich-format-disclosure[open] summary {background:#e8f0fa;border-color:#9cbbdc}
+.rich-format-disclosure .rich-editor-toolbar {margin:10px 0 0;padding:11px;border-radius:12px;border:1px solid #d5dfed;background:#f7faff}
+.rich-format-disclosure .rich-editor-toolbar button,.rich-format-disclosure .rich-editor-toolbar select {min-height:44px}
+.post-head,.post-head .post-profile-link {min-width:0}
+.post-head .post-author-meta {display:flex!important;flex-direction:column!important;gap:5px!important;min-width:0;justify-content:center}
+.post-head .post-author-meta strong {font-size:1.05rem!important;line-height:1.3!important;overflow-wrap:anywhere}
+.post-head .post-author-meta time {display:block;font-size:.9rem;line-height:1.3;color:#596c84;overflow-wrap:anywhere}
+.post-head .avatar-fallback {width:46px;height:46px;min-width:46px;min-height:46px;flex:0 0 46px;overflow:hidden}
+.post-head .avatar-fallback img{width:100%!important;height:100%!important;object-fit:cover}
+.post-head .post-profile-link {display:flex;flex:1 1 240px;align-items:center;gap:12px}
+.post-head > .post-author-meta {flex:1;min-width:0}
+.post-head {display:flex!important;gap:12px!important;align-items:flex-start!important;flex-wrap:wrap!important}
+.post-head > .chip {margin-left:auto}
+html[data-theme="dark"] .post-head .post-author-meta time{color:#c9d7ec!important}
+
+/* Respect high contrast on BOTH light and dark surfaces. */
+html[data-theme="dark"] :is(.kpi-card,.branded-kpis .kpi-card,.campaign-mini,.dashboard-panel .campaign-mini,.announcement-card,.rich-announcements .announcement-card,.community-directory-side,.composer,.social-status-composer,.user-chip,.event-card,.profile-photo-card,.creator-social-card,.resource-card,.announcement-item,.profile-status-card) {
+ background:#20344f!important;color:#f6f9ff!important;border-color:#506783!important
+}
+html[data-theme="dark"] :is(.branded-kpis .kpi-card,.dashboard-panel .campaign-mini) :is(span,strong,small,h2,h3,p),
+html[data-theme="dark"] .announcement-item :is(strong,small,p,span),
+html[data-theme="dark"] :is(.announcement-card,.creator-social-card,.resource-card,.profile-status-card) :is(h2,h3,p,strong,small,span),
+html[data-theme="dark"] .user-chip :is(strong,small),
+html[data-theme="dark"] .branded-topbar .workspace-identity :is(strong,span) {
+ color:#f2f7ff!important;opacity:1!important
+}
+html[data-theme="dark"] .announcement-item .split-line span,
+html[data-theme="dark"] .announcement-item small,
+html[data-theme="dark"] .branded-kpis .kpi-card small,
+html[data-theme="dark"] .branded-kpis .kpi-card span {color:#d5e2f3!important}
+html[data-theme="dark"] .branded-topbar,.branded-topbar:has(.theme-toggle){color:#1b3048}
+html[data-theme="dark"] .branded-topbar{background:#1b2d46!important;border-color:#4a617b!important}
+html[data-theme="dark"] :is(.branded-topbar .icon-button,.branded-topbar .role-select,.branded-topbar .user-chip,.theme-toggle){background:#2c4361!important;color:#fff!important;border-color:#617995!important}
+html[data-theme="dark"] .workspace-identity{color:#eef5ff!important}
+html[data-theme="dark"] .kpi-card .kpi-icon{background:#334e6a;border-color:#54718e}
+html[data-theme="dark"] .dashboard-panel .panel-head{background:#20344f!important;color:#f3f8ff!important}
+html[data-theme="dark"] .dashboard-panel .panel-head :is(span,h2,a,svg){color:#eff7ff!important}
+html[data-theme="dark"] .dashboard-panel .announcement-stack{background:#20344f!important}
+html[data-theme="dark"] :is(.announcement-item,.campaign-mini,.post-card,.event-card,.dashboard-panel) :is(.muted,small,time){color:#cedbed}
+html[data-theme="dark"] :is(.calendar-day,.calendar-day.outside,.calendar-toolbar,.calendar-weekdays,.calendar-grid,.battle-detail-panel){border-color:#506785!important}
+html[data-theme="dark"] .calendar-date small{background:#314f72!important;color:#fff!important}
+html[data-theme="dark"] :is(.post-footer a,.text-link,.resource-link){color:#e1edff!important}
+html[data-theme="dark"] .rich-format-disclosure summary {background:#2b4462!important;color:#fff!important;border-color:#718bad!important}
+html[data-theme="dark"] .rich-format-disclosure .rich-editor-toolbar {background:#1a304c!important;border-color:#536e8c!important}
+
+/* Bigger type for dashboard statistics, announcements and navigation. */
+.kpi-card span{font-size:.92rem!important;line-height:1.3!important;letter-spacing:.055em!important}
+.kpi-card strong{font-size:clamp(2rem,5vw,2.5rem)!important;line-height:1.2!important}
+.kpi-card small{font-size:1rem!important;line-height:1.5!important}
+.announcement-item strong{font-size:1.08rem!important;line-height:1.5!important}
+.announcement-item p{font-size:1rem!important;line-height:1.68!important;overflow-wrap:anywhere}
+.announcement-item small{font-size:.91rem!important;line-height:1.4!important}
+.announcement-item .split-line span{font-size:.85rem!important}
+.dashboard-panel .panel-head h2{font-size:1.3rem!important;line-height:1.4!important}
+.dashboard-panel .panel-head .section-kicker{font-size:.9rem!important}
+.campaign-mini h3{font-size:1.08rem!important;line-height:1.45!important}
+.campaign-mini small{font-size:.89rem!important}
+.announcement-card p,.announcement-body p{font-size:1rem!important;line-height:1.7!important}
+.announcement-card h2{font-size:1.3rem!important;line-height:1.35!important}
+.announcement-card .split-line small,.announcement-expiry{font-size:.9rem!important}
+.dashboard-panel .text-link{font-size:1rem!important}
+.dashboard-panel .panel-head{flex-wrap:wrap;gap:10px!important}
+.dashboard-panel .panel-head .text-link{white-space:normal;overflow-wrap:anywhere}
+.battle-detail-copy{font-size:1rem!important;line-height:1.55!important}
+.calendar-sync-note{font-size:.94rem!important;line-height:1.55!important}
+.post-card .post-rich-text{font-size:1.08rem!important;line-height:1.65!important}
+.post-footer,.community-reply time{font-size:.91rem!important}
+.post-card .community-reply .post-rich-text{font-size:1rem!important}
+.section-kicker{font-size:.88rem}
+.btn,.chip,.table td,.table th{font-size:max(.92rem,14px)}
+
+/* Profile image must not disappear at phone widths or when rotating. */
+.topbar .user-chip {display:flex!important;flex:0 0 auto;min-width:44px;min-height:46px;align-items:center}
+.topbar .topbar-avatar {display:grid!important;min-width:42px!important;width:42px!important;min-height:42px!important;height:42px!important;flex:0 0 42px;overflow:hidden}
+.topbar .topbar-avatar img {width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:cover!important;border-radius:50%}
+.topbar .user-chip-copy strong{font-size:.93rem}
+.topbar .user-chip-copy small{font-size:.8rem}
+.topbar .workspace-identity{flex:0 1 auto;min-width:0}
+.topbar .workspace-identity>div:nth-child(2){min-width:0}
+@media(max-width:1024px){
+ .topbar{display:flex;align-items:center;flex-wrap:wrap;gap:10px;min-height:68px;padding:10px 14px!important}
+ .topbar-actions{display:flex;flex:1 1 auto;width:auto;align-items:center;justify-content:flex-end;gap:8px;min-width:0;margin-left:auto}
+ .topbar .workspace-identity>div:nth-child(2){display:none}
+ .topbar .workspace-spark{display:none}
+ .topbar .workspace-mini-logo{width:42px;height:42px;flex:0 0 42px}
+ .topbar .role-select{max-width:126px;min-height:44px}
+ .topbar .user-chip-copy{display:none}
+ .topbar .user-chip{padding:2px!important;border-radius:999px}
+ .topbar .icon-button,.topbar .theme-toggle{min-width:42px;min-height:42px}
+}
+@media(max-width:400px){
+ .topbar{gap:7px!important}
+ .topbar-actions{gap:6px!important}
+ .topbar .role-select{max-width:106px;font-size:.87rem}
+ .topbar .topbar-avatar{width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;flex-basis:40px}
+ .topbar .workspace-mini-logo{width:36px;height:36px;flex-basis:36px}
+}
+@media(orientation:landscape) and (max-height:600px) and (pointer:coarse){
+ html:not(:has(.battles-page)) .portal-shell .sidebar{display:none!important}
+ html:not(:has(.battles-page)) .portal-shell{display:block!important}
+ html:not(:has(.battles-page)) .workspace{width:100%!important;min-width:0!important}
+ .post-head .avatar-fallback{display:grid!important}
+}
+
+/* Month-at-a-glance, not an endless list of dates. On phones, tap a day. */
+@media (max-width:1024px) and (pointer:coarse){
+ .battles-page .calendar-grid{display:grid!important;grid-template-columns:repeat(7,minmax(0,1fr))!important;overflow:visible!important}
+ .battles-page .calendar-weekdays{display:grid!important;grid-template-columns:repeat(7,minmax(0,1fr))!important}
+ .battles-page .calendar-weekdays span{font-size:.77rem!important;padding:10px 2px!important;letter-spacing:0!important}
+ .battles-page .calendar-day{display:flex!important;min-height:58px!important;min-width:0;padding:6px 2px!important;align-items:center;justify-content:center;overflow:hidden;border-right:1px solid var(--line2)!important}
+ .battles-page .calendar-day.outside{display:flex!important;opacity:.45}
+ .battles-page .calendar-day .calendar-events{display:none!important}
+ .battles-page .calendar-date{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px;margin:0!important}
+ .battles-page .calendar-date>span{font-size:1.01rem!important;font-weight:850!important;width:30px!important;height:29px!important;flex:0 0 auto}
+ .battles-page .calendar-date small{display:block!important;max-width:100%;font-size:.7rem!important;line-height:1.15!important;padding:2px 3px!important;border-radius:6px!important;background:#dceaf8!important;color:#153d62!important;text-align:center!important;white-space:normal!important;overflow-wrap:anywhere}
+ .battles-page .calendar-day.selected{box-shadow:inset 0 0 0 2px #c99a3d!important}
+ .battles-page .calendar-day-link:focus-visible{outline:3px solid #4e8fd2!important;outline-offset:-3px}
+ .battles-page:not(.has-selected-day) .battle-detail-panel{display:none!important}
+ .battles-page.has-selected-day .battle-detail-panel .table-wrap{display:none!important}
+ .battles-page.has-selected-day .mobile-battle-day-list{display:grid;gap:12px;padding:15px}
+ .mobile-day-battle{display:grid;gap:10px;border:1px solid #cbd8e8;border-left:5px solid #3a8dc8;background:#f7fbff;color:#142a47;border-radius:14px;padding:15px;min-width:0}
+ .mobile-day-battle-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+ .mobile-day-battle-top strong{font-size:1.05rem}
+ .mobile-day-battle-names{display:flex;gap:7px;align-items:flex-start;flex-wrap:wrap;font-size:1rem;line-height:1.5;overflow-wrap:anywhere}
+ .mobile-day-battle-names strong{font-size:1.05rem}
+ .mobile-day-battle-names span{color:#6a7690}
+ .mobile-day-battle-meta{display:flex;gap:6px 15px;flex-wrap:wrap;color:#4c5f7a;font-size:.92rem;line-height:1.5}
+ .battles-page .battle-detail-panel .panel-head{flex-wrap:wrap!important}
+ .battles-page .battle-detail-panel .panel-head h2{font-size:1.25rem!important}
+ html[data-theme="dark"] .mobile-day-battle{background:#233953!important;color:#f4f8ff!important;border-color:#647b9b}
+ html[data-theme="dark"] .mobile-day-battle :is(strong,span){color:#f4f8ff!important}
+ .battles-page .calendar-date small{font-size:.72rem!important}
+}
+@media (max-width:450px) and (pointer:coarse){
+ .battles-page .calendar-date small{font-size:.67rem!important}
+ .battles-page .calendar-day{min-height:56px!important}
+ .battles-page .calendar-toolbar>div{min-width:0}
+ .battles-page .calendar-toolbar strong{font-size:1.12rem!important}
+ .battles-page .calendar-toolbar{gap:6px;padding:10px!important;justify-content:space-between}
+}
+/* Phone in landscape: dedicate the viewport to the month calendar. */
+@media (orientation:landscape) and (max-height:600px) and (pointer:coarse){
+ html:has(.battles-page) .sidebar,html:has(.battles-page) .topbar,html:has(.battles-page) .return-top{display:none!important}
+ html:has(.battles-page) .portal-shell{display:block!important}
+ html:has(.battles-page) .workspace{width:100%!important;min-width:0!important}
+ html:has(.battles-page) .content{padding:6px!important;margin:0!important;max-width:100%!important}
+ .battles-page>.page-head,.battles-page>.battle-source-links,.battles-page>.battle-alert-summary{display:none!important}
+ .battles-page .calendar-panel{width:100%;margin:0;border-radius:12px!important}
+ .battles-page .calendar-toolbar{padding:5px 12px!important;min-height:44px!important}
+ .battles-page .calendar-toolbar strong{font-size:1.07rem!important}
+ .battles-page .calendar-toolbar span{display:none!important}
+ .battles-page .calendar-weekdays span{padding:5px 0!important;font-size:.78rem!important}
+ .battles-page .calendar-grid{max-height:calc(100dvh - 94px);overflow-y:auto!important;grid-auto-rows:minmax(44px,1fr)!important}
+ .battles-page .calendar-day{min-height:44px!important;padding:3px 0!important}
+ .battles-page .calendar-date{gap:1px!important}
+ .battles-page .calendar-date>span{width:27px!important;height:25px!important;font-size:1rem!important}
+ .battles-page .calendar-date small{font-size:.72rem!important}
+ .battles-page.has-selected-day .battle-detail-panel{position:fixed!important;z-index:140!important;inset:6px!important;margin:0!important;overflow:auto!important;max-height:calc(100dvh - 12px)!important;background:#172943!important;border:2px solid #8194b2!important;box-shadow:0 0 0 10px rgba(3,12,27,.58)!important}
+ .battles-page.has-selected-day .battle-detail-panel .panel-head{position:sticky;top:0;z-index:2;background:#1e3452!important;padding:11px!important}
+ .battles-page.has-selected-day .battle-detail-panel .panel-head :is(h2,p,span){color:#eff7ff!important}
+ .battles-page.has-selected-day .mobile-battle-day-list{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));padding:12px!important}
+ .battles-page.has-selected-day .battle-day-close{background:#345270!important;color:#fff!important;min-height:44px}
+}
+@media (prefers-reduced-motion:reduce) {.rich-format-disclosure summary,.calendar-day{transition:none!important}}
