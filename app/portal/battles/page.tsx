@@ -43,14 +43,9 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
   const supabase=await createClient();
   const {data:{user}}=await supabase.auth.getUser();
   let activeRole:string|null=null;
-  let ownCreatorId:string|null=null;
   if(user){
-    const [{data:profile},{data:ownCreator}]=await Promise.all([
-      supabase.from("profiles").select("active_role").eq("id",user.id).maybeSingle(),
-      supabase.from("creators").select("id").eq("auth_user_id",user.id).eq("active",true).maybeSingle()
-    ]);
+    const {data:profile}=await supabase.from("profiles").select("active_role").eq("id",user.id).maybeSingle();
     activeRole=profile?.active_role||null;
-    ownCreatorId=ownCreator?.id||null;
   }
 
   const {data:monthBattles}=await supabase.from("battles")
@@ -101,28 +96,21 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
     :`${month.toLocaleDateString("en-US",{month:"long",year:"numeric",timeZone:"UTC"})} battles`;
 
   type BattleRow=NonNullable<typeof monthBattles>[number];
-  const canSyncBattle=(b:BattleRow)=>(
-    (activeRole==="admin"||activeRole==="manager"||(activeRole==="creator"&&Boolean(ownCreatorId&&b.creator_id===ownCreatorId)))
-    && Boolean(b.time_sort)
-    && !["cancelled","canceled"].includes(String(b.status||"").toLowerCase())
-  );
-  const calendarActions=(b:BattleRow)=><BattleCalendarActions battle={{
+  // Any signed-in viewer may save a battle they can see; the calendar only copies public matchup details.
+  const canSyncBattle=(b:BattleRow)=>Boolean(user&&b.time_sort)&&!["cancelled","canceled"].includes(String(b.status||"").toLowerCase());
+  const calendarActions=(b:BattleRow,compact=false)=><BattleCalendarActions compact={compact} battle={{
     id:b.id,creatorHandle:b.creator_handle,battleDate:b.battle_date,
     timeEst:b.time_est,timeSort:b.time_sort,opponentName:b.opponent_name,
     opponentAgency:b.opponent_agency,diamondRange:b.diamond_range,
     league:b.league,lhsManager:b.lhs_manager,updatedAt:b.updated_at
   }}/>;
-  const quickAddBattles=(monthBattles||[])
-    .filter(b=>b.battle_date>=todayKey&&canSyncBattle(b))
-    .slice(0,3);
-
   return <div className={"battles-page"+(selectedDay?" has-selected-day":"")}>
     <div className="page-head">
       <div>
         <span className="section-kicker">Battle Central</span>
         <h1>{isArchived?"Archived battle calendar":"Battle calendar"}</h1>
 
-        <div className="calendar-sync-note"><CalendarDays size={17}/><span><strong>Calendar sync:</strong> Use the Google Calendar or Apple/iCal buttons in the Calendar tools section below, or select a date to find the buttons on each eligible battle card. These calendar copies do not update automatically when a battle changes.</span></div>
+        <div className="calendar-sync-note"><CalendarDays size={17}/><span><strong>Add to calendar:</strong> Tap a date, open a battle card, and choose <strong>Add to calendar</strong>. You can save any scheduled battle you can see. Calendar copies do not update automatically if a matchup changes.</span></div>
       </div>
       <div className="head-actions">
         {isArchived&&<span className="chip archive-chip"><Archive size={15}/> Archived month</span>}
@@ -157,30 +145,6 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
         {b.alert_reason&&!b.alert_previous_opponent&&!b.alert_previous_time&&<p className="muted">Earlier alert: the previous value was not recorded.</p>}
         <Link className="battle-alert-day-link" href={`/portal/battles?month=${monthKey}&day=${b.battle_date}#schedule-detail`}>View this battle</Link>
       </article>)}</div>:<p className="muted">No active battle alerts this month.</p>}
-    </section>
-    <section className="panel battle-calendar-quickadd" aria-labelledby="battle-calendar-add-heading">
-      <div className="battle-calendar-quickadd-header">
-        <div>
-          <span className="section-kicker">Calendar tools</span>
-          <h2 id="battle-calendar-add-heading"><CalendarDays size={23} aria-hidden="true"/> Add battles to your calendar</h2>
-          <p>Choose Google Calendar to create an event, or Apple / iCal to download a calendar file. Each event is a copy; if the battle changes, add the updated version again.</p>
-        </div>
-        <a className="btn battle-calendar-find-date" href="#battle-calendar"><CalendarDays size={18}/> Choose a date</a>
-      </div>
-      {quickAddBattles.length>0
-        ?<div className="battle-calendar-quickadd-list">
-          {quickAddBattles.map(b=><article className="battle-calendar-quickadd-item" key={b.id}>
-            <div className="battle-calendar-quickadd-meta"><strong>{prettyDate(b.battle_date)} · {b.time_est}</strong>
-              <span>{b.creator_handle||"LHS Creator"} vs. {b.opponent_name||"Opponent TBD"} · {b.league} League</span>
-            </div>
-            {calendarActions(b)}
-          </article>)}
-        </div>
-        :<p className="battle-calendar-quickadd-empty">{activeRole==="creator"
-          ?(!ownCreatorId
-            ?"This login is in Creator view but has no linked creator roster account. Switch to Admin or have an administrator link this login to a creator to export assigned battles."
-            :"No upcoming battles are assigned to your creator account this month. Ask your manager if one is missing.")
-          :"Select a date below to find battles and add them to your calendar."}</p>}
     </section>
     <section className="panel calendar-panel" id="battle-calendar">
       <div className="calendar-toolbar">
@@ -256,10 +220,7 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
             {b.opponent_agency&&<span>Agency: {b.opponent_agency}</span>}
             {b.diamond_range&&<span>Diamonds: {b.diamond_range}</span>}
           </div>
-          {canSyncBattle(b)&&<div className="mobile-day-battle-calendar">
-            <strong className="mobile-calendar-heading"><CalendarDays size={17} aria-hidden="true"/> Add to calendar</strong>
-            {calendarActions(b)}
-          </div>}
+          {canSyncBattle(b)&&<div className="mobile-day-battle-calendar">{calendarActions(b,true)}</div>}
         </article>):<p className="mobile-day-empty">No battles are scheduled for this day.</p>}
       </div>}
       <div className="table-wrap">
@@ -275,7 +236,7 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
             <td>{b.diamond_range||"—"}</td>
             <td><span className="chip accent">{b.league}</span></td>
             <td><span className={"battle-status "+statusOf(b).toLowerCase()} title={b.alert_reason||undefined}>{statusOf(b)}</span></td>
-            <td>{canSyncBattle(b)?calendarActions(b):<span className="calendar-sync-unavailable">Only assigned, scheduled battles can be added</span>}</td>
+            <td>{canSyncBattle(b)?calendarActions(b):<span className="calendar-sync-unavailable">A valid time is required</span>}</td>
           </tr>):<tr><td colSpan={10}><div className="empty-state compact">No battles are scheduled for this date.</div></td></tr>}</tbody>
         </table>
       </div>

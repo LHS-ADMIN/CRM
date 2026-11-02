@@ -147,7 +147,7 @@ function googleCalendarUrl(battle: BattleCalendarItem) {
   return url.toString();
 }
 
-export function BattleCalendarActions({ battle }: { battle: BattleCalendarItem }) {
+export function BattleCalendarActions({ battle, compact = false }: { battle: BattleCalendarItem; compact?: boolean }) {
   function downloadIcs() {
     const blob = new Blob([calendarFile(battle)], { type: "text/calendar;charset=utf-8" });
     const objectUrl = URL.createObjectURL(blob);
@@ -164,7 +164,7 @@ export function BattleCalendarActions({ battle }: { battle: BattleCalendarItem }
     window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
   }
 
-  return (
+  const choices = (
     <div className="battle-calendar-actions">
       <a
         className="calendar-action google"
@@ -185,4 +185,9 @@ export function BattleCalendarActions({ battle }: { battle: BattleCalendarItem }
       </button>
     </div>
   );
+  if(!compact)return choices;
+  return <details className="battle-add-to-calendar">
+    <summary><CalendarPlus size={18} aria-hidden="true"/> Add to calendar</summary>
+    <div className="battle-add-to-calendar-options">{choices}</div>
+  </details>;
 }

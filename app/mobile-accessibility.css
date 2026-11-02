@@ -472,3 +472,26 @@ html[data-theme="dark"] .creator-setup-badge.saved{background:#1e563e!important;
  .creator-setup-filter{flex:1 1 130px}
  .creator-table{min-width:880px}
 }
+
+/* Calendar action belongs to the selected battle, not the calendar home. */
+.battle-add-to-calendar{margin:0;width:100%;min-width:0}
+.battle-add-to-calendar summary{
+ display:flex;align-items:center;justify-content:center;gap:10px;min-height:48px;
+ padding:10px 16px;border:1px solid #3c7ba9;border-radius:12px;
+ color:#fff;background:#1c5a85;font-size:1rem;line-height:1.35;
+ font-weight:800;cursor:pointer;list-style:none;user-select:none;
+}
+.battle-add-to-calendar summary::-webkit-details-marker{display:none}
+.battle-add-to-calendar summary::marker{content:""}
+.battle-add-to-calendar summary:focus-visible{outline:3px solid #359de9;outline-offset:2px}
+.battle-add-to-calendar[open] summary{background:#194765;border-bottom-left-radius:0;border-bottom-right-radius:0}
+.battle-add-to-calendar-options{padding:12px;border:1px solid #88abc8;border-top:0;border-bottom-left-radius:12px;border-bottom-right-radius:12px;background:#e8f1f9}
+.battle-add-to-calendar-options .battle-calendar-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px}
+html[data-theme="dark"] .battle-add-to-calendar summary{background:#2b638d!important;border-color:#9bb8d5!important;color:#fff!important}
+html[data-theme="dark"] .battle-add-to-calendar-options{background:#1c314c!important;border-color:#6885a5!important}
+@media(max-width:760px){
+ .battle-add-to-calendar-options .battle-calendar-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px}
+}
+@media(max-width:355px){
+ .battle-add-to-calendar-options .battle-calendar-actions{grid-template-columns:1fr!important}
+}
