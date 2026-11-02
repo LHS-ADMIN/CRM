@@ -248,6 +248,11 @@ export function ProfileForm({userId,profile,creator,details}:{userId:string;prof
     },{onConflict:"user_id"});
     if(d.error){setMsg(d.error.message);setBusy(false);return;}
 
+    const recoveryHint=String(f.get("recovery_hint")||"").trim();
+    if(recoveryHint){
+      const {data:hintData,error:hintError}=await supabase.functions.invoke("save-recovery-hint",{body:{hint:recoveryHint}});
+      if(hintError||hintData?.error){setMsg(String(hintData?.error||"Your hint could not be saved."));setBusy(false);return;}
+    }
     if(creator){
       const c=await supabase.from("creators").update({display_name:displayName,niche:niche||null,bio:bio||null}).eq("id",creator.id);
       if(c.error){setMsg(c.error.message);setBusy(false);return;}
@@ -320,6 +325,7 @@ export function ProfileForm({userId,profile,creator,details}:{userId:string;prof
           <div className="field"><label htmlFor="profile-form-phone"><Phone size={15}/> Phone number</label><input id="profile-form-phone" className="input" name="phone" type="tel" defaultValue={details?.phone||""} placeholder="(555) 555-5555"/></div>
           <div className="field"><label htmlFor="profile-form-birthday"><CalendarDays size={15}/> Birthday</label><input id="profile-form-birthday" className="input" name="birthday" type="date" defaultValue={details?.birthday||""}/></div>
           <div className="field full-width"><label htmlFor="profile-form-address"><MapPin size={15}/> Address</label><input id="profile-form-address" className="input" name="address" defaultValue={details?.address||""} placeholder="Street, city, state, ZIP"/></div>
+          <div className="field full-width"><label htmlFor="profile-form-recovery_hint"><LockKeyhole size={15}/> Password recovery Hint (one private word)</label><input id="profile-form-recovery_hint" className="input" name="recovery_hint" type="password" autoComplete="off" pattern="[A-Za-z0-9]{2,40}" placeholder="Enter a word to set or replace your hint"/><small>This word is never shown again. Leave blank to keep your existing hint. For a locked account, contact your manager to reset access.</small></div>
         </div>
       </div>
 

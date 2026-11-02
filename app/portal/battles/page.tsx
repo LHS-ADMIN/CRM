@@ -54,13 +54,34 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
   }
 
   const {data:monthBattles}=await supabase.from("battles")
-    .select("id,creator_id,creator_handle,battle_date,time_est,time_sort,opponent_name,opponent_agency,diamond_range,league,lhs_manager,status,updated_at")
+    .select("id,creator_id,creator_handle,battle_date,time_est,time_sort,opponent_name,opponent_agency,diamond_range,league,lhs_manager,status,updated_at,alert_reason,alert_at,source_confirm")
     .gte("battle_date",ymd(month))
     .lt("battle_date",ymd(next))
     .order("battle_date")
     .order("time_sort")
     .limit(1500);
 
+  const isSoon=(b:{battle_date:string;time_sort:string|null})=>{
+    if(!b.time_sort)return false;
+    const now=Date.now();
+    const [year,mo,day]=b.battle_date.split("-").map(Number);
+    const [hours,minutes]=b.time_sort.split(":").map(Number);
+    const probe=new Date(Date.UTC(year,mo-1,day,hours,minutes));
+    const offsetName=new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York",timeZoneName:"shortOffset"}).formatToParts(probe).find(p=>p.type==="timeZoneName")?.value||"GMT-5";
+    const hoursOffset=Number(offsetName.replace("GMT",""))||-5;
+    const battleAt=Date.UTC(year,mo-1,day,hours-hoursOffset,minutes);
+    return battleAt>now&&battleAt<=now+48*3600*1000;
+  };
+  const statusOf=(b:NonNullable<typeof monthBattles>[number])=>{
+    if(b.alert_reason||((b.status==="open"||b.status==="filled")&&isSoon(b)))return "Alert";
+    return b.status==="open"?"Open":b.status==="filled"?"Filled":b.status==="confirmed"?"Confirmed":b.status;
+  };
+  const categoryCounts={open:0,filled:0,alerts:0};
+  for(const b of monthBattles||[]){
+    if(b.status==="open")categoryCounts.open++;
+    if(b.status==="filled")categoryCounts.filled++;
+    if(statusOf(b)==="Alert")categoryCounts.alerts++;
+  }
   const byDate=new Map<string,NonNullable<typeof monthBattles>>();
   for(const battle of monthBattles||[]){
     const rows=byDate.get(battle.battle_date)||[];
@@ -91,6 +112,15 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
       </div>
     </div>
 
+    <div className="battle-source-links">
+      <a href="https://docs.google.com/spreadsheets/d/1aeRaVKJgQLcCQx3ZXogcnsfCrgBguFZTpVe-TUtJv3w/edit?usp=drivesdk" target="_blank" rel="noopener noreferrer" className="btn">Open A League Google Sheet ↗</a>
+      <a href="https://docs.google.com/spreadsheets/d/1MAvE8MazgSx83Dv1VYa8x_KVGRUDSZzTti922Ypx_F0/edit?usp=drivesdk" target="_blank" rel="noopener noreferrer" className="btn">Open B League Google Sheet ↗</a>
+    </div>
+    <section className="battle-alert-summary panel" aria-label="Battle status summary">
+      <span><strong>{categoryCounts.open}</strong> Open</span>
+      <span><strong>{categoryCounts.filled}</strong> Filled</span>
+      <span className={categoryCounts.alerts?"battle-alert-count active":"battle-alert-count"}><strong>{categoryCounts.alerts}</strong> Alerts</span>
+    </section>
     <section className="panel calendar-panel">
       <div className="calendar-toolbar">
         <Link className="icon-button bordered" href={`/portal/battles?month=${ym(prev)}`} aria-label="Previous month"><ChevronLeft size={21}/></Link>
@@ -119,7 +149,7 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
             {rows.slice(0,3).map(b=><div className="battle-event" key={b.id} title={`${b.creator_handle||"LHS"} vs ${b.opponent_name||"TBD"}`}>
               <strong>{b.time_est.replace(" EST","")}</strong>
               <span>{b.creator_handle||"LHS Creator"}</span>
-              <small>vs {b.opponent_name||"TBD"}</small>
+              <small>vs {b.opponent_name||"TBD"}</small><em className={"battle-status "+statusOf(b).toLowerCase()}>{statusOf(b)}</em>
             </div>)}
             {rows.length>3&&<div className="more-events">+{rows.length-3} more — select day</div>}
             {!outside&&rows.length===0&&<div className="no-battles">No battles</div>}
@@ -152,7 +182,7 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
 
       <div className="table-wrap">
         <table className="table battle-table">
-          <thead><tr><th>Date</th><th>Time</th><th>LHS Creator</th><th>Manager</th><th>Opponent</th><th>Opponent Agency</th><th>Diamond Range</th><th>League</th><th>Calendar</th></tr></thead>
+          <thead><tr><th>Date</th><th>Time</th><th>LHS Creator</th><th>Manager</th><th>Opponent</th><th>Opponent Agency</th><th>Diamond Range</th><th>League</th><th>Status</th><th>Calendar</th></tr></thead>
           <tbody>{detailRows.length?detailRows.map(b=><tr key={b.id}>
             <td>{new Date(b.battle_date+"T12:00:00").toLocaleDateString()}</td>
             <td><strong>{b.time_est}</strong></td>
@@ -162,6 +192,7 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
             <td>{b.opponent_agency||"—"}</td>
             <td>{b.diamond_range||"—"}</td>
             <td><span className="chip accent">{b.league}</span></td>
+            <td><span className={"battle-status "+statusOf(b).toLowerCase()} title={b.alert_reason||undefined}>{statusOf(b)}</span></td>
             <td>{(() => {
               const status=String(b.status||"").toLowerCase();
               const canSync=activeRole==="admin"||activeRole==="manager"||(activeRole==="creator"&&Boolean(ownCreatorId&&b.creator_id===ownCreatorId));
@@ -181,7 +212,7 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
                 updatedAt:b.updated_at
               }}/>;
             })()}</td>
-          </tr>):<tr><td colSpan={9}><div className="empty-state compact">No battles are scheduled for this date.</div></td></tr>}</tbody>
+          </tr>):<tr><td colSpan={10}><div className="empty-state compact">No battles are scheduled for this date.</div></td></tr>}</tbody>
         </table>
       </div>
     </section>

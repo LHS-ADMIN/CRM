@@ -5,11 +5,17 @@ import { MarkAllNotificationsRead, NotificationActions } from "./notification-ac
 function fallbackUrl(type:string){
   if(type==="campaign")return "/portal/campaigns";
   if(type.startsWith("battle_"))return "/portal/battles";
+  if(type==="support_ticket")return "/portal/support";
+  if(type==="event")return "/portal/community";
   return "/portal/announcements";
 }
 
 function typeLabel(type:string){
   if(type==="campaign")return "Campaign";
+  if(type==="support_ticket")return "Support ticket";
+  if(type==="battle_changed")return "Battle changed";
+  if(type==="battle_unconfirmed")return "Battle alert";
+  if(type==="event")return "Event";
   if(type==="battle_tomorrow")return "Battle tomorrow";
   if(type==="battle_hour")return "Battle reminder";
   return "Announcement";

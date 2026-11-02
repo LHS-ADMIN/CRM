@@ -1,10 +1,12 @@
 "use client";
-import { FormEvent, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 import { Send } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { RichEditorToolbar } from "@/components/rich-editor-toolbar";
 
 export function CommunityComposer({userId,teams,activeRole}:{userId:string;teams:{id:string;name:string}[];activeRole:string}) {
+  const editorRef=useRef<HTMLTextAreaElement>(null);
   const router=useRouter();
   const [busy,setBusy]=useState(false);
   const [message,setMessage]=useState("");
@@ -30,7 +32,8 @@ export function CommunityComposer({userId,teams,activeRole}:{userId:string;teams
     <div className="composer-avatar">LHS</div>
     <div className="composer-main">
       {message&&<div role="alert" className="error">{message}</div>}
-      <textarea aria-label="Post message" name="body" rows={3} placeholder="Share an update with your LHS community…" required/>
+      <textarea ref={editorRef} aria-label="Post message" name="body" rows={3} placeholder="Share an update with your LHS community…" required/>
+      <RichEditorToolbar editorRef={editorRef}/>
       <div className="composer-actions">
         <div className="composer-scope">
           <select aria-label="Post channel" name="channel" defaultValue="network">

@@ -19,12 +19,15 @@ Deno.serve(async(req)=>{
     const {data:authData,error:authError}=await userClient.auth.getUser(token);
     if(authError||!authData.user)return json({error:"Unauthorized"},401);
     const actorId=authData.user.id;
-    const [{data:roleRow},{data:actorProfile}]=await Promise.all([
+    const body=await req.json();const action=String(body?.action??"");
+    const [{data:roleRow},{data:managerRow},{data:actorProfile}]=await Promise.all([
       userClient.from("user_roles").select("role").eq("user_id",actorId).eq("role","admin").maybeSingle(),
+      userClient.from("user_roles").select("role").eq("user_id",actorId).eq("role","manager").maybeSingle(),
       userClient.from("profiles").select("login_username,active,active_role,must_change_password").eq("id",actorId).maybeSingle()
     ]);
-    if(!roleRow||actorProfile?.active!==true||actorProfile?.active_role!=="admin"||actorProfile?.must_change_password!==false)return json({error:"Admin role must be active"},403);
-    const body=await req.json();const action=String(body?.action??"");
+    const isAdmin=Boolean(roleRow&&actorProfile?.active===true&&actorProfile?.active_role==="admin"&&actorProfile?.must_change_password===false);
+    const isManager=Boolean(managerRow&&actorProfile?.active===true&&actorProfile?.active_role==="manager"&&actorProfile?.must_change_password===false);
+    if(!isAdmin&&!(isManager&&action==="reset_password"))return json({error:"An active Admin or assigned Manager is required."},403);
 
     if(action==="provision_creator_batch"){
       const ids=Array.isArray(body?.creatorIds)?[...new Set(body.creatorIds.map(String))]:[];
@@ -125,7 +128,25 @@ Deno.serve(async(req)=>{
     }
     const userId=String(body?.userId??"");if(!userId)return json({error:"userId is required."},400);
     if(userId===actorId&&["set_active","set_roles"].includes(action))return json({error:"Your own access cannot be changed here."},400);
-    if(action==="reset_password"){const temp=String(body?.temporaryPassword??"")||temporaryPassword();if(temp.length<8)return json({error:"Temporary password must be at least 8 characters."},400);const {error}=await admin.auth.admin.updateUserById(userId,{password:temp});if(error)throw error;const {error:flagError}=await admin.from("profiles").update({must_change_password:true}).eq("id",userId);if(flagError)throw flagError;await admin.from("audit_log").insert({actor_user_id:actorId,actor_username:actorProfile?.login_username??null,action:"password_reset",entity_type:"profiles",entity_id:userId,result:"success",metadata:{temporary_password_policy:"unique random; change required at next login"}});return json({ok:true,temporaryPassword:temp,mustChangePassword:true})}
+    if(action==="reset_password"){
+      const {data:targetRoles}=await admin.from("user_roles").select("role").eq("user_id",userId);
+      if(!targetRoles?.length)return json({error:"Target account does not exist."},404);
+      if(isManager){
+        if(targetRoles.some(x=>x.role==="manager"||x.role==="admin"))return json({error:"Managers can reset Creator passwords only."},403);
+        const {data:creator}=await admin.from("creators").select("team_id").eq("auth_user_id",userId).eq("active",true).maybeSingle();
+        if(!creator?.team_id)return json({error:"Creator is not assigned to your team."},403);
+        const {data:membership}=await admin.from("team_memberships").select("team_id")
+          .eq("user_id",actorId).eq("team_id",creator.team_id).eq("active",true).maybeSingle();
+        if(!membership)return json({error:"Creator is outside your assigned team."},403);
+      }
+      const random=Array.from(crypto.getRandomValues(new Uint8Array(14)),x=>x.toString(16).padStart(2,"0")).join("");
+      const temp="LHS-"+random+"!";
+      const {error}=await admin.auth.admin.updateUserById(userId,{password:temp});if(error)throw error;
+      const {error:flagError}=await admin.from("profiles").update({must_change_password:true}).eq("id",userId);if(flagError)throw flagError;
+      await admin.from("account_recovery").upsert({user_id:userId,login_locked:false,login_failures:0,hint_locked:false,hint_attempts:0,reset_token_hash:null,reset_expires_at:null,updated_at:new Date().toISOString()},{onConflict:"user_id"});
+      await admin.from("audit_log").insert({actor_user_id:actorId,actor_username:actorProfile?.login_username??null,action:"password_reset",entity_type:"profiles",entity_id:userId,result:"success",metadata:{temporary_password_policy:"random one-time temporary password; change required"}});
+      return json({ok:true,temporaryPassword:temp,mustChangePassword:true});
+    }
     if(action==="set_active"){const active=Boolean(body?.active);const {error}=await admin.from("profiles").update({active}).eq("id",userId);if(error)throw error;return json({ok:true,active})}
     if(action==="set_roles"){
       const roles=normalizeRoles(body?.roles);

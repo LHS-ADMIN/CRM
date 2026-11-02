@@ -8,3 +8,14 @@
 .calendar-action.apple{border-color:#d9d9e2;background:#fafafd;color:#262635}
 .calendar-sync-unavailable{display:inline-block;max-width:130px;color:#8a96a8;font-size:.66rem;line-height:1.35}
 @media(max-width:720px){.battle-calendar-actions{min-width:150px}.calendar-action{width:100%}}
+.battle-source-links{display:flex;gap:12px;flex-wrap:wrap;margin:14px 0}
+.battle-source-links a{min-height:46px;font-size:.95rem}
+.battle-alert-summary{display:flex;gap:14px;flex-wrap:wrap;padding:17px;margin-bottom:16px}
+.battle-alert-summary>span{display:flex;align-items:center;gap:9px;padding:10px 18px;border-radius:13px;background:#f2f6fc;color:#23344c;font-weight:700;font-size:1rem}
+.battle-alert-summary strong{font-size:1.5rem}
+.battle-alert-count.active{background:#fff1e6;color:#9b3e18}
+.battle-status{display:inline-block;font-size:.82rem;font-weight:800;font-style:normal;border-radius:999px;padding:5px 10px;white-space:nowrap;background:#e9f1ff;color:#144b8b}
+.battle-status.open{background:#edf3fb;color:#435978}.battle-status.filled{background:#e6f7fb;color:#08748d}
+.battle-status.confirmed{background:#e1f6e9;color:#17653a}.battle-status.alert{background:#fff1e4;color:#9b3e18}
+.calendar-events .battle-status{font-size:.7rem;padding:3px 6px}
+@media(max-width:760px){.battle-source-links a{flex:1 1 100%}.battle-alert-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:10px}.battle-alert-summary>span{padding:8px;display:grid;text-align:center;gap:2px;font-size:.8rem}}

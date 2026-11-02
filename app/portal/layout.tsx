@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SidebarNav } from "@/components/sidebar-nav";
 import { PortalTopbar } from "@/components/portal-topbar";
+import { EventGate } from "@/components/event-gate";
+import { ReturnToTop } from "@/components/return-to-top";
 
 export default async function PortalLayout({children}:{children:React.ReactNode}){
   const supabase=await createClient();
@@ -17,6 +19,12 @@ export default async function PortalLayout({children}:{children:React.ReactNode}
   if(!profile?.active)redirect("/login");
   if(profile.must_change_password)redirect("/change-password");
 
+  const {data:upcomingEvents}=await (supabase as any).from("community_events")
+    .select("id,title,details,event_type,starts_at,require_ack")
+    .eq("require_ack",true).gte("starts_at",new Date().toISOString()).order("starts_at").limit(30);
+  const {data:acknowledgments}=await (supabase as any).from("event_acknowledgments").select("event_id").eq("user_id",user.id);
+  const acknowledged=new Set((acknowledgments||[]).map((x:{event_id:string})=>x.event_id));
+  const unacknowledged=(upcomingEvents||[]).filter((x:{id:string})=>!acknowledged.has(x.id));
   const roles=(roleRows||[]).map(x=>x.role);
   const active=profile.active_role||roles[0]||null;
 
@@ -38,6 +46,8 @@ export default async function PortalLayout({children}:{children:React.ReactNode}
     <main className="workspace">
       <PortalTopbar displayName={profile.display_name} avatarUrl={profile.avatar_url} roles={roles} activeRole={active} unread={unread||0}/>
       <div id="main-content" tabIndex={-1} className="content">{children}</div>
+      <ReturnToTop/>
+      <EventGate userId={user.id} events={unacknowledged}/>
     </main>
   </div>;
 }

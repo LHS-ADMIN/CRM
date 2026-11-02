@@ -1,10 +1,12 @@
 "use client";
-import { FormEvent, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 import { Send, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { RichEditorToolbar } from "@/components/rich-editor-toolbar";
 
 export function CommunityStatusComposer({userId,displayName}:{userId:string;displayName:string}){
+  const editorRef=useRef<HTMLTextAreaElement>(null);
   const router=useRouter();
   const[busy,setBusy]=useState(false);
   const[msg,setMsg]=useState("");
@@ -32,7 +34,8 @@ export function CommunityStatusComposer({userId,displayName}:{userId:string;disp
   return <form className="social-status-composer" onSubmit={submit}>
     <div className="status-composer-head"><Sparkles size={18}/><div><strong>Post a status</strong><span>Share an update as {displayName}. Everyone in LHS can see Network statuses.</span></div></div>
     {msg&&<p role="status" aria-live="polite" className={msg.includes("posted")?"success":"error"}>{msg}</p>}
-    <textarea className="textarea" name="body" maxLength={1500} rows={4} required placeholder="What’s happening in your creator world? Share a win, an update, a goal, or something with the LHS community…"/>
+    <textarea ref={editorRef} className="textarea" name="body" maxLength={1500} rows={4} required placeholder="What’s happening in your creator world? Share a win, an update, a goal, or something with the LHS community…"/>
+    <RichEditorToolbar editorRef={editorRef}/>
     <div className="status-composer-actions"><small>Posts appear in Community and on your LHS profile.</small><button className="btn primary" disabled={busy}><Send size={16}/>{busy?"Posting…":"Post status"}</button></div>
   </form>;
 }

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Bell, HeartPulse, Sparkles } from "lucide-react";
 import { LogoutButton } from "@/components/logout-button";
 import { RoleSwitcher } from "@/components/role-switcher";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function PortalTopbar({
   displayName, avatarUrl, roles, activeRole, unread
@@ -16,6 +17,7 @@ export function PortalTopbar({
       <span className="workspace-spark"><Sparkles size={16}/></span>
     </div>
     <div className="topbar-actions">
+      <ThemeToggle/>
       <Link href="/portal/notifications" className="icon-button" aria-label="View notifications">
         <Bell size={19}/>
         {unread>0&&<span className="notification-count">{unread>9?"9+":unread}</span>}
