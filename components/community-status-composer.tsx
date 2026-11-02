@@ -27,12 +27,12 @@ export function CommunityStatusComposer({userId,displayName}:{userId:string;disp
     setBusy(false);
     if(error){setMsg("Your status could not be posted. Please try again.");return;}
     form.reset();
-    setMsg("Status posted to the LHS Network.");
+    setMsg("Status posted to LHS.");
     router.refresh();
   }
 
   return <form className="social-status-composer" onSubmit={submit}>
-    <div className="status-composer-head"><Sparkles size={18}/><div><strong>Post a status</strong><span>Share an update as {displayName}. Everyone in LHS can see Network statuses.</span></div></div>
+    <div className="status-composer-head"><Sparkles size={18}/><div><strong>Post a status</strong><span>Share an update as {displayName}. Everyone in LHS can see these statuses.</span></div></div>
     {msg&&<p role="status" aria-live="polite" className={msg.includes("posted")?"success":"error"}>{msg}</p>}
     <textarea ref={editorRef} className="textarea" name="body" maxLength={1500} rows={4} required placeholder="What’s happening in your creator world? Share a win, an update, a goal, or something with the LHS community…"/>
     <RichEditorToolbar editorRef={editorRef}/>

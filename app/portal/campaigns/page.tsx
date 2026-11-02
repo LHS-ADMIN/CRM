@@ -1,6 +1,7 @@
 import { CalendarRange, Gift, Target, Trophy } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { AttachmentDisplay } from "@/components/attachment-display";
+import { ExpandableRichPost } from "@/components/expandable-rich-post";
 import { CampaignCreatePanel } from "@/components/campaign-create-panel";
 
 export default async function CampaignsPage(){
@@ -22,7 +23,7 @@ export default async function CampaignsPage(){
       const pct=Math.max(0,Math.min(100,Math.round(((now-start.valueOf())/Math.max(1,end.valueOf()-start.valueOf()))*100)));
       return <article className="campaign-card" key={c.id}>
         <div className="campaign-card-top"><span className={active?"status-badge success":"status-badge"}>{active?"Active":c.status}</span><span className="chip accent"><Target size={13}/>{c.audience_type}</span></div>
-        <h2>{c.title}</h2><p>{c.description||"No campaign description has been added yet."}</p>
+        <h2>{c.title}</h2><ExpandableRichPost text={c.description||"No campaign description has been added yet."} maxLength={420}/>
         <div className="campaign-meta"><span><CalendarRange size={15}/>{start.toLocaleDateString()} – {end.toLocaleDateString()}</span><span><Trophy size={15}/>{c.metric||"Campaign metric"}</span></div>
         <div className="progress large"><span style={{width:`${pct}%`}}/></div><div className="progress-label"><span>Timeline progress</span><strong>{pct}%</strong></div>
         {c.campaign_prizes?.length>0&&<div className="prize-box"><div className="prize-title"><Gift size={16}/> Prizes</div>{c.campaign_prizes.slice(0,3).map((p:any,i:number)=><div className="prize-row" key={i}><span>{p.place_label||`Prize ${i+1}`}</span><strong>{p.prize_description}</strong></div>)}</div>}

@@ -172,3 +172,107 @@ html[data-theme="dark"] .rich-format-disclosure .rich-editor-toolbar {background
  .battles-page.has-selected-day .battle-day-close{background:#345270!important;color:#fff!important;min-height:44px}
 }
 @media (prefers-reduced-motion:reduce) {.rich-format-disclosure summary,.calendar-day{transition:none!important}}
+
+
+/* November 2026: stable dark surfaces, readable statuses, inline media */
+html[data-theme="dark"]{
+ --bg:#101d30;--paper:#1d304a;--ink:#f3f7ff;--muted:#c9d6e7;--line:#536984;--line2:#435771;
+ --warning:#ffdc80;--success:#93ebbb;--danger:#ffadbb;color-scheme:dark
+}
+html[data-theme="dark"] :is(.profile-details-card,.enhanced-private,.profile-photo-card,.profile-identity-card,.profile-status-card,.social-reply,.social-status-feed,.social-profile-side .panel,.social-profile-bio,.social-profile-main,.profile-status-empty,.community-reply,.rich-card,.campaign-card,.campaign-mini,.prize-box,.prize-row,.notification-card,.notification-item,.notification-list,.community-top-tools>.panel,.event-card,.event-create-form,.post-card,.panel,.field,.resource-card,.ticket-card,.support-card,.empty-state,.temporary-login-panel,.attachment-file,.attachment-image,.form-card,.private-details,.modal-card,.modal-dialog,.status-badge,.chip,.role-select,.user-chip,.brand-lockup,.creator-social-card,.account-access-card,.social-reply) {
+ background-color:#1d304a!important;
+ background-image:none!important;
+ color:#f1f6ff!important;
+ border-color:#4b6380!important
+}
+html[data-theme="dark"] :is(.prize-box,.social-reply,.temporary-login-panel,.profile-photo-card,.profile-details-card,.social-status-feed,.rich-card,.announcement-card,.campaign-mini,.community-reply,.field,.calendar-grid,.calendar-day,.calendar-toolbar,.event-card,.announcement-item,.notification-card) :is(h1,h2,h3,h4,p,span,strong,small,time,label,dt,dd) {
+ color:#f1f6ff!important;opacity:1!important
+}
+html[data-theme="dark"] :is(.field label,.profile-details-card label,.profile-private label,.hint-instructions,.status-composer-head span,.social-reply time,.profile-status-head span,.profile-status-meta,.prize-row span,.campaign-meta span,.progress-label,.announcement-expiry,.muted) {
+ color:#cfdded!important;opacity:1!important
+}
+html[data-theme="dark"] :is(.input,.textarea,.select,input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),textarea,select,.composer-scope select,.rich-editor-toolbar button,.rich-editor-toolbar select,.rich-format-disclosure summary,.creator-post-audience) {
+ background:#273e5c!important;
+ color:#ffffff!important;
+ border-color:#69819e!important;
+}
+html[data-theme="dark"] input::placeholder,html[data-theme="dark"] textarea::placeholder{color:#c5d4e7!important;opacity:1}
+html[data-theme="dark"] :is(.btn:not(.gold),button:not(.btn):not(.calendar-day-link):not(.mobile-menu-toggle):not(.return-top),.resource-link,.attachment-file){
+ background-color:#2b4565!important;color:#fff!important;border-color:#7188a3!important
+}
+html[data-theme="dark"] .btn.gold{background:#59431e!important;color:#fff4d4!important;border-color:#ac8642!important}
+html[data-theme="dark"] .progress{background:#354964!important}
+html[data-theme="dark"] .section-kicker,html[data-theme="dark"] .eyebrow{color:#f0cd72!important}
+html[data-theme="dark"] :is(.battle-status.open,.battle-status.filled,.battle-status.confirmed,.battle-status.alert,.battle-status-legend .battle-status){border:1px solid transparent!important}
+html[data-theme="dark"] .battle-status.open{background:#374863!important;color:#edf4ff!important}
+html[data-theme="dark"] .battle-status.filled{background:#164b65!important;color:#acf2ff!important}
+html[data-theme="dark"] .battle-status.confirmed{background:#174d3a!important;color:#b8ffd6!important}
+html[data-theme="dark"] .battle-status.alert{background:#744222!important;color:#ffe0b0!important}
+html[data-theme="dark"] .mobile-day-battle{background:#233a57!important;color:#fff!important}
+html[data-theme="dark"] .mobile-day-battle strong{color:#fff!important}
+html[data-theme="dark"] .attachment-image>span{background:rgba(11,27,49,.96)!important;color:#fff!important}
+html[data-theme="dark"] .error{background:#572737!important;color:#fff!important;border-color:#9c5970!important}
+html[data-theme="dark"] .success{background:#164837!important;color:#e3fff1!important;border-color:#438368!important}
+html[data-theme="dark"] .social-reply{background:#273e5a!important;border:1px solid #527090}
+html[data-theme="dark"] .post-rich-text{color:#f3f7ff!important}
+
+/* Muted compact text styling */
+.show-post-more{border:0;background:transparent!important;color:#2865a2!important;font:750 .89rem/1.4 inherit;padding:6px 2px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+html[data-theme="dark"] .show-post-more{background:transparent!important;color:#bbdcff!important}
+.expandable-rich-post p{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}
+.creator-post-audience{border:1px solid #c9d8ea;background:#edf4ff;color:#193954;border-radius:11px;display:flex;flex-direction:column;gap:2px;min-height:48px;padding:9px 12px}
+.creator-post-audience strong{font-size:.97rem}
+.creator-post-audience span{font-size:.8rem}
+.rich-format-disclosure summary{min-height:48px!important;min-width:175px;justify-content:center}
+.composer-scope select{height:48px!important;min-width:175px}
+.hint-instructions{display:block;font-size:.96rem!important;line-height:1.6!important;color:#526783}
+html[data-theme="dark"] .hint-instructions{color:#d7e4f4!important}
+
+/* Status legend and calendar dots */
+.battle-status-legend{display:flex;flex-wrap:wrap;gap:8px;margin:9px 0 18px}
+.battle-status{border:1px solid #b8c4d3}
+.battle-status.open{background:#e4eaf3!important;color:#273d59!important;border-color:#8da3c1}
+.battle-status.filled{background:#d9f3fd!important;color:#075b79!important;border-color:#53a6c4}
+.battle-status.confirmed{background:#dff4e7!important;color:#0d633c!important;border-color:#65a982}
+.battle-status.alert{background:#ffedd8!important;color:#8b430c!important;border-color:#cc8b4c}
+.battle-event.status-open{border-left-color:#8da3c1!important}
+.battle-event.status-filled{border-left-color:#38a0c5!important}
+.battle-event.status-confirmed{border-left-color:#2ea067!important}
+.battle-event.has-alert{border-left-color:#ee9b42!important}
+.calendar-status-dots{display:flex!important;gap:3px!important;align-items:center!important;justify-content:center!important;min-width:0}
+.calendar-dot{display:block;flex:0 0 7px;width:7px;height:7px;border-radius:50%;border:1px solid rgba(0,0,0,.09)}
+.calendar-dot.open{background:#9fb0c8}.calendar-dot.filled{background:#24a9d6}
+.calendar-dot.confirmed{background:#30a96b}.calendar-dot.alert{background:#f2a332}
+.battle-alert-summary .battle-alert-link{display:flex;align-items:center;gap:10px;cursor:pointer;border-radius:13px;padding:10px 18px;text-decoration:none;font-weight:800;min-height:58px}
+.battle-alert-summary .battle-alert-link:hover{outline:2px solid #e49a31;outline-offset:2px}
+.battle-alert-summary .battle-alert-link strong{font-size:1.5rem}
+.battle-alerts-panel{margin:6px 0 18px;padding:18px;scroll-margin-top:15px}
+.battle-alerts-panel h2{font-size:1.25rem;margin:0 0 13px}
+.battle-alert-items{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px}
+.battle-alert-item{padding:15px;border:1px solid #e5b584;border-left:5px solid #d48629;background:#fff8ec;border-radius:13px;display:grid;gap:7px}
+.battle-alert-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.battle-alert-item p{font-size:.97rem;line-height:1.55;margin:0;overflow-wrap:anywhere}
+.battle-alert-sub{font-size:.9rem;color:#546379;line-height:1.5}
+.battle-alert-reason{font-weight:750;color:#874515}
+.battle-alert-day-link{font-size:.93rem;font-weight:800;text-decoration:underline;color:#145d9b;display:inline-block;margin-top:4px}
+html[data-theme="dark"] .battle-alert-item{background:#273b53!important;color:#f3f8ff!important;border-color:#a57b4f!important}
+html[data-theme="dark"] .battle-alert-item :is(p,strong,.battle-alert-sub,.battle-alert-reason){color:#f3f8ff!important}
+html[data-theme="dark"] .battle-alert-day-link{color:#b6dfff!important}
+@media(max-width:760px){
+ .battle-alert-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .battle-alert-summary .battle-alert-link{justify-content:center;font-size:.9rem}
+ .battle-status-legend{justify-content:center}
+ .battles-page .calendar-status-dots{gap:2px}
+ .battles-page .calendar-dot{width:6px;height:6px;flex-basis:6px}
+}
+
+/* Image and PDF preview stays in CRM, never a new popup or page */
+.inline-image-backdrop{position:fixed;inset:0;z-index:10000;background:rgba(3,13,27,.91);display:flex;align-items:center;justify-content:center;padding:12px}
+.inline-image-dialog{display:flex;flex-direction:column;width:min(96vw,1100px);max-height:94dvh;min-height:150px;border-radius:15px;border:1px solid #657b96;background:#172a43;color:#fff;overflow:hidden}
+.inline-image-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;background:#203956;color:#fff}
+.inline-image-toolbar strong{font-size:1rem;overflow-wrap:anywhere}
+.inline-image-close{display:grid;place-items:center;min-width:48px;min-height:48px;border-radius:10px;border:1px solid #7d91a8;background:#304a68;color:#fff;cursor:pointer}
+.inline-full-image{object-fit:contain;display:block;max-height:calc(94dvh - 74px);max-width:100%;height:auto;width:100%;background:#111f33}
+.inline-file-frame{width:100%;height:min(74dvh,780px);min-height:360px;border:0;background:#1d304a}
+.inline-file-download{padding:22px}
+html[data-theme="dark"] .inline-image-dialog,html[data-theme="dark"] .inline-image-toolbar{background:#172a43!important;color:white!important}

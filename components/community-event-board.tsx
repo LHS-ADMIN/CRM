@@ -3,10 +3,12 @@ import { FormEvent,useState } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarDays,FileUp,Plus,CheckCircle2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-export type CommunityEvent={id:string;title:string;details:string;event_type:string;starts_at:string;ends_at:string|null;team_id:string|null;file_path:string|null;file_name:string|null;require_ack:boolean};
+import { InlineAttachmentViewer } from "@/components/attachment-display";
+export type CommunityEvent={id:string;title:string;details:string;event_type:string;starts_at:string;ends_at:string|null;team_id:string|null;file_path:string|null;file_name:string|null;file_type?:string|null;require_ack:boolean};
 export function CommunityEventBoard({events,userId,activeRole,teams,initialGoing}:{events:CommunityEvent[];userId:string;activeRole:string;teams:string[];initialGoing:string[]}){
  const router=useRouter();const[showForm,setShowForm]=useState(false);
  const[busy,setBusy]=useState(false);const[message,setMessage]=useState("");
+ const[viewFile,setViewFile]=useState<{url:string;name:string;mime:string|null}|null>(null);
  const[attending,setAttending]=useState<Record<string,boolean>>(()=>Object.fromEntries(initialGoing.map(id=>[id,true])));
  const canCreate=activeRole==="admin"||activeRole==="manager";
  async function createEvent(e:FormEvent<HTMLFormElement>){
@@ -40,10 +42,10 @@ export function CommunityEventBoard({events,userId,activeRole,teams,initialGoing
   if(error){setMessage("Could not confirm attendance.");return;}
   setAttending(prev=>({...prev,[id]:true}));
  }
- async function openFile(path:string){
+ async function openFile(path:string,name:string,mime:string|null){
   const {data,error}=await createClient().storage.from("crm-uploads").createSignedUrl(path,90);
   if(error||!data?.signedUrl){setMessage("File could not be opened.");return;}
-  window.location.assign(data.signedUrl);
+  setViewFile({url:data.signedUrl,name,mime});
  }
  return <section className="event-board" aria-label="Upcoming events">
   <div className="event-board-header"><div><span className="section-kicker">LHS Calendar</span><h2>Upcoming events</h2><p>Trainings, meetings and campaigns. Past events are automatically hidden.</p></div>{canCreate&&<button type="button" className="btn primary" onClick={()=>setShowForm(v=>!v)}><Plus size={16}/> {showForm?"Close":"Add upcoming event"}</button>}</div>
@@ -67,8 +69,9 @@ export function CommunityEventBoard({events,userId,activeRole,teams,initialGoing
    <p>{event.details}</p>
    <div className="event-actions">
     <button type="button" className={attending[event.id]?"btn gold":"btn primary"} onClick={()=>rsvp(event.id)} disabled={Boolean(attending[event.id])}>{attending[event.id]?<><CheckCircle2 size={16}/> Attendance confirmed</>:"Confirm attendance"}</button>
-    {event.file_path&&<button type="button" className="btn" onClick={()=>openFile(event.file_path!)}>View {event.file_name||"attachment"}</button>}
+    {event.file_path&&<button type="button" className="btn" onClick={()=>openFile(event.file_path!,event.file_name||"Attachment",(event as CommunityEvent&{file_type?:string|null}).file_type||null)}>View {event.file_name||"attachment"}</button>}
    </div>
   </article>):<div className="panel card-pad"><p>No upcoming events have been published.</p></div>}</div>
+  {viewFile&&<InlineAttachmentViewer url={viewFile.url} name={viewFile.name} mime={viewFile.mime} onClose={()=>setViewFile(null)}/>}
  </section>;
 }

@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CommunityReplyForm } from "@/components/community-reply-form";
 import { CommunityStatusComposer } from "@/components/community-status-composer";
 import { RichPost } from "@/components/rich-post";
+import { ExpandableRichPost } from "@/components/expandable-rich-post";
 
 export default async function CreatorSocialProfile({params}:{params:Promise<{id:string}>}){
   const{id}=await params;
@@ -52,8 +53,8 @@ export default async function CreatorSocialProfile({params}:{params:Promise<{id:
           <div className="panel-head"><div><span className="section-kicker">Status feed</span><h2>{isSelf?"Your LHS updates":creator.display_name+"'s updates"}</h2></div><span className="chip">{posts?.length||0} posts</span></div>
           {(posts||[]).length?(posts||[]).map(p=><article className="profile-status-card" key={p.id}>
             <div className="profile-status-head"><div className="mini-social-avatar">{creator.avatar_url?<img src={creator.avatar_url} alt=""/>:<span>{creator.display_name[0]?.toUpperCase()}</span>}</div><div><strong>{creator.display_name}</strong><span>{new Date(p.created_at).toLocaleString()}</span></div></div>
-            <RichPost text={p.body}/>
-            <div className="profile-status-meta"><span><MessageCircle size={15}/>{(replies||[]).filter(r=>r.post_id===p.id).length} replies</span><span>Network status</span></div>
+            <ExpandableRichPost text={p.body}/>
+            <div className="profile-status-meta"><span><MessageCircle size={15}/>{(replies||[]).filter(r=>r.post_id===p.id).length} replies</span><span>LHS status</span></div>
             <div className="profile-status-replies">{(replies||[]).filter(r=>r.post_id===p.id).map(r=>{const a=authorMap.get(r.author_user_id);return <div className="social-reply" key={r.id}><div className="mini-social-avatar sm">{a?.avatar_url?<img src={a.avatar_url} alt=""/>:<span>{(a?.display_name||"L")[0]}</span>}</div><div><strong>{a?.display_name||"LHS Member"}</strong><time>{new Date(r.created_at).toLocaleString()}</time><p>{r.body}</p></div></div>})}</div>
             <CommunityReplyForm postId={p.id} userId={user.id}/>
           </article>):<div className="profile-status-empty"><Sparkles size={28}/><strong>No statuses yet</strong><span>{isSelf?"Post your first update above.":"When this creator posts to the LHS Network, their updates will appear here."}</span></div>}

@@ -272,6 +272,10 @@ export type Database = {
           battle_date: string
           alert_reason: string | null
           alert_at: string | null
+          alert_previous_opponent: string | null
+          alert_new_opponent: string | null
+          alert_previous_time: string | null
+          alert_new_time: string | null
           battle_sheet_url: string | null
           created_at: string
           creator_handle: string | null
@@ -300,6 +304,10 @@ export type Database = {
           battle_date: string
           alert_reason?: string | null
           alert_at?: string | null
+          alert_previous_opponent?: string | null
+          alert_new_opponent?: string | null
+          alert_previous_time?: string | null
+          alert_new_time?: string | null
           battle_sheet_url?: string | null
           created_at?: string
           creator_handle?: string | null
@@ -328,6 +336,10 @@ export type Database = {
           battle_date?: string
           alert_reason?: string | null
           alert_at?: string | null
+          alert_previous_opponent?: string | null
+          alert_new_opponent?: string | null
+          alert_previous_time?: string | null
+          alert_new_time?: string | null
           battle_sheet_url?: string | null
           created_at?: string
           creator_handle?: string | null

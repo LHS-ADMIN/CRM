@@ -15,7 +15,7 @@ export function CommunityComposer({userId,teams,activeRole}:{userId:string;teams
     e.preventDefault();const form=e.currentTarget;
     setBusy(true);setMessage("");
     const f=new FormData(form);
-    const channel=String(f.get("channel")||"network");
+    const channel=activeRole==="creator"?"network":String(f.get("channel")||"network");
     const teamId=channel==="team"?String(f.get("team_id")||""):null;
     const {error}=await createClient().from("community_posts").insert({
       channel_type:channel,
@@ -36,12 +36,13 @@ export function CommunityComposer({userId,teams,activeRole}:{userId:string;teams
       <RichEditorToolbar editorRef={editorRef}/>
       <div className="composer-actions">
         <div className="composer-scope">
+          {activeRole==="creator"?<div className="creator-post-audience"><strong>LHS</strong><span>Everyone in the network</span></div>:<>
           <select aria-label="Post channel" name="channel" defaultValue="network">
-            <option value="network">Network</option>
+            <option value="network">LHS</option>
             {teams.length>0&&<option value="team">Team</option>}
             {["manager","admin"].includes(activeRole)&&<option value="leadership">Leadership</option>}
           </select>
-          {teams.length>0&&<select aria-label="Post team" name="team_id" defaultValue={teams[0].id}>{teams.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}</select>}
+          {teams.length>0&&<select aria-label="Post team" name="team_id" defaultValue={teams[0].id}>{teams.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}</select>}</>}
         </div>
         <button className="btn primary" disabled={busy}><Send size={15}/>{busy?"Posting…":"Post"}</button>
       </div>

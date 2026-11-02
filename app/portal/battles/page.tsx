@@ -54,7 +54,7 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
   }
 
   const {data:monthBattles}=await supabase.from("battles")
-    .select("id,creator_id,creator_handle,battle_date,time_est,time_sort,opponent_name,opponent_agency,diamond_range,league,lhs_manager,status,updated_at,alert_reason,alert_at,source_confirm")
+    .select("id,creator_id,creator_handle,battle_date,time_est,time_sort,opponent_name,opponent_agency,diamond_range,league,lhs_manager,status,updated_at,alert_reason,alert_at,source_confirm,alert_previous_opponent,alert_new_opponent,alert_previous_time,alert_new_time")
     .gte("battle_date",ymd(month))
     .lt("battle_date",ymd(next))
     .order("battle_date")
@@ -73,7 +73,7 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
     return battleAt>now&&battleAt<=now+48*3600*1000;
   };
   const statusOf=(b:NonNullable<typeof monthBattles>[number])=>{
-    if((b.status==="filled"&&b.alert_reason)||((b.status==="open"||b.status==="filled")&&isSoon(b)))return "Alert";
+    if(b.status==="filled"&&(b.alert_reason||isSoon(b)))return "Alert";
     return b.status==="open"?"Open":b.status==="filled"?"Filled":b.status==="confirmed"?"Confirmed":b.status;
   };
   const categoryCounts={open:0,filled:0,confirmed:0,alerts:0};
@@ -83,6 +83,7 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
     if(b.status==="confirmed")categoryCounts.confirmed++;
     if(statusOf(b)==="Alert")categoryCounts.alerts++;
   }
+  const alertBattles=(monthBattles||[]).filter(b=>statusOf(b)==="Alert");
   const byDate=new Map<string,NonNullable<typeof monthBattles>>();
   for(const battle of monthBattles||[]){
     const rows=byDate.get(battle.battle_date)||[];
@@ -103,7 +104,7 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
       <div>
         <span className="section-kicker">Battle Central</span>
         <h1>{isArchived?"Archived battle calendar":"Battle calendar"}</h1>
-        <p>Leadership schedules battles in the A/B League source sheets. The CRM remains read-only and displays all battle times in EST. Select any date to view that day's battles.</p>
+
         <div className="calendar-sync-note"><CalendarDays size={17}/><span><strong>Calendar sync:</strong> Assigned battles can be added to Google Calendar or Apple/iCal. This version creates a calendar copy; later Battle Central changes do not automatically rewrite an event already added to your personal calendar.</span></div>
       </div>
       <div className="head-actions">
@@ -121,7 +122,23 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
       <span><strong>{categoryCounts.open}</strong> Open</span>
       <span><strong>{categoryCounts.filled}</strong> Filled</span>
       <span className="battle-confirmed-count"><strong>{categoryCounts.confirmed}</strong> Confirmed</span>
-      <span className={categoryCounts.alerts?"battle-alert-count active":"battle-alert-count"}><strong>{categoryCounts.alerts}</strong> Alerts</span>
+      <a href="#battle-alerts" className={categoryCounts.alerts?"battle-alert-count active battle-alert-link":"battle-alert-count battle-alert-link"} aria-label={`Show ${categoryCounts.alerts} battle alerts`}><strong>{categoryCounts.alerts}</strong> Alerts <span aria-hidden="true">↓</span></a>
+    </section>
+    <div className="battle-status-legend" aria-label="Battle status colors">
+      <span className="battle-status open">Open</span><span className="battle-status filled">Filled</span>
+      <span className="battle-status confirmed">Confirmed</span><span className="battle-status alert">Alert</span>
+    </div>
+    <section className="panel battle-alerts-panel" id="battle-alerts" aria-labelledby="battle-alerts-heading">
+      <h2 id="battle-alerts-heading">Battle alerts ({alertBattles.length})</h2>
+      {alertBattles.length?<div className="battle-alert-items">{alertBattles.map(b=><article className="battle-alert-item" key={b.id}>
+        <div className="battle-alert-head"><strong>{b.creator_handle||"LHS Creator"}</strong><span className="battle-status alert">Alert</span></div>
+        <div className="battle-alert-sub">{prettyDate(b.battle_date)} · {b.time_est} · {b.league} League</div>
+        <p className="battle-alert-reason">{b.alert_reason||"Not marked confirmed within 48 hours of battle time."}</p>
+        {(b.alert_previous_opponent||b.alert_new_opponent)&&<p><strong>Opponent:</strong> {b.alert_previous_opponent||"Unknown"} → {b.alert_new_opponent||b.opponent_name||"Unassigned"}</p>}
+        {(b.alert_previous_time||b.alert_new_time)&&<p><strong>Time:</strong> {b.alert_previous_time||"Unknown"} → {b.alert_new_time||b.time_est}</p>}
+        {b.alert_reason&&!b.alert_previous_opponent&&!b.alert_previous_time&&<p className="muted">Earlier alert: the previous value was not recorded.</p>}
+        <Link className="battle-alert-day-link" href={`/portal/battles?month=${monthKey}&day=${b.battle_date}#schedule-detail`}>View this battle</Link>
+      </article>)}</div>:<p className="muted">No active battle alerts this month.</p>}
     </section>
     <section className="panel calendar-panel">
       <div className="calendar-toolbar">
@@ -145,10 +162,14 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
         const inner=<>
           <div className="calendar-date">
             <span>{d.getUTCDate()}</span>
+            {rows.length>0&&<span className="calendar-status-dots" aria-hidden="true">
+              {(["open","filled","confirmed"] as const).filter(s=>rows.some(b=>b.status===s)).map(s=><i key={s} className={"calendar-dot "+s}/>)}
+              {rows.some(b=>statusOf(b)==="Alert")&&<i className="calendar-dot alert"/>}
+            </span>}
             {rows.length>0&&<small title={`${rows.length} scheduled ${rows.length===1?"battle":"battles"}`}>{rows.length} {rows.length===1?"battle":"battles"}</small>}
           </div>
           <div className="calendar-events">
-            {rows.slice(0,3).map(b=><div className="battle-event" key={b.id} title={`${b.creator_handle||"LHS"} vs ${b.opponent_name||"TBD"}`}>
+            {rows.slice(0,3).map(b=><div className={"battle-event status-"+b.status+(statusOf(b)==="Alert"?" has-alert":"")} key={b.id} title={`${b.creator_handle||"LHS"} vs ${b.opponent_name||"TBD"}`}>
               <strong>{b.time_est.replace(" EST","")}</strong>
               <span>{b.creator_handle||"LHS Creator"}</span>
               <small>vs {b.opponent_name||"TBD"}</small><em className={"battle-status "+statusOf(b).toLowerCase()}>{statusOf(b)}</em>
@@ -185,6 +206,7 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
       {selectedDay&&<div className="mobile-battle-day-list" aria-label={"Battles for "+prettyDate(selectedDay)}>
         {detailRows.length?detailRows.map(b=><article className="mobile-day-battle" key={b.id}>
           <div className="mobile-day-battle-top"><strong>{b.time_est}</strong><span className={"battle-status "+statusOf(b).toLowerCase()}>{statusOf(b)}</span></div>
+          {statusOf(b)==="Alert"&&<p className="battle-alert-reason">{b.alert_reason||"Not marked confirmed within 48 hours of battle time."}</p>}
           <div className="mobile-day-battle-names"><strong>{b.creator_handle||"LHS Creator"}</strong><span>vs.</span><strong>{b.opponent_name||"Opponent not assigned"}</strong></div>
           <div className="mobile-day-battle-meta">
             <span>{b.league} League</span>
