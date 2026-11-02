@@ -381,3 +381,57 @@ html[data-theme="dark"] .announcement-editor-modal :is(.input,.select,.textarea)
  .creator-directory-panel .panel-head .search-form{min-width:0!important;width:100%!important}
  .creator-directory-panel .table-wrap{max-width:100%;overflow-x:auto!important;-webkit-overflow-scrolling:touch}
 }
+
+
+/* Battle calendar exports: visible on the Battle Central home and on phone day cards. */
+.battle-calendar-quickadd{
+  margin:18px 0 20px;padding:20px;
+  border:1px solid var(--line);border-top:5px solid #47abd8;
+  border-radius:18px;background:var(--paper);color:var(--ink);
+}
+.battle-calendar-quickadd-header{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.battle-calendar-quickadd-header h2{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:1.3rem;line-height:1.3;margin:7px 0}
+.battle-calendar-quickadd-header p{max-width:720px;font-size:1rem;line-height:1.5;color:var(--muted);margin:6px 0}
+.battle-calendar-find-date{min-height:46px!important;flex-shrink:0}
+.battle-calendar-quickadd-list{display:grid;gap:12px;margin-top:18px}
+.battle-calendar-quickadd-item{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;border:1px solid var(--line);background:rgba(68,151,208,.055);padding:14px;border-radius:13px;min-width:0}
+.battle-calendar-quickadd-meta{display:grid;gap:6px;min-width:0;flex:1 1 220px}
+.battle-calendar-quickadd-meta strong{font-size:1rem;line-height:1.4}
+.battle-calendar-quickadd-meta span{font-size:.95rem;line-height:1.45;overflow-wrap:anywhere;color:var(--muted)}
+.battle-calendar-quickadd-empty{margin:16px 0 0;font-size:.97rem;line-height:1.5;color:var(--muted)}
+.battle-calendar-actions{display:flex!important;align-items:center;gap:10px;flex-wrap:wrap}
+.battle-calendar-actions .calendar-action{
+ display:inline-flex!important;align-items:center;justify-content:center;gap:7px;
+ min-height:46px;padding:11px 14px;border-radius:11px;
+ background:#173a5f;border:1px solid #35618c;
+ font-size:.96rem;font-weight:750;line-height:1.25;color:#fff;
+ text-decoration:none;cursor:pointer;white-space:normal;text-align:center;
+}
+.battle-calendar-actions .calendar-action.apple{background:#314967;border-color:#607f9e;color:#fff}
+.battle-calendar-actions .calendar-action:focus-visible{outline:3px solid #51aee2;outline-offset:2px}
+.mobile-day-battle-calendar{display:grid;gap:10px;border-top:1px solid #bacce1;margin-top:4px;padding-top:12px}
+.mobile-calendar-heading{display:flex;align-items:center;gap:8px;font-size:1rem;line-height:1.4}
+html[data-theme="dark"] :is(.battle-calendar-quickadd,.battle-calendar-quickadd-item){
+ background:#1f3350!important;background-image:none!important;color:#f2f7ff!important;border-color:#567391!important;
+}
+html[data-theme="dark"] .battle-calendar-quickadd-header :is(h2,p,.section-kicker),
+html[data-theme="dark"] .battle-calendar-quickadd-meta :is(strong,span),
+html[data-theme="dark"] .battle-calendar-quickadd-empty,
+html[data-theme="dark"] .mobile-calendar-heading{color:#eff6ff!important}
+html[data-theme="dark"] .battle-calendar-find-date{background:#345270!important;color:#fff!important;border-color:#6888aa!important}
+html[data-theme="dark"] .mobile-day-battle-calendar{border-top-color:#5b7697}
+html[data-theme="dark"] .battle-calendar-actions .calendar-action{background:#275a88!important;border-color:#83abd2!important;color:#fff!important}
+html[data-theme="dark"] .battle-calendar-actions .calendar-action.apple{background:#354c6c!important;color:#fff!important}
+@media(max-width:760px){
+ .battle-calendar-quickadd{padding:16px!important;margin:16px 0!important}
+ .battle-calendar-quickadd-header h2{font-size:1.22rem!important}
+ .battle-calendar-quickadd-header p{font-size:.98rem!important}
+ .battle-calendar-find-date{width:100%!important;justify-content:center}
+ .battle-calendar-quickadd-item{padding:13px!important}
+ .battle-calendar-quickadd-item .battle-calendar-actions,.mobile-day-battle-calendar .battle-calendar-actions{width:100%!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
+ .battle-calendar-actions .calendar-action{min-width:0!important;min-height:50px!important;padding:10px 8px!important;font-size:.91rem!important}
+ .mobile-day-battle-calendar{padding-top:15px!important}
+}
+@media(max-width:365px){
+ .battle-calendar-quickadd-item .battle-calendar-actions,.mobile-day-battle-calendar .battle-calendar-actions{grid-template-columns:1fr!important}
+}
