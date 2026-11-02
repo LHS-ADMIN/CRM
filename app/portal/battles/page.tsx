@@ -122,7 +122,7 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
         <span className="section-kicker">Battle Central</span>
         <h1>{isArchived?"Archived battle calendar":"Battle calendar"}</h1>
 
-        <div className="calendar-sync-note"><CalendarDays size={17}/><span><strong>Calendar sync:</strong> Assigned battles can be added to Google Calendar or Apple/iCal. This version creates a calendar copy; later Battle Central changes do not automatically rewrite an event already added to your personal calendar.</span></div>
+        <div className="calendar-sync-note"><CalendarDays size={17}/><span><strong>Calendar sync:</strong> Use the Google Calendar or Apple/iCal buttons in the Calendar tools section below, or select a date to find the buttons on each eligible battle card. These calendar copies do not update automatically when a battle changes.</span></div>
       </div>
       <div className="head-actions">
         {isArchived&&<span className="chip archive-chip"><Archive size={15}/> Archived month</span>}
@@ -177,7 +177,9 @@ export default async function BattlesPage({searchParams}:{searchParams:Promise<{
           </article>)}
         </div>
         :<p className="battle-calendar-quickadd-empty">{activeRole==="creator"
-          ?"No upcoming battles are currently linked to your creator account for this month. Ask your manager to check your account link if a battle is missing."
+          ?(!ownCreatorId
+            ?"This login is in Creator view but has no linked creator roster account. Switch to Admin or have an administrator link this login to a creator to export assigned battles."
+            :"No upcoming battles are assigned to your creator account this month. Ask your manager if one is missing.")
           :"Select a date below to find battles and add them to your calendar."}</p>}
     </section>
     <section className="panel calendar-panel" id="battle-calendar">
