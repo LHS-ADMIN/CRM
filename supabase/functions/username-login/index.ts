@@ -50,10 +50,28 @@ Deno.serve(async(req)=>{
 
     const auth=createClient(url,anonKey,{auth:{persistSession:false,autoRefreshToken:false}});
     const {data,error}=await auth.auth.signInWithPassword({email,password});
-    if(error||!data.session||data.user.id!==profile.id){
+    // Only confirmed incorrect credentials count toward the three-attempt lock.
+    // Network errors, Auth service failures, or rate limits must not lock a valid account.
+    if(error&&error.code!=="invalid_credentials"){
+      console.error("Sign-in provider error",error.code||"unknown");
+      return json({error:"Sign-in is temporarily unavailable. Please try again."},503);
+    }
+    if(!error&&(!data.session||data.user?.id!==profile.id)){
+      return json({error:"Sign-in is temporarily unavailable. Please try again."},503);
+    }
+    if(error){
       const failed=(state?.login_failures||0)+1;
-      await admin.from("account_recovery").upsert({user_id:profile.id,login_failures:failed,login_locked:failed>=3,updated_at:new Date().toISOString()},{onConflict:"user_id"});
-      return json({error:failed>=3?"Account locked after 3 incorrect passwords. Contact your manager.":"Invalid username or password.",locked:failed>=3,requiresReset:failed>=3},failed>=3?423:401);
+      const {error:writeError}=await admin.from("account_recovery").upsert({
+        user_id:profile.id,login_failures:failed,login_locked:failed>=3,updated_at:new Date().toISOString()
+      },{onConflict:"user_id"});
+      if(writeError){
+        console.error("Unable to persist login attempt state");
+        return json({error:"Sign-in is temporarily unavailable. Please try again."},503);
+      }
+      return json({
+        error:failed>=3?"Account locked after 3 incorrect passwords. Contact your manager.":"Invalid username or password.",
+        locked:failed>=3,requiresReset:failed>=3,remainingAttempts:Math.max(0,3-failed)
+      },failed>=3?423:401);
     }
     if(state?.login_failures)await admin.from("account_recovery").update({login_failures:0,login_locked:false,updated_at:new Date().toISOString()}).eq("user_id",profile.id);
 

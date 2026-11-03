@@ -18,15 +18,19 @@ function LoginForm(){
     const {data,error:loginError}=await supabase.functions.invoke("username-login",{body:{username,password}});
     if(loginError||data?.error||!data?.access_token||!data?.refresh_token){
       let message=String(data?.error||"");
-      if(loginError?.context instanceof Response){
-        const detail=await loginError.context.json().catch(()=>null);
-        message=String(detail?.error||message);
-      }
-      const locked=Boolean(data?.locked||data?.requiresReset||message.toLowerCase().includes("locked")||message.includes("3 incorrect passwords"));
-      if(locked){setBusy(false);router.replace("/forgot-password");return;}
+      const detail=loginError?.context instanceof Response?await loginError.context.json().catch(()=>null):null;
+      message=String(detail?.error||message);
+      const locked=Boolean(detail?.locked||detail?.requiresReset||data?.locked||data?.requiresReset||message.toLowerCase().includes("locked"));
+      if(locked){setBusy(false);router.replace("/forgot-password?reason=locked");return;}
+      const attempts=Number(detail?.remainingAttempts??data?.remainingAttempts);
+      const attemptWarning=Number.isInteger(attempts)&&attempts>0&&attempts<3
+        ?` ${attempts} sign-in ${attempts===1?"attempt remains":"attempts remain"} before your account locks.`
+        :"";
       setError(message.includes("has not been activated")
         ?"Your LHS login has not been activated yet. Ask your LHS manager for your personal temporary password."
-        :"The username or password is incorrect.");
+        :message.toLowerCase().includes("temporarily unavailable")||loginError?.context instanceof Response&&loginError.context.status>=500
+          ?"Sign-in is temporarily unavailable. Please try again; a service error does not count as a wrong password."
+          :"The username or password was not accepted."+attemptWarning);
       setBusy(false);return;
     }
 
@@ -71,7 +75,7 @@ function LoginForm(){
           <div className="field"><label htmlFor="page-password">Password</label><input id="page-password" className="input" name="password" type="password" autoComplete="current-password" required placeholder="••••••••••"/></div>
           <button className="btn primary login-submit" disabled={busy}>{busy?"Signing in…":"Enter LHS Connect"}</button>
         </form>
-        <p style={{marginTop:14,fontSize:"1rem"}}><Link href="/forgot-password" className="resource-link">Forgot password?</Link></p>
+        <p style={{marginTop:14,fontSize:"1rem"}}><Link href="/forgot-password" className="resource-link">Forgot password or locked out?</Link></p>
         <div className="login-security"><ShieldCheck size={15}/> Protected by secure role-based access.</div>
       </div>
     </section>
