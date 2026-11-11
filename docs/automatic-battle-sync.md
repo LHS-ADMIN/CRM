@@ -28,3 +28,19 @@ select * from cron.job_run_details where jobid=3 order by start_time desc limit 
 ```
 
 This configuration explicitly covers November and December 2026; for 2027, update the private sync function after the next source tabs and IDs are known.
+
+## November 11, 2026 date correction
+The A League November sheet has both `11/12/2026` and `11/13/26` headers. The initial live sync accepted only four-digit years, so two November 13 A League battles were mistakenly stored as November 12. The same short-year pattern exists on the December 13 template row.
+
+Production migrations `20261111154506` and `20261111154844` now:
+- Interpret MM/DD/YY and MM/DD/YYYY headers for their explicitly configured month/year.
+- Reject missing, invalid, and unfamiliar source headers instead of placing creator battles on a previous day.
+- Count date changes in synchronization audit totals.
+- Preserve the normal five-minute automated sync.
+
+After the fix, the two November 13 A League records (source rows 172–173) were corrected. An independent audit compared all **107** current November/December A and B League source rows with CRM records: zero missing rows and zero wrong dates at the time of testing.
+
+A League November has a `11/31/2026` template heading with no associated creator battles. November 31 is not a valid date: the new parser ignores that empty section and will refuse any battle entered under it, rather than create a nonexistent schedule.
+
+### Follow-up verification after source sheet edits
+Run `select private.sync_google_battles();` as a database administrator, confirm `ok=true` and check `private.battle_sync_audit`. Match the source sheet's date header against `battles.battle_date` for the same `source_key`. See `tests/battle-date-source-regression.sql` for the November 13 regression checks.
